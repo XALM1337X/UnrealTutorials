@@ -36,13 +36,14 @@ AFPSProjectile::AFPSProjectile()
 void AFPSProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Only add impulse and destroy projectile if we hit a physics
-	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL) && OtherComp->IsSimulatingPhysics())
+	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL))
 	{
 		//OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
 		UWorld* World = GetWorld();
 		FVector loc = GetActorLocation();
 		FRotator rot = GetActorRotation();
 		World->SpawnActor(ActorToSpawn,&loc,&rot);
+		MakeNoise(2.0f, GetInstigator());
 		Destroy();
 	}
 }

@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimSequence.h"
+#include "Components/PawnNoiseEmitterComponent.h"
 
 
 AFPSCharacter::AFPSCharacter()
@@ -29,6 +30,7 @@ AFPSCharacter::AFPSCharacter()
 	GunMeshComponent->CastShadow = false;
 	GunMeshComponent->SetupAttachment(Mesh1PComponent, "GripPoint");
 
+	NoiseEmitComp = CreateDefaultSubobject<UPawnNoiseEmitterComponent>(TEXT("NoiseEmitterComponent"));
 }
 
 
@@ -61,7 +63,7 @@ void AFPSCharacter::Fire()
 		//Set Spawn Collision Handling Override
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-
+		ActorSpawnParams.Instigator = this;
 		// spawn the projectile at the muzzle
 		GetWorld()->SpawnActor<AFPSProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
 	}
@@ -69,7 +71,7 @@ void AFPSCharacter::Fire()
 	// try and play the sound if specified
 	if (FireSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+		//UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
 	}
 
 	// try and play a firing animation if specified
@@ -91,6 +93,7 @@ void AFPSCharacter::MoveForward(float Value)
 	{
 		// add movement in that direction
 		AddMovementInput(GetActorForwardVector(), Value);
+		NoiseEmitComp->MakeNoise(this, 1.5f, this->GetActorLocation());
 	}
 }
 
@@ -101,5 +104,6 @@ void AFPSCharacter::MoveRight(float Value)
 	{
 		// add movement in that direction
 		AddMovementInput(GetActorRightVector(), Value);
+		NoiseEmitComp->MakeNoise(this, 1.5f, this->GetActorLocation());
 	}
 }
