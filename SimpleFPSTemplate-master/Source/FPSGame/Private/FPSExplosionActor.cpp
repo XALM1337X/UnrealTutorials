@@ -9,17 +9,21 @@
 // Sets default values
 AFPSExplosionActor::AFPSExplosionActor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
-	MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	RootComponent = MeshComp;
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+		PrimaryActorTick.bCanEverTick = true;
+		MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
+		MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		RootComponent = MeshComp;
 
-	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	SphereComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	SphereComp->SetupAttachment(MeshComp);
-	Ticks = 0;
-
+		SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+		SphereComp->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		SphereComp->SetupAttachment(MeshComp);
+		Ticks = 0;
+		SetReplicates(true);
+		SetReplicateMovement(false);
+	}
 }
 
 // Called when the game starts or when spawned
