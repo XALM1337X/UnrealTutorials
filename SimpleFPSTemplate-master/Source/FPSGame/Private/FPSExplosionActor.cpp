@@ -29,36 +29,50 @@ AFPSExplosionActor::AFPSExplosionActor()
 // Called when the game starts or when spawned
 void AFPSExplosionActor::BeginPlay()
 {
-	Super::BeginPlay();
-	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation());	
-	Explode();
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		Super::BeginPlay();
+		Explode();
+	}
+	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation());
 }
 
 // Called every frame
 void AFPSExplosionActor::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-	if (Ticks >= 5) {
-		Destroy();
-	}
-	else {
-		Explode();
-		Ticks++;
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		Super::Tick(DeltaTime);
+		if (Ticks >= 5) {
+			Destroy();
+		}
+		else {
+			Explode();
+			Ticks++;
+		}
 	}
 }
 
-void AFPSExplosionActor::Explode()
+void AFPSExplosionActor::Explode_Implementation()
 {
-	TArray<UPrimitiveComponent*> OverLaps;
-	SphereComp->GetOverlappingComponents(OverLaps);
-	for (int32 i = 0; i < OverLaps.Num(); i++)
+	if (GetLocalRole() == ROLE_Authority)
 	{
-		UPrimitiveComponent* OverLap = OverLaps[i];
-		if (OverLap && OverLap->IsSimulatingPhysics())
+		TArray<UPrimitiveComponent*> OverLaps;
+		SphereComp->GetOverlappingComponents(OverLaps);
+		for (int32 i = 0; i < OverLaps.Num(); i++)
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
-			OverLap->AddRadialForce(GetActorLocation(), SphereComp->GetScaledSphereRadius(), 30000, ERadialImpulseFalloff::RIF_Constant, true);
+			UPrimitiveComponent* OverLap = OverLaps[i];
+			if (OverLap && OverLap->IsSimulatingPhysics())
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
+				OverLap->AddRadialForce(GetActorLocation(), SphereComp->GetScaledSphereRadius(), 30000, ERadialImpulseFalloff::RIF_Constant, true);
+			}
 		}
 	}
+}
+
+bool AFPSExplosionActor::Explode_Validate()
+{
+	return true;
 }
 
