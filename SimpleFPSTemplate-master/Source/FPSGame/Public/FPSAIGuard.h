@@ -65,6 +65,7 @@ protected:
 	FTimerHandle th_rot_reset;
 
 	EAIGuardState GuardState;
+	//
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

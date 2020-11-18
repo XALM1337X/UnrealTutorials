@@ -36,7 +36,7 @@ AFPSCharacter::AFPSCharacter()
 
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// set up gameplay key bindings
+	// set up game play key bindings
 	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
@@ -49,6 +49,18 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 }
 
+
+void AFPSCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (!IsLocallyControlled())
+	{
+		FRotator NewRot = CameraComponent->GetRelativeRotation();
+		//This 360.0f / 255.0f is to reverse some built in crap.
+		NewRot.Pitch = RemoteViewPitch * 360.0f / 255.0f;
+		CameraComponent->SetRelativeRotation(NewRot);
+	}
+}
 
 void AFPSCharacter::Fire()
 {

@@ -7,6 +7,7 @@
 #include "Components/PawnNoiseEmitterComponent.h"
 #include "FPSGameMode.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
+#include "Engine/Public/TimerManager.h"
 // Sets default values
 AFPSAIGuard::AFPSAIGuard()
 {
@@ -144,6 +145,5 @@ void AFPSAIGuard::Tick(float DeltaTime)
 void AFPSAIGuard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
