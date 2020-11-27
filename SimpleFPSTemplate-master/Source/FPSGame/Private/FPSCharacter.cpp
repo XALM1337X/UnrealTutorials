@@ -8,7 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Animation/AnimSequence.h"
 #include "Components/PawnNoiseEmitterComponent.h"
-
+#include "Net/UnrealNetwork.h"
 
 AFPSCharacter::AFPSCharacter()
 {
@@ -129,4 +129,11 @@ void AFPSCharacter::MoveRight(float Value)
 		AddMovementInput(GetActorRightVector(), Value);
 		NoiseEmitComp->MakeNoise(this, 1.5f, this->GetActorLocation());
 	}
+}
+
+//This does not have a definition in FPSAIGuard.h.
+void AFPSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFPSCharacter, bIsCarryingObjective);
 }

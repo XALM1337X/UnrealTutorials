@@ -8,6 +8,7 @@
 #include "FPSGameMode.h"
 #include "Blueprint/AIBlueprintHelperLibrary.h"
 #include "Engine/Public/TimerManager.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 AFPSAIGuard::AFPSAIGuard()
 {
@@ -95,6 +96,10 @@ void AFPSAIGuard::ResetRotation()
 	SetGuardState(EAIGuardState::Idle);
 }
 
+void AFPSAIGuard::OnRep_GuardState() {
+	OnStateChange(GuardState);
+}
+
 void AFPSAIGuard::SetGuardState(EAIGuardState NewState)
 {
 	if (GuardState == NewState)
@@ -102,7 +107,7 @@ void AFPSAIGuard::SetGuardState(EAIGuardState NewState)
 		return;
 	}
 	GuardState = NewState;
-	OnStateChange(NewState);
+	OnRep_GuardState();
 }
 
 void AFPSAIGuard::MoveToNextPoint()
@@ -146,4 +151,10 @@ void AFPSAIGuard::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
-
+//This is a function for replication on clients for the UPROPERTY GuardState for AFPSAIGuard. 
+//This does not have a definition in FPSAIGuard.h.
+void AFPSAIGuard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(AFPSAIGuard, GuardState);
+}

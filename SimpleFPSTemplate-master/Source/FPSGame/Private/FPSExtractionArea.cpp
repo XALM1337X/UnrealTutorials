@@ -44,10 +44,12 @@ void AFPSExtractionArea::HandleOverlap(UPrimitiveComponent* OverlappedComponent,
 	}
 	if (MyChar->bIsCarryingObjective)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("OverLap 2"));
 		AFPSGameMode* GM = Cast<AFPSGameMode>(GetWorld()->GetAuthGameMode());
 		if (GM)
 		{
-			GM->CompleteMission(MyChar, true);
+			UE_LOG(LogTemp, Warning, TEXT("OverLap 3"));
+			GM->CompleteMission(MyChar, MyChar->bIsCarryingObjective);
 		}
 	}
 	else {

@@ -63,8 +63,12 @@ protected:
 	FRotator OriginalLookDirection;
 
 	FTimerHandle th_rot_reset;
-
+	UPROPERTY(ReplicatedUsing=OnRep_GuardState)
 	EAIGuardState GuardState;
+
+	UFUNCTION()
+	void OnRep_GuardState();
+
 	//
 public:	
 	// Called every frame
