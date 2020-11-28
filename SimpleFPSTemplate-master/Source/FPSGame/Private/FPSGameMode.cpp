@@ -22,12 +22,10 @@ AFPSGameMode::AFPSGameMode()
 
 void AFPSGameMode::CompleteMission(APawn* pawn, bool IsSuccess)
 {	
-	UE_LOG(LogTemp, Warning, TEXT("CompleteMission 1"));
 	TArray<AActor*> ret_actors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), SpectatingViewPoints, ret_actors);
 	if (ret_actors.Num() > 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CompleteMission 2"));
 		AActor* target = ret_actors[0];
 		for (FConstPlayerControllerIterator it = GetWorld()->GetPlayerControllerIterator(); it; ++it) 
 		{
@@ -42,11 +40,9 @@ void AFPSGameMode::CompleteMission(APawn* pawn, bool IsSuccess)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SpectatingViewPoint is null"));
 	}
-	UE_LOG(LogTemp, Warning, TEXT("CompleteMission 3"));
 	AFPSGameState* GS = GetWorld()->GetGameState<AFPSGameState>();
 	//UE_LOG(LogTemp, Warning, TEXT("GameMode_1"));
 	if (GS) {
-		UE_LOG(LogTemp, Warning, TEXT("CompleteMission 4"));
 		GS->MulticastMissionCompleted(pawn,IsSuccess);
 	}
 }
