@@ -1,3 +1,5 @@
+This is my personal flavor of the course created by Tom Looman for unreal engine 4.
+
 # SimpleFPSTemplate
 Simple C++ FPS Template for Unreal Engine 4
 
