@@ -552,7 +552,8 @@
                 "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.18362.0\\winrt"
             ],
             "intelliSenseMode": "msvc-x64",
-            "defines": [                "IS_PROGRAM=0",
+            "defines": [    
+                "IS_PROGRAM=0",
                 "UE_EDITOR=1",
                 "ENABLE_PGO_PROFILE=0",
                 "USE_VORBIS_FOR_STREAMING=1",
