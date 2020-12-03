@@ -6,6 +6,11 @@
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 
+enum class RunState : uint8 
+{
+	Walk,
+	Run
+};
 
 class UCameraComponent;
 class USpringArmComponent;
@@ -28,6 +33,17 @@ protected:
 	UCameraComponent* CameraComponent;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
+
+	void BeginCrouch();
+	void EndCrouch();
+
+	//Non-template version to call within template in bind action.
+	void ToggleSprint(RunState speed);
+	//Template of same function for taking in RunState enum
+	template<RunState speed>
+	void ToggleSprint() {ToggleSprint(speed);}
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

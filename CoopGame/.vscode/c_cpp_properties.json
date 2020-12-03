@@ -537,7 +537,8 @@
                 "AUDIOMIXERCORE_API=",
                 "UE_PROJECT_NAME=CoopGame",
                 "COOPGAME_VTABLE=DLLEXPORT_VTABLE",
-                "COOPGAME_API="],
+                "COOPGAME_API="
+            ],
             "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++17"
