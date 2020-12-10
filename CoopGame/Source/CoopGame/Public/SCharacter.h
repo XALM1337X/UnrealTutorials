@@ -11,7 +11,17 @@ enum class RunState : uint8
 	Walk,
 	Run
 };
+enum class CrouchState : uint8 
+{
+	Crouch,
+	Stand
+};
 
+enum class JumpState : uint8 
+{
+	Jump,
+	Fall
+};
 class UCameraComponent;
 class USpringArmComponent;
 UCLASS()
@@ -29,20 +39,29 @@ protected:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+	//UProperties 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComponent;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
 
-	void BeginCrouch();
-	void EndCrouch();
-
-	//Non-template version to call within template in bind action.
+	//These are Toggle Templates bound to action inputs.
+	//Sprint
 	void ToggleSprint(RunState speed);
-	//Template of same function for taking in RunState enum
 	template<RunState speed>
 	void ToggleSprint() {ToggleSprint(speed);}
 
+	//Crouch function.
+	void ToggleCrouch(CrouchState posture);
+	template<CrouchState posture>
+	void ToggleCrouch() {ToggleCrouch(posture);}
+
+	//Jump
+	void ToggleJump(JumpState jumping);	
+	template<JumpState jumping>
+	void ToggleJump() {ToggleJump(jumping);}
 
 public:	
 	// Called every frame

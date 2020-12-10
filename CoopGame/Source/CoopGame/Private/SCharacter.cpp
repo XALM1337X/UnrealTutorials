@@ -21,7 +21,10 @@ ASCharacter::ASCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComp);
-	
+	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+	moveComp->GravityScale = 3.0;
+	moveComp->JumpZVelocity = 1000.0f;
+
 }
 
 // Called when the game starts or when spawned
@@ -49,14 +52,33 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(GetActorRightVector() * Value);
 }
 
-void ASCharacter::BeginCrouch()
+void ASCharacter::ToggleCrouch(CrouchState posture)
 {
-	Crouch();
-}
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController *PC = Cast<APlayerController>(It->Get());
+		if (PC && PC->IsLocalController())
+		{			
+			APawn* Pawn = PC->GetPawn();
+			if (Pawn)
+			{
+				UCharacterMovementComponent* PawnMovement = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
+				if (PawnMovement)
+				{
+					switch(posture)
+					{
+						case CrouchState::Crouch:
+							Crouch();
+							break;
 
-void ASCharacter::EndCrouch()
-{
-	UnCrouch();
+						case CrouchState::Stand:
+							UnCrouch();
+							break;
+					}
+				}
+			}
+		}
+	}
 }
 
 void ASCharacter::ToggleSprint(RunState speed)
@@ -93,6 +115,29 @@ void ASCharacter::ToggleSprint(RunState speed)
 	}
 }
 
+void ASCharacter::ToggleJump(JumpState jumping)
+{
+	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController *PC = Cast<APlayerController>(It->Get());
+		if (PC && PC->IsLocalController())
+		{			
+			ACharacter* character = PC->GetCharacter();	
+			if (character)
+			{
+				switch(jumping)
+				{
+					case JumpState::Jump:
+							character->Jump();
+							break;
+					case JumpState::Fall:
+							break;
+				}	
+			}			
+		}
+	}
+}
+
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -101,9 +146,11 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("LookUp",this, &ASCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn",this, &ASCharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::BeginCrouch);
-	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::EndCrouch);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::ToggleCrouch<CrouchState::Crouch>);
+	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::ToggleCrouch<CrouchState::Stand>);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASCharacter::ToggleSprint<RunState::Run>);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::ToggleSprint<RunState::Walk>);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::ToggleJump<JumpState::Jump>);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ASCharacter::ToggleJump<JumpState::Fall>);
 }
 
