@@ -99,13 +99,13 @@ void ASCharacter::ToggleSprint(RunState speed)
 						case RunState::Walk:
 						{
 							PawnMovement->MaxWalkSpeed = 600;
-							UE_LOG(LogTemp, Warning, TEXT("Walking"));
+							//UE_LOG(LogTemp, Warning, TEXT("Walking"));
 							break;
 						}
 						case RunState::Run:
 						{
 							PawnMovement->MaxWalkSpeed = 1000;
-							UE_LOG(LogTemp, Warning, TEXT("Running"));
+							//UE_LOG(LogTemp, Warning, TEXT("Running"));
 							break;
 						}
 					}
