@@ -131,7 +131,7 @@ void AFPSCharacter::MoveRight(float Value)
 	}
 }
 
-//This does not have a definition in FPSAIGuard.h.
+//This does not have a definition in FPSCharacter.h.
 void AFPSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

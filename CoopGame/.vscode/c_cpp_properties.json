@@ -5,6 +5,8 @@
             "includePath": [
                 "C:\\Program Files\\Epic Games\\UE_4.25\\Engine\\Source",
                 "C:\\Users\\smokums\\UnrealTutorials\\CoopGame\\Source",
+                "C:\\Users\\smokums\\UnrealTutorials\\CoopGame\\Source\\CoopGame\\Public",
+                "C:\\Users\\smokums\\UnrealTutorials\\CoopGame\\Source\\CoopGame\\Private",
                 "C:\\Program Files\\Epic Games\\UE_4.25\\Engine\\Source\\Runtime",
                 "C:\\Program Files\\Epic Games\\UE_4.25\\Engine\\Source\\Runtime\\TraceLog\\Public",
                 "C:\\Program Files\\Epic Games\\UE_4.25\\Engine\\Source\\Runtime\\Core\\Public",

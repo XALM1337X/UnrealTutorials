@@ -67,7 +67,7 @@ void ASWeapon::Fire_Implementation()
 			UParticleSystemComponent* TracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
 			if (TracerComp)
 			{
-				TracerComp->SetVectorParameter("BeamEnd",TraceEndPoint);
+				TracerComp->SetVectorParameter("BeamEnd", TraceEndPoint);
 			}
 			//DrawDebugLine(GetWorld(), EyeLocation, TraceEndPos, FColor::White, false, 1.0f, 0, 1.0f);
 		}
