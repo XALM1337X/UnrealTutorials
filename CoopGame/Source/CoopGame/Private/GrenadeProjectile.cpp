@@ -4,46 +4,72 @@
 #include "GrenadeProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AGrenadeProjectile::AGrenadeProjectile()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	CollisionComp->InitSphereRadius(0.5f);
-	CollisionComp->SetCollisionProfileName("Projectile");
-	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
-	CollisionComp->CanCharacterStepUpOn = ECB_No;
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+		PrimaryActorTick.bCanEverTick = true;
+		
+		ExplosionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ExplosionMesh"));
+		RootComponent = ExplosionMesh;
 
-	RootComponent = CollisionComp;
 
-	// Use a ProjectileMovementComponent to govern this projectile's movement
-	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
-	ProjectileMovement->UpdatedComponent = CollisionComp;
-	ProjectileMovement->InitialSpeed = 3000.f;
-	ProjectileMovement->MaxSpeed = 3000.f;
-	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = true;
+		CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+		CollisionComp->InitSphereRadius(0.5f);
+		CollisionComp->SetCollisionProfileName("Projectile");
+		CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
+		CollisionComp->CanCharacterStepUpOn = ECB_No;
+		CollisionComp->SetupAttachment(ExplosionMesh);
 
-	// Die after 3 seconds by default
-	InitialLifeSpan = 3.0f;
-	SetReplicates(true);
-	SetReplicateMovement(true);
+		// Use a ProjectileMovementComponent to govern this projectile's movement
+		ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
+		ProjectileMovement->UpdatedComponent = ExplosionMesh;
+		ProjectileMovement->InitialSpeed = 1500.f;
+		ProjectileMovement->MaxSpeed = 1500.f;
+		ProjectileMovement->bRotationFollowsVelocity = true;
+		ProjectileMovement->bShouldBounce = true;
+
+		
+		// Die after 3 seconds by default
+		//InitialLifeSpan = 3.0f;
+		TickCount = 1;
+		SetReplicates(true);
+		SetReplicateMovement(true);
+	}
 
 }
 
 // Called when the game starts or when spawned
 void AGrenadeProjectile::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		Super::BeginPlay();
+	}
 }
 
 // Called every frame
 void AGrenadeProjectile::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+	if (GetLocalRole() == ROLE_Authority)
+	{
+		Super::Tick(DeltaTime);
+		if (TickCount % 300 == 0) 
+		{
+			//Call Explosion
+			FVector loc = GetActorLocation();
+			FRotator rot = GetActorRotation();
+			GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot);
+			Destroy();
+		} 
+		else 
+		{
+			TickCount++;
+		}
+	}
 
 }
-

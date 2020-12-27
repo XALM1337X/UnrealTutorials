@@ -19,6 +19,7 @@ void ASWeaponGrenadeLauncher::Fire_Implementation()
 	APawn*  pawn = Cast<APawn>(MyOwner);
 	if (MyOwner)
 	{
+
 		if (MuzzleEffect) 
 		{
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
@@ -30,18 +31,34 @@ void ASWeaponGrenadeLauncher::Fire_Implementation()
 			FVector EyeLocation; 
 			FRotator EyeRotation;		
 			MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-			EyeRotation.Yaw += EyeRotation.Yaw+3;
-			EyeRotation.Pitch += EyeRotation.Pitch+2;
+
+
+			FVector ShotDirection = EyeRotation.Vector();
+
+			FVector TraceEndPos = EyeLocation + (ShotDirection * 10000);
+
 			FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
 			FRotator MuzzleRotator = EyeRotation;
 			//Set Spawn Collision Handling Override
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+
+			FHitResult hit;
+			FVector TraceEndPoint = TraceEndPos;
+			if (GetWorld()->LineTraceSingleByChannel(hit, EyeLocation, TraceEndPos, ECC_Visibility))
+			{
+				//AActor* HitActor = hit.GetActor();
+				TraceEndPoint = hit.ImpactPoint;
+
+			}
+
 			if (pawn)
 			{
 				ActorSpawnParams.Instigator = pawn;
 				// spawn the projectile at the muzzle
-				GetWorld()->SpawnActor<AGrenadeProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotator, ActorSpawnParams);
+				FRotator FinalRot  =  (TraceEndPoint - MuzzleLocation).Rotation();
+				GetWorld()->SpawnActor<AGrenadeProjectile>(ProjectileClass, MuzzleLocation, FinalRot, ActorSpawnParams);
 			}
 		}
 
