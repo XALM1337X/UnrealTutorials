@@ -20,7 +20,6 @@ AExplosionActor::AExplosionActor()
 // Called when the game starts or when spawned
 void AExplosionActor::BeginPlay()
 {
-	Super::BeginPlay();
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		Super::BeginPlay();
