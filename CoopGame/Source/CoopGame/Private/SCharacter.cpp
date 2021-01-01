@@ -24,6 +24,9 @@ ASCharacter::ASCharacter()
 	UCharacterMovementComponent* moveComp = GetCharacterMovement();
 	moveComp->GravityScale = 3.0;
 	moveComp->JumpZVelocity = 1000.0f;
+	zoomPOV = 65.0f;
+	zoomInterpolationSpeed = 20.0f;
+	isAiming = false;
 
 }
 
@@ -31,6 +34,7 @@ ASCharacter::ASCharacter()
 void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	hipPOV = CameraComponent->FieldOfView;
 	
 }
 
@@ -38,6 +42,9 @@ void ASCharacter::BeginPlay()
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	float targetPOV = isAiming ? zoomPOV : hipPOV;
+	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
+	CameraComponent->SetFieldOfView(newPOV);
 	//UE_LOG(LogTemp, Warning, TEXT("VALUE: %f"),);
 }
 
@@ -99,13 +106,11 @@ void ASCharacter::ToggleSprint(RunState speed)
 						case RunState::Walk:
 						{
 							PawnMovement->MaxWalkSpeed = 600;
-							//UE_LOG(LogTemp, Warning, TEXT("Walking"));
 							break;
 						}
 						case RunState::Run:
 						{
 							PawnMovement->MaxWalkSpeed = 1000;
-							//UE_LOG(LogTemp, Warning, TEXT("Running"));
 							break;
 						}
 					}
@@ -138,6 +143,24 @@ void ASCharacter::ToggleJump(JumpState jumping)
 	}
 }
 
+void ASCharacter::ToggleAim(AimState aim)
+{		
+	switch(aim)
+	{
+		case AimState::Zoom:
+		{
+			isAiming = true;
+			break;
+		}			
+		
+		case AimState::Hip:
+		{
+			isAiming = false;
+			break;
+		}
+	}	
+}
+
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -152,6 +175,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::ToggleSprint<RunState::Walk>);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::ToggleJump<JumpState::Jump>);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ASCharacter::ToggleJump<JumpState::Fall>);
+	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ASCharacter::ToggleAim<AimState::Zoom>);
+	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASCharacter::ToggleAim<AimState::Hip>);
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

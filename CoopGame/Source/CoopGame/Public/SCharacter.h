@@ -22,6 +22,13 @@ enum class JumpState : uint8
 	Jump,
 	Fall
 };
+
+enum class AimState : uint8 
+{
+	Zoom,
+	Hip
+};
+
 class UCameraComponent;
 class USpringArmComponent;
 UCLASS()
@@ -29,10 +36,35 @@ class COOPGAME_API ASCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+//Public Member Variables
 public:
-	// Sets default values for this character's properties
+	
+//Public Methods/Functions
+public:	
 	ASCharacter();
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
+	// Called to bind functionality to input
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	virtual FVector GetPawnViewLocation() const override;
+
+//Protected Member Variables
+protected:
+
+	UPROPERTY(BlueprintReadOnly, Category="Player")
+	bool isAiming;
+
+	float hipPOV;
+
+	UPROPERTY(EditDefaultsOnly, Category="Player")
+	float zoomPOV;
+
+	UPROPERTY(EditDefaultsOnly, Category="Player", meta = ( ClampMin = 0.1, ClampMax = 100.0))
+	float zoomInterpolationSpeed;
+
+//Protected Methods/Functions
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -63,13 +95,7 @@ protected:
 	template<JumpState jumping>
 	void ToggleJump() {ToggleJump(jumping);}
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	virtual FVector GetPawnViewLocation() const override;
-
+	void ToggleAim(AimState aim);
+	template<AimState aim>
+	void ToggleAim() {ToggleAim(aim);}
 };

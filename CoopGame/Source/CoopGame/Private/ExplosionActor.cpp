@@ -57,7 +57,7 @@ void AExplosionActor::Explode_Implementation()
 			UPrimitiveComponent* OverLap = OverLaps[i];
 			if (OverLap && OverLap->IsSimulatingPhysics())
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
+				//UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
 				OverLap->AddRadialForce(GetActorLocation(), SphereComp->GetScaledSphereRadius(), 20000, ERadialImpulseFalloff::RIF_Constant, true);
 			}
 		}
