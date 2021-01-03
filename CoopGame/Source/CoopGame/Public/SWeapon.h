@@ -15,21 +15,20 @@ class COOPGAME_API ASWeapon : public AActor
 {
 	GENERATED_BODY()
 	
+//Public memeber variables
+public:
+
+//Public member functions
 public:	
 	// Sets default values for this actor's properties
 	ASWeapon();
-		// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void CallFire();
 
+//Protected member variables
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
 	USkeletalMeshComponent* MeshComp;
-
-	UFUNCTION(Server, BlueprintCallable, Reliable)
-	virtual void Fire();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	TSubclassOf<UDamageType> DamageType;
@@ -46,7 +45,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	UParticleSystem* TracerEffect;
 
-private: 
-
+//Protected member functions
+protected:
+	UFUNCTION(Server, BlueprintCallable, Reliable)
+	virtual void Fire();
 
 };

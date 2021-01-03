@@ -29,8 +29,20 @@ enum class AimState : uint8
 	Hip
 };
 
+enum class FireState : uint8 
+{
+	Fire,
+	Release
+};
+enum class WeaponState : uint8 
+{
+	Primary,
+	Secondary
+};
+
 class UCameraComponent;
 class USpringArmComponent;
+class ASWeapon;
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
 {
@@ -52,6 +64,8 @@ public:
 
 //Protected Member Variables
 protected:
+	UPROPERTY(BlueprintReadWrite)
+	ASWeapon* CurrentWeapon;
 
 	UPROPERTY(BlueprintReadOnly, Category="Player")
 	bool isAiming;
@@ -63,6 +77,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Player", meta = ( ClampMin = 0.1, ClampMax = 100.0))
 	float zoomInterpolationSpeed;
+
+	bool isFiring;
+
+
 
 //Protected Methods/Functions
 protected:
@@ -98,4 +116,9 @@ protected:
 	void ToggleAim(AimState aim);
 	template<AimState aim>
 	void ToggleAim() {ToggleAim(aim);}
+
+	void ToggleFire(FireState fire);
+	template<FireState fire>
+	void ToggleFire() {ToggleFire(fire);}
+
 };

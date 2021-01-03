@@ -6,6 +6,7 @@
 #include "GameFramework/SpringarmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "SWeapon.h"
 
 
 // Sets default values
@@ -27,6 +28,7 @@ ASCharacter::ASCharacter()
 	zoomPOV = 65.0f;
 	zoomInterpolationSpeed = 20.0f;
 	isAiming = false;
+	isFiring = false;
 
 }
 
@@ -45,6 +47,11 @@ void ASCharacter::Tick(float DeltaTime)
 	float targetPOV = isAiming ? zoomPOV : hipPOV;
 	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 	CameraComponent->SetFieldOfView(newPOV);
+	if (isFiring)
+	{
+		CurrentWeapon->CallFire();
+		UE_LOG(LogTemp, Warning, TEXT("TICK::FIRE"));
+	}
 	//UE_LOG(LogTemp, Warning, TEXT("VALUE: %f"),);
 }
 
@@ -161,6 +168,36 @@ void ASCharacter::ToggleAim(AimState aim)
 	}	
 }
 
+void ASCharacter::ToggleFire(FireState fire)
+{
+	switch(fire)
+	{
+		case FireState::Fire:
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleFire::FIRE_0"));
+			if (CurrentWeapon)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ToggleFire::FIRE_1"));
+				//bool isFiring 
+				isFiring = true;
+			}	
+			break;
+		}
+	
+		case FireState::Release:
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleFire::Release_0"));
+			if (CurrentWeapon)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ToggleFire::Release_1"));
+				isFiring = false;
+			}
+		}
+		break;
+	}
+}
+
+
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -177,6 +214,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ASCharacter::ToggleJump<JumpState::Fall>);
 	PlayerInputComponent->BindAction("Aim", IE_Pressed, this, &ASCharacter::ToggleAim<AimState::Zoom>);
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASCharacter::ToggleAim<AimState::Hip>);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::ToggleFire<FireState::Fire>);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::ToggleFire<FireState::Release>);
+
 }
 
 FVector ASCharacter::GetPawnViewLocation() const

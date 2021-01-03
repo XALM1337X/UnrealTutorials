@@ -8,7 +8,6 @@
 
 ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 {
-    PrimaryActorTick.bCanEverTick = true;
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshCompGren"));
 	MuzzleSocketName = "MuzzleSocket";
 }
@@ -63,21 +62,5 @@ void ASWeaponGrenadeLauncher::Fire_Implementation()
 		}
 
 	}
-}
-
-
-
-// Called when the game starts or when spawned
-void ASWeaponGrenadeLauncher::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void ASWeaponGrenadeLauncher::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
