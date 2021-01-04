@@ -80,6 +80,7 @@ protected:
 
 	bool isFiring;
 
+	int CharacterTick;
 
 
 //Protected Methods/Functions

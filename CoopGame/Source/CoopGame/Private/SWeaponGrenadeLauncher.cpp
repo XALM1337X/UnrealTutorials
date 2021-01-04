@@ -10,7 +10,45 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 {
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshCompGren"));
 	MuzzleSocketName = "MuzzleSocket";
+	currentAmmo = 2;
+	maxAmmo = 2;
+	needReload = false;
+	weaponMod = 1;
 }
+
+
+int ASWeaponGrenadeLauncher::GetWeaponMod() 
+{
+	return this->weaponMod;
+}
+
+void ASWeaponGrenadeLauncher::CallFire() 
+{
+	this->Fire();
+	this->currentAmmo--;
+}
+
+int ASWeaponGrenadeLauncher::GetCurrentAmmoCount() 
+{
+	return this->currentAmmo;
+}
+
+void ASWeaponGrenadeLauncher::SetCurrentAmmoCount(int ammo) 
+{
+	this->currentAmmo = ammo;
+}
+
+bool ASWeaponGrenadeLauncher::GetReloadState()
+{
+	return this->needReload;
+}
+
+void ASWeaponGrenadeLauncher::SetReloadState(bool reload) {
+	this->needReload = reload;
+}
+
+
+
 
 void ASWeaponGrenadeLauncher::Fire_Implementation() 
 {

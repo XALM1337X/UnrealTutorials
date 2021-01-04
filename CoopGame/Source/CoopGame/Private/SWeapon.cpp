@@ -17,11 +17,46 @@ ASWeapon::ASWeapon()
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
 	MuzzleSocketName = "MuzzleSocket";
+	
+	needReload = false;
+	currentAmmo = 45;
+	maxAmmo = 45;
+	clipsLeft = 5;
+	weaponMod = 15;
 }
 
 void ASWeapon::CallFire()
 {
+
 	this->Fire();
+	this->currentAmmo--;
+}
+
+int ASWeapon::GetWeaponMod()
+{
+	return this->weaponMod;
+}
+
+
+int ASWeapon::GetCurrentAmmoCount()
+{
+	return this->currentAmmo;
+}
+
+void ASWeapon::SetCurrentAmmoCount(int count)
+{
+	this->currentAmmo = count;
+}
+
+bool ASWeapon::GetReloadState()
+{
+	return this->needReload;
+}
+
+void ASWeapon::SetReloadState(bool reload)
+{
+	this->needReload = reload;
+
 }
 
 void ASWeapon::Fire_Implementation()

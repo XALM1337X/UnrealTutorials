@@ -23,6 +23,11 @@ public:
 	// Sets default values for this actor's properties
 	ASWeapon();
 	virtual void CallFire();
+	virtual int GetWeaponMod();
+	virtual int GetCurrentAmmoCount();
+	virtual void SetCurrentAmmoCount(int);
+	virtual bool GetReloadState();
+	virtual void SetReloadState(bool);
 
 //Protected member variables
 protected:
@@ -44,6 +49,12 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	UParticleSystem* TracerEffect;
+
+	int currentAmmo;
+	int maxAmmo;
+	int clipsLeft;
+	bool needReload;
+	int weaponMod;
 
 //Protected member functions
 protected:

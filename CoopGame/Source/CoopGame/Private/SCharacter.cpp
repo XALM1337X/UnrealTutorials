@@ -7,6 +7,7 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SWeapon.h"
+#include "SWeaponGrenadeLauncher.h"
 
 
 // Sets default values
@@ -23,6 +24,7 @@ ASCharacter::ASCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComp);
 	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+	CharacterTick = 0;
 	moveComp->GravityScale = 3.0;
 	moveComp->JumpZVelocity = 1000.0f;
 	zoomPOV = 65.0f;
@@ -47,12 +49,20 @@ void ASCharacter::Tick(float DeltaTime)
 	float targetPOV = isAiming ? zoomPOV : hipPOV;
 	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 	CameraComponent->SetFieldOfView(newPOV);
-	if (isFiring)
+	
+	if (isFiring && (CharacterTick % CurrentWeapon->GetWeaponMod() == 0) && CurrentWeapon->GetCurrentAmmoCount() > 0)
 	{
 		CurrentWeapon->CallFire();
-		UE_LOG(LogTemp, Warning, TEXT("TICK::FIRE"));
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("VALUE: %f"),);
+
+	if (CharacterTick == 1000)
+	{
+		CharacterTick = 0; 
+	}
+	else 
+	{
+		CharacterTick++;
+	}
 }
 
 void ASCharacter::MoveForward(float Value) 
@@ -174,11 +184,8 @@ void ASCharacter::ToggleFire(FireState fire)
 	{
 		case FireState::Fire:
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ToggleFire::FIRE_0"));
 			if (CurrentWeapon)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("ToggleFire::FIRE_1"));
-				//bool isFiring 
 				isFiring = true;
 			}	
 			break;
@@ -186,10 +193,8 @@ void ASCharacter::ToggleFire(FireState fire)
 	
 		case FireState::Release:
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ToggleFire::Release_0"));
 			if (CurrentWeapon)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("ToggleFire::Release_1"));
 				isFiring = false;
 			}
 		}
