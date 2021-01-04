@@ -23,6 +23,7 @@ ASWeapon::ASWeapon()
 	maxAmmo = 45;
 	clipsLeft = 5;
 	weaponMod = 15;
+	weaponName = "rifle";
 }
 
 void ASWeapon::CallFire()

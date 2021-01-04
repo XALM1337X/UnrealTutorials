@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "SWeapon.generated.h"
 
+
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
@@ -49,6 +50,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	UParticleSystem* TracerEffect;
+
+	UPROPERTY(BlueprintReadOnly)
+	FString weaponName;
 
 	int currentAmmo;
 	int maxAmmo;

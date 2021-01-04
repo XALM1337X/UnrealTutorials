@@ -14,6 +14,7 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 	maxAmmo = 2;
 	needReload = false;
 	weaponMod = 1;
+	weaponName = "grenadeLauncher";
 }
 
 
