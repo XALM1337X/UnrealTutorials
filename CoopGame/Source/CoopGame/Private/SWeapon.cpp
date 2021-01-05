@@ -31,6 +31,10 @@ void ASWeapon::CallFire()
 
 	this->Fire();
 	this->currentAmmo--;
+	if (this->currentAmmo == 0)
+	{
+		this->needReload = true;
+	}
 }
 
 int ASWeapon::GetWeaponMod()

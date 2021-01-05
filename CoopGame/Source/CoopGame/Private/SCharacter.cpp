@@ -50,7 +50,7 @@ void ASCharacter::Tick(float DeltaTime)
 	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 	CameraComponent->SetFieldOfView(newPOV);
 	
-	if (isFiring && (CharacterTick % CurrentWeapon->GetWeaponMod() == 0) && CurrentWeapon->GetCurrentAmmoCount() > 0)
+	if (isFiring && (CharacterTick % CurrentWeapon->GetWeaponMod() == 0) && CurrentWeapon->GetCurrentAmmoCount() > 0 && !CurrentWeapon->GetReloadState())
 	{
 		CurrentWeapon->CallFire();
 	}

@@ -27,6 +27,7 @@ void ASWeaponGrenadeLauncher::CallFire()
 {
 	this->Fire();
 	this->currentAmmo--;
+	this->needReload = true;
 }
 
 int ASWeaponGrenadeLauncher::GetCurrentAmmoCount() 
