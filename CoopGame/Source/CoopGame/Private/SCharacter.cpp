@@ -76,6 +76,12 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(GetActorRightVector() * Value);
 }
 
+void ASCharacter::Reload()
+{
+	UE_LOG(LogTemp, Warning, TEXT("TRIGGER"));
+	CurrentWeapon->ReloadWeapon();
+}
+
 void ASCharacter::ToggleCrouch(CrouchState posture)
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
@@ -221,6 +227,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASCharacter::ToggleAim<AimState::Hip>);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::ToggleFire<FireState::Fire>);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::ToggleFire<FireState::Release>);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASCharacter::Reload);
 
 }
 

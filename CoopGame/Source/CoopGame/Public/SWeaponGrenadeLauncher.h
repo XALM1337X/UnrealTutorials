@@ -32,6 +32,7 @@ public:
 	virtual void SetCurrentAmmoCount(int) override;
 	virtual bool GetReloadState() override;
 	virtual void SetReloadState(bool) override;
+	virtual void ReloadWeapon() override;
 
 public:
 
@@ -41,7 +42,7 @@ public:
 
 protected:
 	virtual void Fire_Implementation() override;
-
+	
 protected:
 
 private:

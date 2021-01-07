@@ -90,6 +90,7 @@ protected:
 
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void Reload();
 
 	//UProperties 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -121,5 +122,6 @@ protected:
 	void ToggleFire(FireState fire);
 	template<FireState fire>
 	void ToggleFire() {ToggleFire(fire);}
+
 
 };

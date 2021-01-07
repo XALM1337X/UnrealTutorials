@@ -19,10 +19,10 @@ ASWeapon::ASWeapon()
 	MuzzleSocketName = "MuzzleSocket";
 	
 	needReload = false;
-	currentAmmo = 45;
-	maxAmmo = 45;
+	currentAmmo = 35;
+	maxAmmo = 35;
 	clipsLeft = 5;
-	weaponMod = 15;
+	weaponMod = 13;
 	weaponName = "rifle";
 }
 
@@ -34,6 +34,16 @@ void ASWeapon::CallFire()
 	if (this->currentAmmo == 0)
 	{
 		this->needReload = true;
+	}
+}
+
+void ASWeapon::ReloadWeapon()
+{
+	if (this->clipsLeft != 0)
+	{
+		this->currentAmmo = this->maxAmmo;
+		this->needReload = false;
+		this->clipsLeft--;
 	}
 }
 

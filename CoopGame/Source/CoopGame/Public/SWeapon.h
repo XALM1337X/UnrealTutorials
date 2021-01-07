@@ -29,7 +29,8 @@ public:
 	virtual void SetCurrentAmmoCount(int);
 	virtual bool GetReloadState();
 	virtual void SetReloadState(bool);
-
+	virtual void ReloadWeapon();
+	
 //Protected member variables
 protected:
 

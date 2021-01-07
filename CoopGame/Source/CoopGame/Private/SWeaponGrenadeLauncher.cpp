@@ -10,8 +10,9 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 {
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshCompGren"));
 	MuzzleSocketName = "MuzzleSocket";
-	currentAmmo = 2;
-	maxAmmo = 2;
+	currentAmmo = 1;
+	clipsLeft = 2;
+	maxAmmo = 1;
 	needReload = false;
 	weaponMod = 1;
 	weaponName = "grenadeLauncher";
@@ -30,6 +31,15 @@ void ASWeaponGrenadeLauncher::CallFire()
 	this->needReload = true;
 }
 
+void ASWeaponGrenadeLauncher::ReloadWeapon()
+{
+	if (this->clipsLeft != 0)
+	{
+		this->currentAmmo = this->maxAmmo;
+		this->needReload = false;
+		this->clipsLeft--;
+	}
+}
 int ASWeaponGrenadeLauncher::GetCurrentAmmoCount() 
 {
 	return this->currentAmmo;
