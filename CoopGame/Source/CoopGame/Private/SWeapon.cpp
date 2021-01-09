@@ -7,6 +7,7 @@
 #include "Particles/ParticleSystem.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "SCharacter.h"
 
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugWeapon(TEXT("COOP.DebugWeapons"), DebugMode, TEXT("Draw debugs for weapons"), ECVF_Cheat);
@@ -87,9 +88,20 @@ void ASWeapon::Fire_Implementation()
 		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 
 		FVector ShotDirection = EyeRotation.Vector();
-
+		
 		FVector TraceEndPos = EyeLocation + (ShotDirection * 10000);
-
+	/*
+		ASCharacter* CharCast = Cast<ASCharacter>(MyOwner);
+		if (CharCast)
+		{
+			if (!CharCast->GetIsAiming())
+			{
+				TraceEndPos.Z = TraceEndPos.Z - 100;
+			} else {
+				TraceEndPos.Z = TraceEndPos.Z - 220;
+			}
+		}
+	*/
 		FCollisionQueryParams queryParams;
 		queryParams.AddIgnoredActor(MyOwner);
 		queryParams.AddIgnoredActor(this);
@@ -98,7 +110,7 @@ void ASWeapon::Fire_Implementation()
 		FVector TraceEndPoint = TraceEndPos;
 
 		FHitResult hit;
-		if (GetWorld()->LineTraceSingleByChannel(hit, EyeLocation, TraceEndPos, ECC_Visibility))
+		if (GetWorld()->LineTraceSingleByChannel(hit, EyeLocation, TraceEndPos, ECC_Visibility, queryParams))
 		{
 			AActor* HitActor = hit.GetActor();
 			// Process damage and such

@@ -78,7 +78,7 @@ void ASCharacter::MoveRight(float Value)
 
 void ASCharacter::Reload()
 {
-	UE_LOG(LogTemp, Warning, TEXT("TRIGGER"));
+	UE_LOG(LogTemp, Warning, TEXT("RELOAD"));
 	CurrentWeapon->ReloadWeapon();
 }
 
@@ -208,7 +208,10 @@ void ASCharacter::ToggleFire(FireState fire)
 	}
 }
 
-
+bool ASCharacter::GetIsAiming()
+{
+	return this->isAiming;
+} 
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

@@ -62,6 +62,8 @@ public:
 
 	virtual FVector GetPawnViewLocation() const override;
 
+	bool GetIsAiming();
+
 //Protected Member Variables
 protected:
 	UPROPERTY(BlueprintReadWrite)
