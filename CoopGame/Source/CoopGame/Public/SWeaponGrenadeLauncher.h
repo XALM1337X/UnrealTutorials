@@ -33,6 +33,7 @@ public:
 	virtual bool GetReloadState() override;
 	virtual void SetReloadState(bool) override;
 	virtual void ReloadWeapon() override;
+	virtual void PlayEffects(FVector,FVector,FVector) override;
 
 public:
 

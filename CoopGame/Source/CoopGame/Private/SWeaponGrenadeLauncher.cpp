@@ -68,13 +68,6 @@ void ASWeaponGrenadeLauncher::Fire_Implementation()
 	APawn*  pawn = Cast<APawn>(MyOwner);
 	if (MyOwner)
 	{
-
-		if (MuzzleEffect) 
-		{
-			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
-			
-		}	
-
 		if (ProjectileClass)
 		{
 			FVector EyeLocation; 
@@ -109,8 +102,30 @@ void ASWeaponGrenadeLauncher::Fire_Implementation()
 				FRotator FinalRot  =  (TraceEndPoint - MuzzleLocation).Rotation();
 				GetWorld()->SpawnActor<AGrenadeProjectile>(ProjectileClass, MuzzleLocation, FinalRot, ActorSpawnParams);
 			}
+			PlayEffects(EyeLocation, TraceEndPos, TraceEndPoint);
 		}
 
 	}
+}
+
+void ASWeaponGrenadeLauncher::PlayEffects(FVector EyeLocation, FVector TraceEndPos, FVector TraceEndPoint)
+{
+		if (MuzzleEffect) 
+		{
+			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+		}	
+		
+		APawn* owner = Cast<APawn>(GetOwner());
+		if (owner)
+		{
+			APlayerController* PC = Cast<APlayerController>(owner->GetController());
+			if (PC)
+			{
+				if (fireCamShake)
+				{
+					PC->ClientPlayCameraShake(fireCamShake);
+				}
+			}
+		}
 }
 

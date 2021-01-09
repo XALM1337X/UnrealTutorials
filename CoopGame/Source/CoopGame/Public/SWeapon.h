@@ -10,7 +10,7 @@
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
-
+class UCameraShake;
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
 {
@@ -30,7 +30,7 @@ public:
 	virtual bool GetReloadState();
 	virtual void SetReloadState(bool);
 	virtual void ReloadWeapon();
-	
+	virtual void PlayEffects(FVector,FVector,FVector);
 //Protected member variables
 protected:
 
@@ -54,6 +54,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	FString weaponName;
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	TSubclassOf<UCameraShake> fireCamShake;
 
 	int currentAmmo;
 	int maxAmmo;

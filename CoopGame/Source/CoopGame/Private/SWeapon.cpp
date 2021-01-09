@@ -90,18 +90,6 @@ void ASWeapon::Fire_Implementation()
 		FVector ShotDirection = EyeRotation.Vector();
 		
 		FVector TraceEndPos = EyeLocation + (ShotDirection * 10000);
-	/*
-		ASCharacter* CharCast = Cast<ASCharacter>(MyOwner);
-		if (CharCast)
-		{
-			if (!CharCast->GetIsAiming())
-			{
-				TraceEndPos.Z = TraceEndPos.Z - 100;
-			} else {
-				TraceEndPos.Z = TraceEndPos.Z - 220;
-			}
-		}
-	*/
 		FCollisionQueryParams queryParams;
 		queryParams.AddIgnoredActor(MyOwner);
 		queryParams.AddIgnoredActor(this);
@@ -122,12 +110,16 @@ void ASWeapon::Fire_Implementation()
 			}
 			TraceEndPoint = hit.ImpactPoint;
 		}
+		PlayEffects(EyeLocation, TraceEndPos, TraceEndPoint);
+	}
+}
 
+void ASWeapon::PlayEffects(FVector EyeLocation, FVector TraceEndPos, FVector TraceEndPoint)
+{
 		if (MuzzleEffect) 
 		{
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
 		}		
-
 
 		if (TracerEffect) 
 		{
@@ -141,7 +133,16 @@ void ASWeapon::Fire_Implementation()
 				DrawDebugLine(GetWorld(), EyeLocation, TraceEndPos, FColor::White, false, 1.0f, 0, 1.0f);
 			}
 		}
-
-	}
+		APawn* owner = Cast<APawn>(GetOwner());
+		if (owner)
+		{
+			APlayerController* PC = Cast<APlayerController>(owner->GetController());
+			if (PC)
+			{
+				if (fireCamShake)
+				{
+					PC->ClientPlayCameraShake(fireCamShake);
+				}
+			}
+		}
 }
-
