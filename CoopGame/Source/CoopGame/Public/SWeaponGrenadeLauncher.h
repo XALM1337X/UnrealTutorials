@@ -28,12 +28,15 @@ public:
 	
 	virtual void CallFire() override;
 	virtual int GetWeaponMod() override;
-	virtual int GetCurrentAmmoCount() override;
 	virtual void SetCurrentAmmoCount(int) override;
 	virtual bool GetReloadState() override;
 	virtual void SetReloadState(bool) override;
 	virtual void ReloadWeapon() override;
 	virtual void PlayEffects(FVector,FVector,FVector) override;
+
+	
+	virtual int GetMaxClipSize() override;
+	virtual int GetCurrentAmmoCount() override;
 
 public:
 

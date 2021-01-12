@@ -15,7 +15,7 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 	maxAmmo = 1;
 	needReload = false;
 	weaponMod = 1;
-	weaponName = "grenadeLauncher";
+	weaponName = "Launcher";
 }
 
 
@@ -44,7 +44,10 @@ int ASWeaponGrenadeLauncher::GetCurrentAmmoCount()
 {
 	return this->currentAmmo;
 }
-
+int ASWeaponGrenadeLauncher::GetMaxClipSize()
+{
+	return this->maxAmmo;
+}
 void ASWeaponGrenadeLauncher::SetCurrentAmmoCount(int ammo) 
 {
 	this->currentAmmo = ammo;
@@ -58,6 +61,7 @@ bool ASWeaponGrenadeLauncher::GetReloadState()
 void ASWeaponGrenadeLauncher::SetReloadState(bool reload) {
 	this->needReload = reload;
 }
+
 
 
 

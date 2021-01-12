@@ -64,6 +64,11 @@ void ASWeapon::SetCurrentAmmoCount(int count)
 	this->currentAmmo = count;
 }
 
+int ASWeapon::GetMaxClipSize()
+{
+	return this->maxAmmo;
+}
+
 bool ASWeapon::GetReloadState()
 {
 	return this->needReload;

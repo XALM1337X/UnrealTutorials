@@ -25,12 +25,18 @@ public:
 	ASWeapon();
 	virtual void CallFire();
 	virtual int GetWeaponMod();
-	virtual int GetCurrentAmmoCount();
 	virtual void SetCurrentAmmoCount(int);
 	virtual bool GetReloadState();
 	virtual void SetReloadState(bool);
 	virtual void ReloadWeapon();
 	virtual void PlayEffects(FVector,FVector,FVector);
+	
+	UFUNCTION(BlueprintCallable)
+	virtual int GetMaxClipSize();
+
+	UFUNCTION(BlueprintCallable)
+	virtual int GetCurrentAmmoCount();
+	
 //Protected member variables
 protected:
 
