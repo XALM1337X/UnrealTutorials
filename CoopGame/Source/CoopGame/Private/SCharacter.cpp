@@ -78,7 +78,7 @@ void ASCharacter::MoveRight(float Value)
 
 void ASCharacter::Reload()
 {
-	UE_LOG(LogTemp, Warning, TEXT("RELOAD"));
+	//UE_LOG(LogTemp, Warning, TEXT("RELOAD"));
 	CurrentWeapon->ReloadWeapon();
 }
 
@@ -149,8 +149,8 @@ void ASCharacter::ToggleJump(JumpState jumping)
 	{
 		APlayerController *PC = Cast<APlayerController>(It->Get());
 		if (PC && PC->IsLocalController())
-		{			
-			ACharacter* character = PC->GetCharacter();	
+		{
+			ACharacter* character = PC->GetCharacter();
 			if (character)
 			{
 				switch(jumping)
@@ -160,8 +160,8 @@ void ASCharacter::ToggleJump(JumpState jumping)
 							break;
 					case JumpState::Fall:
 							break;
-				}	
-			}			
+				}
+			}
 		}
 	}
 }

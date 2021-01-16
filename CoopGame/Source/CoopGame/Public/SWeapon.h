@@ -36,6 +36,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual int GetCurrentAmmoCount();
+
+	UFUNCTION(BlueprintCallable)
+	virtual int GetRemainingClips();
 	
 //Protected member variables
 protected:
@@ -65,7 +68,8 @@ protected:
 	TSubclassOf<UCameraShake> fireCamShake;
 
 	int currentAmmo;
-	int maxAmmo;
+	int totalAmmo;
+	int maxClipSize;
 	int clipsLeft;
 	bool needReload;
 	int weaponMod;

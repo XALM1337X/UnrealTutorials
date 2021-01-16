@@ -21,10 +21,11 @@ ASWeapon::ASWeapon()
 	
 	needReload = false;
 	currentAmmo = 35;
-	maxAmmo = 35;
-	clipsLeft = 5;
+	totalAmmo = 175;
+	maxClipSize = 35;
 	weaponMod = 13;
 	weaponName = "rifle";
+	clipsLeft = totalAmmo / maxClipSize;
 }
 
 void ASWeapon::CallFire()
@@ -42,9 +43,40 @@ void ASWeapon::ReloadWeapon()
 {
 	if (this->clipsLeft != 0)
 	{
-		this->currentAmmo = this->maxAmmo;
+		UE_LOG(LogTemp, Warning, TEXT("HIT_0"));
+		if (this->currentAmmo == 0 && this->totalAmmo >= this->maxClipSize) {
+			this->currentAmmo = this->maxClipSize;
+			this->totalAmmo -= this->maxClipSize;
+			UE_LOG(LogTemp, Warning, TEXT("HIT_1"));
+		} else if (this->currentAmmo != 0 && this->totalAmmo >= this->maxClipSize){
+			this->totalAmmo += this->currentAmmo;
+			this->currentAmmo = this->maxClipSize;
+			this->totalAmmo -= this->maxClipSize;
+			UE_LOG(LogTemp, Warning, TEXT("HIT_2"));
+		} else if (this->currentAmmo == 0 && (this->totalAmmo < this->maxClipSize && this->totalAmmo != 0)) 
+		{
+			this->currentAmmo = this->totalAmmo;
+			this->totalAmmo = 0;
+			UE_LOG(LogTemp, Warning, TEXT("HIT_3"));
+		} else if (this->currentAmmo != 0 && (this->totalAmmo < this->maxClipSize && this->totalAmmo != 0))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HIT_4"));
+			if (this->totalAmmo + this->currentAmmo >= this->maxClipSize)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("HIT_5"));
+				this->totalAmmo += this->currentAmmo;
+				this->currentAmmo = this->maxClipSize;
+				this->totalAmmo -= this->maxClipSize;
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("HIT_6"));
+				this->totalAmmo += this->currentAmmo;
+				this->currentAmmo = this->totalAmmo;
+				this->totalAmmo = 0;
+			}
+		}
+
 		this->needReload = false;
-		this->clipsLeft--;
+		this->clipsLeft = this->totalAmmo/this->maxClipSize;
 	}
 }
 
@@ -66,7 +98,7 @@ void ASWeapon::SetCurrentAmmoCount(int count)
 
 int ASWeapon::GetMaxClipSize()
 {
-	return this->maxAmmo;
+	return this->maxClipSize;
 }
 
 bool ASWeapon::GetReloadState()
@@ -78,6 +110,11 @@ void ASWeapon::SetReloadState(bool reload)
 {
 	this->needReload = reload;
 
+}
+
+int ASWeapon::GetRemainingClips()
+{
+	return this->clipsLeft;
 }
 
 void ASWeapon::Fire_Implementation()
