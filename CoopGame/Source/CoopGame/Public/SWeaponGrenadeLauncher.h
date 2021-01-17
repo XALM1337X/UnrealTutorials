@@ -27,7 +27,6 @@ public:
 	
 	
 	virtual void CallFire() override;
-	virtual int GetWeaponMod() override;
 	virtual void SetCurrentAmmoCount(int) override;
 	virtual bool GetReloadState() override;
 	virtual void SetReloadState(bool) override;

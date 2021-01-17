@@ -15,15 +15,9 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 	maxClipSize = 1;
 	totalAmmo = 3;
 	needReload = false;
-	weaponMod = 1;
 	weaponName = "Launcher";
 }
 
-
-int ASWeaponGrenadeLauncher::GetWeaponMod() 
-{
-	return this->weaponMod;
-}
 
 void ASWeaponGrenadeLauncher::CallFire() 
 {

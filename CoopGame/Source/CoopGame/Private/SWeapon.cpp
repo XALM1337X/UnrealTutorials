@@ -28,8 +28,14 @@ ASWeapon::ASWeapon()
 	baseDamage = 20;
 	weaponName = "rifle";
 	clipsLeft = totalAmmo / maxClipSize;
+	rateOfFire = 600;
 }
 
+void ASWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+	this->timeBetweenShots = 60/rateOfFire;
+}
 void ASWeapon::CallFire()
 {
 
@@ -58,12 +64,6 @@ void ASWeapon::ReloadWeapon()
 		this->clipsLeft = this->totalAmmo/this->maxClipSize;
 	}
 }
-
-int ASWeapon::GetWeaponMod()
-{
-	return this->weaponMod;
-}
-
 
 int ASWeapon::GetCurrentAmmoCount()
 {
@@ -95,7 +95,25 @@ int ASWeapon::GetRemainingClips()
 {
 	return this->clipsLeft;
 }
+float ASWeapon::GetTimeBetweenShots()
+{
+	return this->timeBetweenShots;
+}
 
+void ASWeapon::SetLastFireTime(float value)
+{
+	this->lastFireTime = value;
+}
+
+float ASWeapon::GetLastFireTime()
+{
+	return this->lastFireTime;
+}
+
+void ASWeapon::SetFireRate(float value)
+{
+	this->rateOfFire = value;
+}
 void ASWeapon::Fire_Implementation()
 {
 
@@ -160,6 +178,7 @@ void ASWeapon::Fire_Implementation()
 			UGameplayStatics::ApplyPointDamage(hitActor,actualDamage, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
 		}
 		PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
+		this->SetLastFireTime(GetWorld()->TimeSeconds);
 	}
 }
 

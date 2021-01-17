@@ -23,13 +23,18 @@ public:
 public:	
 	// Sets default values for this actor's properties
 	ASWeapon();
+	virtual void BeginPlay() override;
 	virtual void CallFire();
-	virtual int GetWeaponMod();
 	virtual void SetCurrentAmmoCount(int);
 	virtual bool GetReloadState();
+	virtual float GetTimeBetweenShots();
+	virtual void SetLastFireTime(float);
+	virtual float GetLastFireTime();
 	virtual void SetReloadState(bool);
+	virtual void SetFireRate(float);
 	virtual void ReloadWeapon();
 	virtual void PlayEffects(FVector,FVector,FVector);
+	
 	
 	UFUNCTION(BlueprintCallable)
 	virtual int GetMaxClipSize();
@@ -39,6 +44,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual int GetRemainingClips();
+
+
 	
 //Protected member variables
 protected:
@@ -72,6 +79,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	int baseDamage;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	float rateOfFire;
 
 	int currentAmmo;
 	int totalAmmo;
@@ -79,6 +89,8 @@ protected:
 	int clipsLeft;
 	bool needReload;
 	int weaponMod;
+	float timeBetweenShots;
+	float lastFireTime;
 
 //Protected member functions
 protected:

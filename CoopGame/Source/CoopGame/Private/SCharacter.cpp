@@ -189,7 +189,8 @@ void ASCharacter::ToggleFire(FireState fire)
 			this->SetFiringState(true);
 			if (CurrentWeapon)
 			{
-				GetWorldTimerManager().SetTimer(th_time_between_shots, this, &ASCharacter::Fire, .12f, true, 0.0f);
+				float FirstDelay = FMath::Max(CurrentWeapon->GetLastFireTime() + CurrentWeapon->GetTimeBetweenShots() - GetWorld()->TimeSeconds, 0.0f);
+				GetWorldTimerManager().SetTimer(th_time_between_shots, this, &ASCharacter::Fire, CurrentWeapon->GetTimeBetweenShots() , true, FirstDelay);
 			}	
 			break;
 		}
