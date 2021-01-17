@@ -5,6 +5,7 @@
 #include "GrenadeProjectile.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "kismet/GameplayStatics.h"
+#include "SCharacter.h"
 
 ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 {
@@ -38,7 +39,7 @@ void ASWeaponGrenadeLauncher::ReloadWeapon()
 		this->currentAmmo = this->maxClipSize;
 		this->needReload = false;
 		this->clipsLeft--;
-	}
+	}	
 }
 int ASWeaponGrenadeLauncher::GetCurrentAmmoCount() 
 {

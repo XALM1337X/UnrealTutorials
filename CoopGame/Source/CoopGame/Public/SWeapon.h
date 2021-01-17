@@ -69,6 +69,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	TSubclassOf<UCameraShake> fireCamShake;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	int baseDamage;
 
 	int currentAmmo;
 	int totalAmmo;

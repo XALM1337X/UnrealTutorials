@@ -64,6 +64,10 @@ public:
 
 	bool GetIsAiming();
 
+	bool GetFiringState();
+
+	void SetFiringState(bool);
+
 //Protected Member Variables
 protected:
 	UPROPERTY(BlueprintReadWrite)
@@ -84,17 +88,19 @@ protected:
 
 	bool isFiring;
 
-	int CharacterTick;
+	FTimerHandle th_time_between_shots;
 
 
 //Protected Methods/Functions
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	
+	void ToggleCrouch();
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Reload();
+	void Fire();
 
 	//UProperties 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -108,12 +114,6 @@ protected:
 	void ToggleSprint(RunState speed);
 	template<RunState speed>
 	void ToggleSprint() {ToggleSprint(speed);}
-
-	//Crouch function.
-	void ToggleCrouch();
-	/*void ToggleCrouch(CrouchState posture);
-	template<CrouchState posture>
-	void ToggleCrouch() {ToggleCrouch(posture);}*/
 
 	//Jump
 	void ToggleJump(JumpState jumping);	

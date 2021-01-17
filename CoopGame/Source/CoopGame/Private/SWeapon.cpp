@@ -25,6 +25,7 @@ ASWeapon::ASWeapon()
 	totalAmmo = 175;
 	maxClipSize = 35;
 	weaponMod = 13;
+	baseDamage = 20;
 	weaponName = "rifle";
 	clipsLeft = totalAmmo / maxClipSize;
 }
@@ -119,17 +120,15 @@ void ASWeapon::Fire_Implementation()
 		FVector traceEndPoint = traceEndPos;
 
 		FHitResult hit;
-		if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility, queryParams))
+		if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, COLLISION_WEAPON, queryParams))
 		{
 			AActor* hitActor = hit.GetActor();
 			// Process damage and such
 
-			UGameplayStatics::ApplyPointDamage(hitActor,20.0f, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
-		
-			
 			EPhysicalSurface surfaceType = UPhysicalMaterial::DetermineSurfaceType(hit.PhysMaterial.Get());
 			UParticleSystem* selectedEffect = nullptr;
 			FVector scale;
+			float actualDamage = baseDamage;
 			switch (surfaceType)
 			{
 				case SURFACE_FLESHDEFAULT:
@@ -143,6 +142,7 @@ void ASWeapon::Fire_Implementation()
 					scale.X = .7;
 					scale.Y = .7;
 					scale.Z = .7;
+					actualDamage *= 4;
 					break;
 				default: 
 					selectedEffect = defaultImpactEffect;
@@ -157,6 +157,7 @@ void ASWeapon::Fire_Implementation()
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, hit.ImpactPoint, hit.ImpactNormal.Rotation(), scale);
 			}
 			traceEndPoint = hit.ImpactPoint;
+			UGameplayStatics::ApplyPointDamage(hitActor,actualDamage, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
 		}
 		PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
 	}

@@ -24,7 +24,6 @@ ASCharacter::ASCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComp);
 	UCharacterMovementComponent* moveComp = GetCharacterMovement();
-	CharacterTick = 0;
 	moveComp->GravityScale = 3.0;
 	moveComp->JumpZVelocity = 1000.0f;
 	zoomPOV = 65.0f;
@@ -51,19 +50,6 @@ void ASCharacter::Tick(float DeltaTime)
 	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 	CameraComponent->SetFieldOfView(newPOV);
 	
-	if (isFiring && (CharacterTick % CurrentWeapon->GetWeaponMod() == 0) && CurrentWeapon->GetCurrentAmmoCount() > 0 && !CurrentWeapon->GetReloadState())
-	{
-		CurrentWeapon->CallFire();
-	}
-
-	if (CharacterTick == 1000)
-	{
-		CharacterTick = 0; 
-	}
-	else 
-	{
-		CharacterTick++;
-	}
 }
 
 void ASCharacter::MoveForward(float Value) 
@@ -80,41 +66,20 @@ void ASCharacter::MoveRight(float Value)
 void ASCharacter::Reload()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("RELOAD"));
-	if (CurrentWeapon->GetRemainingClips() > 0 && CurrentWeapon->GetCurrentAmmoCount() < CurrentWeapon->GetMaxClipSize()) 
+	if (CurrentWeapon->GetRemainingClips() > 0 && CurrentWeapon->GetCurrentAmmoCount() < CurrentWeapon->GetMaxClipSize() && !this->isFiring) 
 	{
-		isFiring = false;
 		CurrentWeapon->ReloadWeapon();
 	}
 }
 
-/*void ASCharacter::ToggleCrouch(CrouchState posture)
+void ASCharacter::Fire()
 {
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	if (CurrentWeapon && CurrentWeapon->GetCurrentAmmoCount() > 0 && !CurrentWeapon->GetReloadState())
 	{
-		APlayerController *PC = Cast<APlayerController>(It->Get());
-		if (PC && PC->IsLocalController())
-		{			
-			APawn* Pawn = PC->GetPawn();
-			if (Pawn)
-			{
-				UCharacterMovementComponent* PawnMovement = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
-				if (PawnMovement)
-				{
-					switch(posture)
-					{
-						case CrouchState::Crouch:
-							Crouch();
-							break;
-
-						case CrouchState::Stand:
-							UnCrouch();
-							break;
-					}
-				}
-			}
-		}
+		CurrentWeapon->CallFire();
 	}
-}*/
+}
+
 void ASCharacter::ToggleCrouch()
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
@@ -221,21 +186,23 @@ void ASCharacter::ToggleFire(FireState fire)
 	{
 		case FireState::Fire:
 		{
+			this->SetFiringState(true);
 			if (CurrentWeapon)
 			{
-				isFiring = true;
+				GetWorldTimerManager().SetTimer(th_time_between_shots, this, &ASCharacter::Fire, .12f, true, 0.0f);
 			}	
 			break;
 		}
 	
 		case FireState::Release:
 		{
+			this->SetFiringState(false);
 			if (CurrentWeapon)
 			{
-				isFiring = false;
+				GetWorldTimerManager().ClearTimer(th_time_between_shots);
 			}
+			break;
 		}
-		break;
 	}
 }
 
@@ -243,6 +210,17 @@ bool ASCharacter::GetIsAiming()
 {
 	return this->isAiming;
 } 
+
+bool ASCharacter::GetFiringState()
+{
+	return this->isFiring;
+}
+
+void ASCharacter::SetFiringState(bool value)
+{
+	this->isFiring = value;
+}
+
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
