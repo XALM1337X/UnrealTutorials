@@ -31,6 +31,7 @@ ASCharacter::ASCharacter()
 	zoomInterpolationSpeed = 20.0f;
 	isAiming = false;
 	isFiring = false;
+	isCrouching = false;
 
 }
 
@@ -86,7 +87,7 @@ void ASCharacter::Reload()
 	}
 }
 
-void ASCharacter::ToggleCrouch(CrouchState posture)
+/*void ASCharacter::ToggleCrouch(CrouchState posture)
 {
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
@@ -113,8 +114,34 @@ void ASCharacter::ToggleCrouch(CrouchState posture)
 			}
 		}
 	}
+}*/
+void ASCharacter::ToggleCrouch()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController *PC = Cast<APlayerController>(It->Get());
+		if (PC && PC->IsLocalController())
+		{			
+			APawn* Pawn = PC->GetPawn();
+			if (Pawn)
+			{
+				UCharacterMovementComponent* PawnMovement = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
+				if (PawnMovement)
+				{
+					if (!this->isCrouching)
+					{
+						Crouch();
+						this->isCrouching = true;
+					} else 
+					{
+						UnCrouch();
+						this->isCrouching = false;
+					}					
+				}
+			}
+		}
+	}
 }
-
 void ASCharacter::ToggleSprint(RunState speed)
 {
 	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
@@ -224,8 +251,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("LookUp",this, &ASCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn",this, &ASCharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::ToggleCrouch<CrouchState::Crouch>);
-	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::ToggleCrouch<CrouchState::Stand>);
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::ToggleCrouch);
+	//PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::ToggleCrouch<CrouchState::Stand>);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASCharacter::ToggleSprint<RunState::Run>);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::ToggleSprint<RunState::Walk>);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::ToggleJump<JumpState::Jump>);

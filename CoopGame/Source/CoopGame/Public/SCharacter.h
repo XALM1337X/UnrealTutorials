@@ -72,13 +72,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Player")
 	bool isAiming;
 
-	float hipPOV;
-
 	UPROPERTY(EditDefaultsOnly, Category="Player")
 	float zoomPOV;
 
 	UPROPERTY(EditDefaultsOnly, Category="Player", meta = ( ClampMin = 0.1, ClampMax = 100.0))
 	float zoomInterpolationSpeed;
+
+	bool isCrouching;
+	
+	float hipPOV;
 
 	bool isFiring;
 
@@ -108,9 +110,10 @@ protected:
 	void ToggleSprint() {ToggleSprint(speed);}
 
 	//Crouch function.
-	void ToggleCrouch(CrouchState posture);
+	void ToggleCrouch();
+	/*void ToggleCrouch(CrouchState posture);
 	template<CrouchState posture>
-	void ToggleCrouch() {ToggleCrouch(posture);}
+	void ToggleCrouch() {ToggleCrouch(posture);}*/
 
 	//Jump
 	void ToggleJump(JumpState jumping);	

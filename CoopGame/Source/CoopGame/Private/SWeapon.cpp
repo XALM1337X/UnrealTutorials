@@ -8,16 +8,17 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "SCharacter.h"
-
+#include "PhysicalMaterials/PhysicalMaterial.h"
+#include "CoopGame/CoopGame.h"
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugWeapon(TEXT("COOP.DebugWeapons"), DebugMode, TEXT("Draw debugs for weapons"), ECVF_Cheat);
 // Sets default values
 ASWeapon::ASWeapon()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
-	RootComponent = MeshComp;
-	MuzzleSocketName = "MuzzleSocket";
+	meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("meshComp"));
+	RootComponent = meshComp;
+	muzzleSocketName = "MuzzleSocket";
 	
 	needReload = false;
 	currentAmmo = 35;
@@ -97,59 +98,87 @@ int ASWeapon::GetRemainingClips()
 void ASWeapon::Fire_Implementation()
 {
 
-	AActor* MyOwner = GetOwner();
+	AActor* myOwner = GetOwner();
 
-	if (MyOwner)
+	if (myOwner)
 	{
-		FVector EyeLocation; 
-		FRotator EyeRotation;
+		FVector eyeLocation; 
+		FRotator eyeRotation;
 		
-		MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+		myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
 
-		FVector ShotDirection = EyeRotation.Vector();
+		FVector shotDirection = eyeRotation.Vector();
 		
-		FVector TraceEndPos = EyeLocation + (ShotDirection * 10000);
+		FVector traceEndPos = eyeLocation + (shotDirection * 10000);
 		FCollisionQueryParams queryParams;
-		queryParams.AddIgnoredActor(MyOwner);
+		queryParams.AddIgnoredActor(myOwner);
 		queryParams.AddIgnoredActor(this);
 		queryParams.bTraceComplex = true;
+		queryParams.bReturnPhysicalMaterial = true;
 
-		FVector TraceEndPoint = TraceEndPos;
+		FVector traceEndPoint = traceEndPos;
 
 		FHitResult hit;
-		if (GetWorld()->LineTraceSingleByChannel(hit, EyeLocation, TraceEndPos, ECC_Visibility, queryParams))
+		if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility, queryParams))
 		{
-			AActor* HitActor = hit.GetActor();
+			AActor* hitActor = hit.GetActor();
 			// Process damage and such
 
-			UGameplayStatics::ApplyPointDamage(HitActor,20.0f, ShotDirection, hit, MyOwner->GetInstigatorController(), this, DamageType);
-			if (ImpactEffect)
+			UGameplayStatics::ApplyPointDamage(hitActor,20.0f, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
+		
+			
+			EPhysicalSurface surfaceType = UPhysicalMaterial::DetermineSurfaceType(hit.PhysMaterial.Get());
+			UParticleSystem* selectedEffect = nullptr;
+			FVector scale;
+			switch (surfaceType)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, hit.ImpactPoint, hit.ImpactNormal.Rotation());
+				case SURFACE_FLESHDEFAULT:
+					selectedEffect = fleshImpactEffect;
+					scale.X = .3;
+					scale.Y = .3;
+					scale.Z = .3;
+					break;
+				case SURFACE_FLESHVULNERABLE:
+					selectedEffect = fleshImpactEffect;
+					scale.X = .7;
+					scale.Y = .7;
+					scale.Z = .7;
+					break;
+				default: 
+					selectedEffect = defaultImpactEffect;
+					scale.X = 1;
+					scale.Y = 1;
+					scale.Z = 1;
+					break;
 			}
-			TraceEndPoint = hit.ImpactPoint;
+			
+			if (selectedEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, hit.ImpactPoint, hit.ImpactNormal.Rotation(), scale);
+			}
+			traceEndPoint = hit.ImpactPoint;
 		}
-		PlayEffects(EyeLocation, TraceEndPos, TraceEndPoint);
+		PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
 	}
 }
 
-void ASWeapon::PlayEffects(FVector EyeLocation, FVector TraceEndPos, FVector TraceEndPoint)
+void ASWeapon::PlayEffects(FVector eyeLocation, FVector traceEndPos, FVector traceEndPoint)
 {
-		if (MuzzleEffect) 
+		if (muzzleEffect) 
 		{
-			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComp, MuzzleSocketName);
+			UGameplayStatics::SpawnEmitterAttached(muzzleEffect, meshComp, muzzleSocketName);
 		}		
 
-		if (TracerEffect) 
+		if (tracerEffect) 
 		{
-			FVector MuzzleLocation = MeshComp->GetSocketLocation(MuzzleSocketName);
-			UParticleSystemComponent* TracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TracerEffect, MuzzleLocation);
-			if (TracerComp)
+			FVector muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+			UParticleSystemComponent* tracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), tracerEffect, muzzleLocation);
+			if (tracerComp)
 			{
-				TracerComp->SetVectorParameter("BeamEnd", TraceEndPoint);
+				tracerComp->SetVectorParameter("BeamEnd", traceEndPoint);
 			}
 			if (DebugMode > 0) {
-				DrawDebugLine(GetWorld(), EyeLocation, TraceEndPos, FColor::White, false, 1.0f, 0, 1.0f);
+				DrawDebugLine(GetWorld(), eyeLocation, traceEndPos, FColor::White, false, 1.0f, 0, 1.0f);
 			}
 		}
 		APawn* owner = Cast<APawn>(GetOwner());

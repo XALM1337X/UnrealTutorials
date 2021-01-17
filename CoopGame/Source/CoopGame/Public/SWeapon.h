@@ -44,22 +44,25 @@ public:
 protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
-	USkeletalMeshComponent* MeshComp;
+	USkeletalMeshComponent* meshComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	TSubclassOf<UDamageType> DamageType;
+	TSubclassOf<UDamageType> damageType;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	FName MuzzleSocketName;
+	FName muzzleSocketName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	UParticleSystem* MuzzleEffect;
+	UParticleSystem* muzzleEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	UParticleSystem* ImpactEffect;
+	UParticleSystem* defaultImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	UParticleSystem* fleshImpactEffect;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	UParticleSystem* TracerEffect;
+	UParticleSystem* tracerEffect;
 
 	UPROPERTY(BlueprintReadOnly)
 	FString weaponName;

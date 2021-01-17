@@ -41,7 +41,7 @@ public:
 public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Projectile")
-	TSubclassOf<AGrenadeProjectile> ProjectileClass;
+	TSubclassOf<AGrenadeProjectile> projectileClass;
 
 
 protected:
