@@ -79,7 +79,11 @@ void ASCharacter::MoveRight(float Value)
 void ASCharacter::Reload()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("RELOAD"));
-	CurrentWeapon->ReloadWeapon();
+	if (CurrentWeapon->GetRemainingClips() > 0 && CurrentWeapon->GetCurrentAmmoCount() < CurrentWeapon->GetMaxClipSize()) 
+	{
+		isFiring = false;
+		CurrentWeapon->ReloadWeapon();
+	}
 }
 
 void ASCharacter::ToggleCrouch(CrouchState posture)

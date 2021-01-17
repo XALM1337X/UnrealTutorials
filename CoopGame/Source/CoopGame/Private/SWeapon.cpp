@@ -43,36 +43,13 @@ void ASWeapon::ReloadWeapon()
 {
 	if (this->clipsLeft != 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HIT_0"));
 		if (this->currentAmmo == 0 && this->totalAmmo >= this->maxClipSize) {
 			this->currentAmmo = this->maxClipSize;
 			this->totalAmmo -= this->maxClipSize;
-			UE_LOG(LogTemp, Warning, TEXT("HIT_1"));
 		} else if (this->currentAmmo != 0 && this->totalAmmo >= this->maxClipSize){
+			this->totalAmmo -= this->maxClipSize;
 			this->totalAmmo += this->currentAmmo;
 			this->currentAmmo = this->maxClipSize;
-			this->totalAmmo -= this->maxClipSize;
-			UE_LOG(LogTemp, Warning, TEXT("HIT_2"));
-		} else if (this->currentAmmo == 0 && (this->totalAmmo < this->maxClipSize && this->totalAmmo != 0)) 
-		{
-			this->currentAmmo = this->totalAmmo;
-			this->totalAmmo = 0;
-			UE_LOG(LogTemp, Warning, TEXT("HIT_3"));
-		} else if (this->currentAmmo != 0 && (this->totalAmmo < this->maxClipSize && this->totalAmmo != 0))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("HIT_4"));
-			if (this->totalAmmo + this->currentAmmo >= this->maxClipSize)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("HIT_5"));
-				this->totalAmmo += this->currentAmmo;
-				this->currentAmmo = this->maxClipSize;
-				this->totalAmmo -= this->maxClipSize;
-			} else {
-				UE_LOG(LogTemp, Warning, TEXT("HIT_6"));
-				this->totalAmmo += this->currentAmmo;
-				this->currentAmmo = this->totalAmmo;
-				this->totalAmmo = 0;
-			}
 		}
 
 		this->needReload = false;
