@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SWeapon.h"
 #include "SWeaponGrenadeLauncher.h"
+#include "Components/CapsuleComponent.h"
+#include "CoopGame/CoopGame.h"
 
 
 // Sets default values
@@ -31,6 +33,8 @@ ASCharacter::ASCharacter()
 	isAiming = false;
 	isFiring = false;
 	isCrouching = false;
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 
 }
 
