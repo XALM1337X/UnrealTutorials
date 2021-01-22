@@ -77,7 +77,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	TSubclassOf<UCameraShake> fireCamShake;
 	
-	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	int baseDamage;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")

@@ -3,11 +3,13 @@
 
 #include "SHealthComp.h"
 
+
 // Sets default values for this component's properties
 USHealthComp::USHealthComp()
 {
 	//PrimaryComponentTick.bCanEverTick = true;
-	DefaultHealth = 100;
+	defaultHealth = 100;
+	this->health=0;
 }
 
 
@@ -16,8 +18,8 @@ void USHealthComp::BeginPlay()
 {
 	Super::BeginPlay();
 	AActor* myOwner = GetOwner();
+	this->health = this->defaultHealth;
 	myOwner->OnTakeAnyDamage.AddDynamic(this, &USHealthComp::HandleTakeAnyDamage);
-	Health = DefaultHealth;
 	
 }
 
@@ -27,9 +29,10 @@ void USHealthComp::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const
 	{
 		return;
 	}
-
-	Health = FMath::Clamp(Health - Damage, 0.0f, DefaultHealth);
-	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(Health));
+	//NOTE: If moving damage from blueprint back here to c++ uncomment this, and delete any blueprint that effects health component.
+	//this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
+	//UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(health));
+	onHealthChanged.Broadcast(this, this->health, Damage, DamageType, InstigatedBy, DamageCauser);
 }
 
 /*
@@ -39,6 +42,5 @@ void USHealthComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 
 }
-
 */
 

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SHealthComp.generated.h"
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, USHealthComp*, HealthComp, float, health, float, healthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
 
 UCLASS( ClassGroup=(COOP), meta=(BlueprintSpawnableComponent) )
 class COOPGAME_API USHealthComp : public UActorComponent
@@ -23,14 +23,15 @@ public:
 	// Sets default values for this component's properties
 	USHealthComp();
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnHealthChangedSignature onHealthChanged;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthComponents")
-	float Health;
+	float health;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthComponents")
-	float DefaultHealth;
+	float defaultHealth;
 
 
 protected:
