@@ -58,7 +58,13 @@ void ASCharacter::Tick(float DeltaTime)
 
 void ASCharacter::MoveForward(float Value) 
 {
-	AddMovementInput(GetActorForwardVector() * Value);
+	if(this->isAiming)
+	{
+	AddMovementInput(GetActorForwardVector() * Value/2);
+	} else {
+		AddMovementInput(GetActorForwardVector() * Value);
+	}
+	
 	//UE_LOG(LogTemp, Warning, TEXT("VALUE: %f"),Value);
 }
 
