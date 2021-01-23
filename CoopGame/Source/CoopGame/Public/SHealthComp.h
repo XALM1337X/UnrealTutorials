@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "SHealthComp.generated.h"
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, USHealthComp*, HealthComp, float, health, float, healthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChangedSignature, USHealthComp*, HealthComp, float, health, float, healthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
 
 UCLASS( ClassGroup=(COOP), meta=(BlueprintSpawnableComponent) )
 class COOPGAME_API USHealthComp : public UActorComponent
@@ -23,8 +23,6 @@ public:
 	// Sets default values for this component's properties
 	USHealthComp();
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	UPROPERTY(BlueprintAssignable, Category="Events")
-	FOnHealthChangedSignature onHealthChanged;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthComponents")
@@ -38,7 +36,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	
-	UFUNCTION()
-	void HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser );
+	UFUNCTION(BlueprintImplementableEvent, Category="Events")
+	void HandleTakePointDamage( AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser);	
 		
 };
