@@ -60,7 +60,7 @@ void ASCharacter::MoveForward(float Value)
 {
 	if(this->isAiming)
 	{
-	AddMovementInput(GetActorForwardVector() * Value/2);
+		AddMovementInput(GetActorForwardVector() * Value/2);
 	} else {
 		AddMovementInput(GetActorForwardVector() * Value);
 	}
@@ -70,7 +70,13 @@ void ASCharacter::MoveForward(float Value)
 
 void ASCharacter::MoveRight(float Value) 
 {
-	AddMovementInput(GetActorRightVector() * Value);
+
+	if(this->isAiming)
+	{
+		AddMovementInput(GetActorRightVector() * Value/2);
+	} else {
+		AddMovementInput(GetActorRightVector() * Value);
+	}
 }
 
 void ASCharacter::Reload()
