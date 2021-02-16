@@ -11,7 +11,6 @@
 #include "Components/CapsuleComponent.h"
 #include "CoopGame/CoopGame.h"
 
-
 // Sets default values
 ASCharacter::ASCharacter()
 {
