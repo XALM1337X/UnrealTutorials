@@ -12,7 +12,7 @@ USHealthComp::USHealthComp()
 {
 	//PrimaryComponentTick.bCanEverTick = true;
 	defaultHealth = 100;
-	this->health=0;
+	this->health = 0;
 }
 
 
@@ -22,29 +22,8 @@ void USHealthComp::BeginPlay()
 	Super::BeginPlay();
 	AActor* myOwner = GetOwner();
 	this->health = this->defaultHealth;
-	myOwner->OnTakePointDamage.AddDynamic(this, &USHealthComp::HandleTakePointDamage);
-	//myOwner->OnTakeAnyDamage.AddDynamic(this, &USHealthComp::HandleAnyDamage);
-
-	
+	myOwner->OnTakePointDamage.AddDynamic(this, &USHealthComp::HandleTakePointDamage);	
 }
-
-/*	NOTE:This function is purely for testing with the pain volume, It will overtake and other dynamically overriden event functions related to 
-	Actors that can take damage or have the SHealthComp.
-
-void USHealthComp::HandleAnyDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser) 
-{
-	this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
-	if (this->health <= 0.0f) {
-		UPawnMovementComponent* MC = Cast<ASCharacter>(DamagedActor)->GetMovementComponent();
-		if (MC) {
-			MC->StopMovementImmediately();
-		} else {
-			UE_LOG(LogTemp, Log, TEXT("FAIL"));		
-		}
-		
-	}
-	UE_LOG(LogTemp, Log, TEXT("CurrentHealth: %f"), this->health);
-}*/
 
 void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser ) 
 {
@@ -52,17 +31,13 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 	{		
 		return;
 	}
-	//NOTE: If moving damage from blueprint back here to c++ uncomment this, and delete any blueprint that effects health component.
 	this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
 
 	if (this->health <= 0.0f) {
 		UPawnMovementComponent* MC = Cast<ASCharacter>(DamagedActor)->GetMovementComponent();
 		if (MC) {
 			MC->StopMovementImmediately();
-			//UE_LOG(LogTemp, Log, TEXT("TRIGGER_1"));
-		} else {
-			//UE_LOG(LogTemp, Log, TEXT("TRIGGER_2"));
-		}
+		} 
 		ASCharacter* character = Cast<ASCharacter>(DamagedActor);
 		if (character) {
 			USkeletalMeshComponent* mesh = character->GetMesh();
@@ -71,13 +46,12 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 				mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
 				FTimerHandle Handler;
 				GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
-				//UE_LOG(LogTemp, Log, TEXT("TRIGGER"));
 			}
 		}
 		
 	}
 
-	UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(health));
+	//UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(health));
 
 	//Using Broadcast to trigger blueprint
 	//onHealthChanged.Broadcast(this, this->health, Damage, DamageType, InstigatedBy,  DamageCauser, ShotFromDirection, BoneName);

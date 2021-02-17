@@ -43,6 +43,7 @@ enum class WeaponState : uint8
 class UCameraComponent;
 class USpringArmComponent;
 class ASWeapon;
+class USHealthComp;
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
 {
@@ -103,12 +104,14 @@ protected:
 	void Fire();
 
 	//UProperties 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComponent;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* SpringArmComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USHealthComp* HealthComp;
 	//These are Toggle Templates bound to action inputs.
 	//Sprint
 	void ToggleSprint(RunState speed);

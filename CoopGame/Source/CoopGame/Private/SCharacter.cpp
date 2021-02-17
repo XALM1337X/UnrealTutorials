@@ -10,6 +10,7 @@
 #include "SWeaponGrenadeLauncher.h"
 #include "Components/CapsuleComponent.h"
 #include "CoopGame/CoopGame.h"
+#include "SHealthComp.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -21,9 +22,12 @@ ASCharacter::ASCharacter()
 	SpringArmComp->SetupAttachment(RootComponent);
 
 	//GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
-
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComp);
+
+	HealthComp = CreateDefaultSubobject<USHealthComp>(TEXT("HealthComp"));
+	
+
 	UCharacterMovementComponent* moveComp = GetCharacterMovement();
 	moveComp->GravityScale = 3.0;
 	moveComp->JumpZVelocity = 1000.0f;
