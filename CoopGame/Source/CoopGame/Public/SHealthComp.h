@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "SHealthComp.generated.h"
 //NOTE: This Delegate was originally created to demonstrate the ability to create blueprint broadcast events.
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_EightParams(FOnHealthChangedSignature, USHealthComp*, HealthComp, float, health, float, healthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser, FVector, ShotFromDirection, FName, BoneName );
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SevenParams(FOnHealthChangedSignature, USHealthComp*, HealthComp, float, health, float, healthDelta, class AController*, InstigatedBy, AActor*, DamageCauser, FVector, ShotFromDirection, FName, BoneName );
 //UPROPERTY(BlueprintAssignable, Category="Events")
 //FOnHealthChangedSignature onHealthChanged;
 
@@ -26,6 +26,9 @@ public:
 public:	
 	// Sets default values for this component's properties
 	USHealthComp();
+
+	void SetHealth(float val);
+	float GetHealth();
 	
 
 protected:

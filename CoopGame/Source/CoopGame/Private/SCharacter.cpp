@@ -11,7 +11,8 @@
 #include "Components/CapsuleComponent.h"
 #include "CoopGame/CoopGame.h"
 #include "SHealthComp.h"
-
+static int32 DebugMode = 0;
+FAutoConsoleVariableRef DebugDeath(TEXT("COOP.DebugDeath"), DebugMode, TEXT("Set death defaults"), ECVF_Cheat);
 // Sets default values
 ASCharacter::ASCharacter()
 {
@@ -56,6 +57,21 @@ void ASCharacter::Tick(float DeltaTime)
 	float targetPOV = isAiming ? zoomPOV : hipPOV;
 	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 	CameraComponent->SetFieldOfView(newPOV);
+	if (DebugMode > 0) {
+		HealthComp->SetHealth(HealthComp->GetHealth() - .05f);
+		HealthComp->onHealthChanged.Broadcast(HealthComp, HealthComp->GetHealth(), HealthComp->GetHealth() -1, GetController(),  this, FVector(1.0,1.0,1.0), "Head");
+		if (HealthComp->GetHealth() <= 0) {
+			UE_LOG(LogTemp, Warning, TEXT("DEBUG_DEAD"));
+			UPawnMovementComponent* MC = GetMovementComponent();
+			if (MC) {
+				MC->StopMovementImmediately();
+			} 
+			USkeletalMeshComponent* mesh = GetMesh();
+			if (mesh) {
+				mesh->SetSimulatePhysics(true);
+			}
+		}
+	}
 	
 }
 

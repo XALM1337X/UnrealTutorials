@@ -50,14 +50,21 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 		}
 		
 	}
-
+	onHealthChanged.Broadcast(this, this->health, Damage, InstigatedBy,  DamageCauser, ShotFromDirection, BoneName);
 	//UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(health));
 
 	//Using Broadcast to trigger blueprint
-	//onHealthChanged.Broadcast(this, this->health, Damage, DamageType, InstigatedBy,  DamageCauser, ShotFromDirection, BoneName);
 }
 
 void USHealthComp::CleanUp() {
 	AActor* myOwner = GetOwner();
 	myOwner->Destroy();
+}
+
+void USHealthComp::SetHealth(float val) {
+	this->health = val;
+}
+
+float USHealthComp::GetHealth() {
+	return this->health;
 }
