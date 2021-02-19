@@ -69,6 +69,8 @@ public:
 
 	void SetFiringState(bool);
 
+	ASWeapon* GetWeapon();
+
 //Protected Member Variables
 protected:
 	UPROPERTY(BlueprintReadWrite)

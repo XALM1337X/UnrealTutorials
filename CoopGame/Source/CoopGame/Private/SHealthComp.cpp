@@ -5,6 +5,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "SWeapon.h"
 
 
 // Sets default values for this component's properties
@@ -44,9 +45,16 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 			if (mesh) {
 				mesh->SetSimulatePhysics(true);
 				mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
-				FTimerHandle Handler;
-				GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
 			}
+			USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
+			if (weapon_mesh) {
+				weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				weapon_mesh->SetSimulatePhysics(true);
+				weapon_mesh->WakeRigidBody();
+				UE_LOG(LogTemp, Log, TEXT("PHYSICS_DEBUG"));			
+			}
+			FTimerHandle Handler;
+			GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
 		}
 		
 	}
@@ -58,7 +66,14 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 
 void USHealthComp::CleanUp() {
 	AActor* myOwner = GetOwner();
-	myOwner->Destroy();
+	ASCharacter* character = Cast<ASCharacter>(myOwner);
+	if (character) {
+		ASWeapon* wep = character->GetWeapon();
+		wep->Destroy();
+	}
+	if (myOwner) {
+		myOwner->Destroy();
+	}
 }
 
 void USHealthComp::SetHealth(float val) {

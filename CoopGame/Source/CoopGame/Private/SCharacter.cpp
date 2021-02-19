@@ -257,6 +257,10 @@ void ASCharacter::SetFiringState(bool value)
 	this->isFiring = value;
 }
 
+ASWeapon* ASCharacter::GetWeapon(){
+	return this->CurrentWeapon;
+}
+
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {

@@ -214,3 +214,7 @@ void ASWeapon::PlayEffects(FVector eyeLocation, FVector traceEndPos, FVector tra
 			}
 		}
 }
+
+USkeletalMeshComponent* ASWeapon::GetWeaponMesh() {
+	return this->meshComp;
+}

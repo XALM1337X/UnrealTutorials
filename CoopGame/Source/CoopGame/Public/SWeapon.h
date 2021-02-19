@@ -34,6 +34,8 @@ public:
 	virtual void SetFireRate(float);
 	virtual void ReloadWeapon();
 	virtual void PlayEffects(FVector,FVector,FVector);
+
+	virtual USkeletalMeshComponent* GetWeaponMesh();
 	
 	
 	UFUNCTION(BlueprintCallable)
