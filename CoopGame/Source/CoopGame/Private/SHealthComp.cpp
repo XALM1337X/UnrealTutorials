@@ -35,12 +35,18 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 	this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
 
 	if (this->health <= 0.0f) {
-		UPawnMovementComponent* MC = Cast<ASCharacter>(DamagedActor)->GetMovementComponent();
-		if (MC) {
-			MC->StopMovementImmediately();
-		} 
 		ASCharacter* character = Cast<ASCharacter>(DamagedActor);
+
 		if (character) {
+
+			UPawnMovementComponent* MC = character->GetMovementComponent();
+			if (MC) {
+				MC->StopMovementImmediately();
+			} 
+			APlayerController* cont = Cast<APlayerController>(character->GetController());
+			if (cont) {
+				character->DisableInput(cont);
+			}
 			USkeletalMeshComponent* mesh = character->GetMesh();
 			if (mesh) {
 				mesh->SetSimulatePhysics(true);
@@ -50,7 +56,7 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 			if (weapon_mesh) {
 				weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 				weapon_mesh->SetSimulatePhysics(true);
-				weapon_mesh->WakeRigidBody();
+				//weapon_mesh->WakeRigidBody();
 				UE_LOG(LogTemp, Log, TEXT("PHYSICS_DEBUG"));			
 			}
 			FTimerHandle Handler;

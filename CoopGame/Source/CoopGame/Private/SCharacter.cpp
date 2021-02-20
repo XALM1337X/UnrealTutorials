@@ -58,14 +58,18 @@ void ASCharacter::Tick(float DeltaTime)
 	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 	CameraComponent->SetFieldOfView(newPOV);
 	if (DebugMode > 0) {
-		HealthComp->SetHealth(HealthComp->GetHealth() - .05f);
-		HealthComp->onHealthChanged.Broadcast(HealthComp, HealthComp->GetHealth(), HealthComp->GetHealth() -1, GetController(),  this, FVector(1.0,1.0,1.0), "Head");
+		HealthComp->SetHealth(HealthComp->GetHealth() - .5f);
+		HealthComp->onHealthChanged.Broadcast(HealthComp, HealthComp->GetHealth()+33, HealthComp->GetHealth() -1, GetController(),  this, FVector(1.0,1.0,1.0), "Head");
 		if (HealthComp->GetHealth() <= 0) {
-			UE_LOG(LogTemp, Warning, TEXT("DEBUG_DEAD"));
+			//UE_LOG(LogTemp, Warning, TEXT("DEBUG_DEAD"));
 			UPawnMovementComponent* MC = GetMovementComponent();
 			if (MC) {
 				MC->StopMovementImmediately();
 			} 
+			APlayerController* cont = Cast<APlayerController>(this->GetController());
+			if (cont) {
+				this->DisableInput(cont);
+			}
 			USkeletalMeshComponent* mesh = GetMesh();
 			if (mesh) {
 				mesh->SetSimulatePhysics(true);

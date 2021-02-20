@@ -64,42 +64,39 @@ void ASWeaponGrenadeLauncher::SetReloadState(bool reload) {
 void ASWeaponGrenadeLauncher::Fire_Implementation() 
 {
 	AActor* myOwner = GetOwner();
-	APawn*  pawn = Cast<APawn>(myOwner);
-	if (myOwner)
-	{
-		if (projectileClass)
-		{
-			FVector eyeLocation; 
-			FRotator eyeRotation;		
-			myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
+	if (myOwner) {
+		APawn*  pawn = Cast<APawn>(myOwner);
+		if (pawn) {
+			if (projectileClass) {
+				FVector eyeLocation; 
+				FRotator eyeRotation;		
+				myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
 
 
-			FVector shotDirection = eyeRotation.Vector();
+				FVector shotDirection = eyeRotation.Vector();
 
-			FVector traceEndPos = eyeLocation + (shotDirection * 10000);
+				FVector traceEndPos = eyeLocation + (shotDirection * 10000);
 
-			FVector muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
-			FRotator muzzleRotator = eyeRotation;
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters actorSpawnParams;
-			actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+				FVector muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+				FRotator muzzleRotator = eyeRotation;
+				//Set Spawn Collision Handling Override
+				FActorSpawnParameters actorSpawnParams;
+				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
 
-			FHitResult hit;
-			FVector traceEndPoint = traceEndPos;
-			if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility))
-			{
-				traceEndPoint = hit.ImpactPoint;
-			}
-
-			if (pawn)
-			{
+				FHitResult hit;
+				FVector traceEndPoint = traceEndPos;
+				if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility)) {
+					traceEndPoint = hit.ImpactPoint;
+				}
+		
 				actorSpawnParams.Instigator = pawn;
 				// spawn the projectile at the muzzle
 				FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
 				GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
+				
+				PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
 			}
-			PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
 		}
 	}
 }
@@ -123,5 +120,9 @@ void ASWeaponGrenadeLauncher::PlayEffects(FVector eyeLocation, FVector traceEndP
 			}
 		}
 	}
+}
+
+USkeletalMeshComponent* ASWeaponGrenadeLauncher::GetWeaponMesh() {
+	return this->meshComp;
 }
 

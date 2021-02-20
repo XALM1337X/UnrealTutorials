@@ -44,7 +44,7 @@ protected:
 
 	
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category ="ExplosionRadius")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ExplosionRadius")
 		UStaticMeshComponent* ExplosionMesh;
 	
 	/** Sphere collision component */

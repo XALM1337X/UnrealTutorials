@@ -36,6 +36,7 @@ public:
 	
 	virtual int GetMaxClipSize() override;
 	virtual int GetCurrentAmmoCount() override;
+	virtual USkeletalMeshComponent* GetWeaponMesh() override;
 
 public:
 

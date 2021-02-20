@@ -19,11 +19,13 @@ protected:
 	
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Components")
-		USphereComponent* SphereComp;
+	USphereComponent* SphereComp;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-		UParticleSystem* Explosion;
+	UParticleSystem* Explosion;
 
+	FVector ExplosionAnimationScale;
+	int ExplosionForce;
 
 public:	
 	// Sets default values for this actor's properties
@@ -40,6 +42,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 	UFUNCTION(Server,Reliable,WithValidation)
-	void Explode();
+	virtual void Explode();
 
 };

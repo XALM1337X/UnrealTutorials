@@ -13,7 +13,9 @@ AExplosionActor::AExplosionActor()
 		PrimaryActorTick.bCanEverTick = true;
 		SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 		RootComponent = SphereComp;
+		ExplosionAnimationScale = FVector(3.0f,3.0f,3.0f);
 		Ticks = 0;
+		ExplosionForce = 20000;
 	}
 }
 
@@ -25,7 +27,7 @@ void AExplosionActor::BeginPlay()
 		Super::BeginPlay();
 		Explode();
 	}
-	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(),GetActorRotation(),FVector(3.0f,3.0f,3.0f));
+	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(),GetActorRotation(), ExplosionAnimationScale);
 	
 }
 
@@ -58,7 +60,7 @@ void AExplosionActor::Explode_Implementation()
 			if (OverLap && OverLap->IsSimulatingPhysics())
 			{
 				//UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
-				OverLap->AddRadialForce(GetActorLocation(), SphereComp->GetScaledSphereRadius(), 20000, ERadialImpulseFalloff::RIF_Constant, true);
+				OverLap->AddRadialForce(GetActorLocation(), SphereComp->GetScaledSphereRadius(), ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
 			}
 		}
 	}
