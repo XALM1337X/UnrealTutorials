@@ -45,18 +45,18 @@ protected:
 	
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ExplosionRadius")
-		UStaticMeshComponent* ExplosionMesh;
+	UStaticMeshComponent* ExplosionMesh;
 	
 	/** Sphere collision component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
-		USphereComponent* CollisionComp;
+	USphereComponent* CollisionComp;
 
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
-		UProjectileMovementComponent* ProjectileMovement;
+	UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
-		TSubclassOf<AActor> ActorToSpawn;
+	TSubclassOf<AActor> ActorToSpawn;
 
 	int TickCount;
 };
