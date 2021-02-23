@@ -105,13 +105,11 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 					if (DamageCauser->IsA(ABarrelExplosionActor::StaticClass())) {
 						ABarrelExplosionActor* barrel_exp_act = Cast<ABarrelExplosionActor>(DamageCauser);
 						if (barrel_exp_act) {
-							UE_LOG(LogTemp, Warning, TEXT("BarrelForce: %f"), barrel_exp_act->ExplosionForce);
 							mesh->AddRadialForce(Origin, barrel_exp_act->SphereComp->GetScaledSphereRadius(),  barrel_exp_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
 						}
 					} else if (DamageCauser->IsA(AExplosionActor::StaticClass())) {
 						AExplosionActor* gren_exp_act = Cast<AExplosionActor>(DamageCauser);
 						if (gren_exp_act) {
-							UE_LOG(LogTemp, Warning, TEXT("GrenForce: %f"), gren_exp_act->ExplosionForce);
 							mesh->AddRadialForce(Origin, gren_exp_act->SphereComp->GetScaledSphereRadius(), gren_exp_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
 						}
 					}

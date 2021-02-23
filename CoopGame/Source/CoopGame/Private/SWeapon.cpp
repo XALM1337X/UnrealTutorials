@@ -29,6 +29,7 @@ ASWeapon::ASWeapon()
 	weaponName = "rifle";
 	clipsLeft = totalAmmo / maxClipSize;
 	rateOfFire = 600;
+	SetReplicates(true);
 }
 
 void ASWeapon::BeginPlay()
