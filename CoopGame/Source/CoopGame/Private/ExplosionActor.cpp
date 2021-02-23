@@ -11,12 +11,17 @@ AExplosionActor::AExplosionActor()
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		PrimaryActorTick.bCanEverTick = true;
-		SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+		this->SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 		RootComponent = SphereComp;
-		ExplosionAnimationScale = FVector(3.0f,3.0f,3.0f);
-		Ticks = 0;
-		ExplosionForce = 20000;
+		this->ExplosionAnimationScale = FVector(3.0f,3.0f,3.0f);
+		this->Ticks = 0;
+		this->ExplosionForce = 100000.0f;
 	}
+}
+
+
+void AExplosionActor::Init(AController* controller) {
+	instigator = controller;
 }
 
 // Called when the game starts or when spawned
@@ -25,44 +30,26 @@ void AExplosionActor::BeginPlay()
 	if (GetLocalRole() == ROLE_Authority)
 	{
 		Super::BeginPlay();
-		Explode();
-	}
-	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(),GetActorRotation(), ExplosionAnimationScale);
-	
+	}	
 }
 
 // Called every frame
 void AExplosionActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (Ticks >= 5)
-	{
-		Destroy();
-	} 
-	else	
-	{
-		Explode();
-		Ticks++;
-	}
+	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(),GetActorRotation(), ExplosionAnimationScale);
+	Explode();
+	Destroy();
 
 }
 
 void AExplosionActor::Explode_Implementation()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("HIT"));
 	if (GetLocalRole() == ROLE_Authority)
 	{
-		TArray<UPrimitiveComponent*> OverLaps;
-		SphereComp->GetOverlappingComponents(OverLaps);
-		for (int32 i = 0; i < OverLaps.Num(); i++)
-		{
-			UPrimitiveComponent* OverLap = OverLaps[i];
-			if (OverLap && OverLap->IsSimulatingPhysics())
-			{
-				//UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
-				OverLap->AddRadialForce(GetActorLocation(), SphereComp->GetScaledSphereRadius(), ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
-			}
-		}
+		TArray<AActor*> ignores;
+		//UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
+		UGameplayStatics::ApplyRadialDamage(GetWorld(), 100, GetActorLocation(), SphereComp->GetScaledSphereRadius(), damageType, ignores, this, instigator, false, ECC_WorldDynamic);		
 	}
 }
 

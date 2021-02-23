@@ -89,11 +89,12 @@ void ASWeaponGrenadeLauncher::Fire_Implementation()
 				if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility)) {
 					traceEndPoint = hit.ImpactPoint;
 				}
-		
+
 				actorSpawnParams.Instigator = pawn;
 				// spawn the projectile at the muzzle
 				FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
-				GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
+				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
+				gren->Init(pawn->GetController());
 				
 				PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
 			}

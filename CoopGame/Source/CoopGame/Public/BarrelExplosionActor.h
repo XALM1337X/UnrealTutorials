@@ -9,6 +9,8 @@
 /**
  * 
  */
+
+class AController;
 UCLASS()
 class COOPGAME_API ABarrelExplosionActor : public AExplosionActor
 {
@@ -20,15 +22,19 @@ class COOPGAME_API ABarrelExplosionActor : public AExplosionActor
 	
 	//Members
 	protected:
+		UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+		TSubclassOf<UDamageType> damageTypeHEBarrel;
+
+		AController* instigator; 
 
 	//Functions/methods
 	public:
 		ABarrelExplosionActor();	
+		void Init(AController* controller);
 		virtual void Tick(float DeltaTime) override;
 		virtual void Explode_Implementation() override;
 	
 	//Members
 	public:
-
 	
 };

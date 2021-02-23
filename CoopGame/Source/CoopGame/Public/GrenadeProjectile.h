@@ -24,13 +24,9 @@ public:
 	AGrenadeProjectile();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-//Protected functions
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
-	
+	void Init(AController* controller);
+
 //Public member variables
 public:	
 
@@ -39,10 +35,21 @@ public:
 	/** Returns ProjectileMovement subobject **/
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
+
+
+
+//Protected functions
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	void SetInstigator(AController* controller);
+
+
 //Protected member variables.
 protected:
 
-	
+	AController* gren_instigator;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ExplosionRadius")
 	UStaticMeshComponent* ExplosionMesh;

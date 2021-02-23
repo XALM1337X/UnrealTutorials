@@ -52,6 +52,11 @@ void AGrenadeProjectile::BeginPlay()
 	}
 }
 
+
+void AGrenadeProjectile::Init(AController* instigator) {
+	SetInstigator(instigator);
+}
+
 // Called every frame
 void AGrenadeProjectile::Tick(float DeltaTime)
 {
@@ -63,7 +68,9 @@ void AGrenadeProjectile::Tick(float DeltaTime)
 			//Call Explosion
 			FVector loc = GetActorLocation();
 			FRotator rot = GetActorRotation();
-			GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot);
+			AActor* explosion = GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot);
+
+			//TODO: Pass player controller into explosion via an initilization function that needs to be put in Explosion Actor.
 			Destroy();
 		} 
 		else 
@@ -72,4 +79,8 @@ void AGrenadeProjectile::Tick(float DeltaTime)
 		}
 	}
 
+}
+
+void AGrenadeProjectile::SetInstigator(AController* inst) {
+		 gren_instigator = inst;
 }

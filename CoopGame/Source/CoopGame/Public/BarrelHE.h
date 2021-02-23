@@ -8,10 +8,11 @@
 
 class USkeletalMeshComponent;
 class USHealthCompMisc;
-
+class AController;
+class UMaterialInterface;
+class UStaticMeshComponent;
 UCLASS()
-class COOPGAME_API ABarrelHE : public AActor
-{
+class COOPGAME_API ABarrelHE : public AActor {
 	GENERATED_BODY()
 
 
@@ -21,22 +22,24 @@ protected:
 
 //Members
 protected:
-/*
-UPROPERTY(VisibleDefaultsOnly, Category= "Components")
-USkeletalMeshComponent* meshComp;
-*/
 
-USHealthCompMisc* Health;
+USHealthCompMisc* HealthComp;
 
 UPROPERTY(EditAnywhere, Category = "Spawning")
 TSubclassOf<AActor> ActorToSpawn;
 
+UPROPERTY(EditAnywhere, Category = "FX")
+UStaticMeshComponent* mesh;
+
 //Methods/Functions
 public:	
 	ABarrelHE();
+	void TriggerExplosion(AController* controller);
+	void CleanUp();
 
 //Members
 public:	
-	virtual void Tick(float DeltaTime) override;
-
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* OffMaterial;
+	bool isDead;
 };
