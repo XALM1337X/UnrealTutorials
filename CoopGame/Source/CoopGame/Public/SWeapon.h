@@ -24,6 +24,7 @@ public:
 	// Sets default values for this actor's properties
 	ASWeapon();
 	virtual void BeginPlay() override;
+	
 	virtual void CallFire();
 	virtual void SetCurrentAmmoCount(int);
 	virtual bool GetReloadState();

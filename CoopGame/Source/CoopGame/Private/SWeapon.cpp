@@ -32,14 +32,12 @@ ASWeapon::ASWeapon()
 	SetReplicates(true);
 }
 
-void ASWeapon::BeginPlay()
-{
+void ASWeapon::BeginPlay() {
 	Super::BeginPlay();
 	this->timeBetweenShots = 60/rateOfFire;
 }
-void ASWeapon::CallFire()
-{
-
+void ASWeapon::CallFire() {
+	UE_LOG(LogTemp, Warning, TEXT("ASWeapon::CallFire"));
 	this->Fire();
 	this->currentAmmo--;
 	if (this->currentAmmo == 0)

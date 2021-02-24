@@ -11,6 +11,7 @@
 #include "Components/CapsuleComponent.h"
 #include "CoopGame/CoopGame.h"
 #include "SHealthComp.h"
+#include "Net/UnrealNetwork.h"
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugDeath(TEXT("COOP.DebugDeath"), DebugMode, TEXT("Set death defaults"), ECVF_Cheat);
 // Sets default values
@@ -111,10 +112,12 @@ void ASCharacter::Reload()
 	}
 }
 
-void ASCharacter::Fire()
+void ASCharacter::Fire_Implementation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_0"));
 	if (CurrentWeapon && CurrentWeapon->GetCurrentAmmoCount() > 0 && !CurrentWeapon->GetReloadState())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_1"));
 		CurrentWeapon->CallFire();
 	}
 }
@@ -294,4 +297,10 @@ FVector ASCharacter::GetPawnViewLocation() const
 		return CameraComponent->GetComponentLocation();
 	}
 	return Super::GetPawnViewLocation();
+}
+
+void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 }

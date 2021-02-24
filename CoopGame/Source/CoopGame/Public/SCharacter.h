@@ -73,7 +73,7 @@ public:
 
 //Protected Member Variables
 protected:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	ASWeapon* CurrentWeapon;
 
 	UPROPERTY(BlueprintReadOnly, Category="Player")
@@ -103,6 +103,8 @@ protected:
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 	void Reload();
+
+	UFUNCTION(Server, Reliable)
 	void Fire();
 
 	//UProperties 
