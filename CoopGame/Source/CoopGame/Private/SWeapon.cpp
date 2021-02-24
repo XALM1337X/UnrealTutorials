@@ -13,8 +13,7 @@
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugWeapon(TEXT("COOP.DebugWeapons"), DebugMode, TEXT("Draw debugs for weapons"), ECVF_Cheat);
 // Sets default values
-ASWeapon::ASWeapon()
-{
+ASWeapon::ASWeapon() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("meshComp"));
 	RootComponent = meshComp;
@@ -46,8 +45,7 @@ void ASWeapon::CallFire() {
 	}
 }
 
-void ASWeapon::ReloadWeapon()
-{
+void ASWeapon::ReloadWeapon() {
 	if (this->clipsLeft != 0)
 	{
 		if (this->currentAmmo == 0 && this->totalAmmo >= this->maxClipSize) {
@@ -64,62 +62,51 @@ void ASWeapon::ReloadWeapon()
 	}
 }
 
-int ASWeapon::GetCurrentAmmoCount()
-{
+int ASWeapon::GetCurrentAmmoCount() {
 	return this->currentAmmo;
 }
 
-void ASWeapon::SetCurrentAmmoCount(int count)
-{
+void ASWeapon::SetCurrentAmmoCount(int count) {
 	this->currentAmmo = count;
 }
 
-int ASWeapon::GetMaxClipSize()
-{
+int ASWeapon::GetMaxClipSize() {
 	return this->maxClipSize;
 }
 
-bool ASWeapon::GetReloadState()
-{
+bool ASWeapon::GetReloadState() {
 	return this->needReload;
 }
 
-void ASWeapon::SetReloadState(bool reload)
-{
+void ASWeapon::SetReloadState(bool reload) {
 	this->needReload = reload;
 
 }
 
-int ASWeapon::GetRemainingClips()
-{
+int ASWeapon::GetRemainingClips() {
 	return this->clipsLeft;
 }
-float ASWeapon::GetTimeBetweenShots()
-{
+
+float ASWeapon::GetTimeBetweenShots() {
 	return this->timeBetweenShots;
 }
 
-void ASWeapon::SetLastFireTime(float value)
-{
+void ASWeapon::SetLastFireTime(float value) {
 	this->lastFireTime = value;
 }
 
-float ASWeapon::GetLastFireTime()
-{
+float ASWeapon::GetLastFireTime() {
 	return this->lastFireTime;
 }
 
-void ASWeapon::SetFireRate(float value)
-{
+void ASWeapon::SetFireRate(float value) {
 	this->rateOfFire = value;
 }
-void ASWeapon::Fire_Implementation()
-{
+void ASWeapon::Fire_Implementation() {
 
 	AActor* myOwner = GetOwner();
 
-	if (myOwner)
-	{
+	if (myOwner) {
 		FVector eyeLocation; 
 		FRotator eyeRotation;
 		
@@ -137,8 +124,7 @@ void ASWeapon::Fire_Implementation()
 		FVector traceEndPoint = traceEndPos;
 
 		FHitResult hit;
-		if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, COLLISION_WEAPON, queryParams))
-		{
+		if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, COLLISION_WEAPON, queryParams)) {
 			AActor* hitActor = hit.GetActor();
 			// Process damage and such
 
@@ -146,8 +132,7 @@ void ASWeapon::Fire_Implementation()
 			UParticleSystem* selectedEffect = nullptr;
 			FVector scale;
 			float actualDamage = baseDamage;
-			switch (surfaceType)
-			{
+			switch (surfaceType) {
 				case SURFACE_FLESHDEFAULT:
 					selectedEffect = fleshImpactEffect;
 					scale.X = .3;
@@ -169,8 +154,7 @@ void ASWeapon::Fire_Implementation()
 					break;
 			}
 			
-			if (selectedEffect)
-			{
+			if (selectedEffect)	{
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, hit.ImpactPoint, hit.ImpactNormal.Rotation(), scale);
 			}
 			traceEndPoint = hit.ImpactPoint;
@@ -181,37 +165,30 @@ void ASWeapon::Fire_Implementation()
 	}
 }
 
-void ASWeapon::PlayEffects(FVector eyeLocation, FVector traceEndPos, FVector traceEndPoint)
-{
-		if (muzzleEffect) 
-		{
-			UGameplayStatics::SpawnEmitterAttached(muzzleEffect, meshComp, muzzleSocketName);
-		}		
+void ASWeapon::PlayEffects(FVector eyeLocation, FVector traceEndPos, FVector traceEndPoint) {
+	if (muzzleEffect) {
+		UGameplayStatics::SpawnEmitterAttached(muzzleEffect, meshComp, muzzleSocketName);
+	}		
 
-		if (tracerEffect) 
-		{
-			FVector muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
-			UParticleSystemComponent* tracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), tracerEffect, muzzleLocation);
-			if (tracerComp)
-			{
-				tracerComp->SetVectorParameter("BeamEnd", traceEndPoint);
-			}
-			if (DebugMode > 0) {
-				DrawDebugLine(GetWorld(), eyeLocation, traceEndPos, FColor::White, false, 1.0f, 0, 1.0f);
+	if (tracerEffect) {
+		FVector muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+		UParticleSystemComponent* tracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), tracerEffect, muzzleLocation);
+		if (tracerComp)	{
+			tracerComp->SetVectorParameter("BeamEnd", traceEndPoint);
+		}
+		if (DebugMode > 0) {
+			DrawDebugLine(GetWorld(), eyeLocation, traceEndPos, FColor::White, false, 1.0f, 0, 1.0f);
+		}
+	}
+	APawn* owner = Cast<APawn>(GetOwner());
+	if (owner) {
+		APlayerController* PC = Cast<APlayerController>(owner->GetController());
+		if (PC) {
+			if (fireCamShake) {
+				PC->ClientPlayCameraShake(fireCamShake);
 			}
 		}
-		APawn* owner = Cast<APawn>(GetOwner());
-		if (owner)
-		{
-			APlayerController* PC = Cast<APlayerController>(owner->GetController());
-			if (PC)
-			{
-				if (fireCamShake)
-				{
-					PC->ClientPlayCameraShake(fireCamShake);
-				}
-			}
-		}
+	}
 }
 
 USkeletalMeshComponent* ASWeapon::GetWeaponMesh() {
