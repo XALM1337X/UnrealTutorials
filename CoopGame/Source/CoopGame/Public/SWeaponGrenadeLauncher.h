@@ -25,18 +25,19 @@ public:
 
 	ASWeaponGrenadeLauncher();
 	
-	
-	virtual void CallFire() override;
 	virtual void SetCurrentAmmoCount(int) override;
 	virtual bool GetReloadState() override;
 	virtual void SetReloadState(bool) override;
 	virtual void ReloadWeapon() override;
-	virtual void PlayEffects(FVector,FVector,FVector) override;
+	virtual void PlayEffects() override;
 
 	
 	virtual int GetMaxClipSize() override;
 	virtual int GetCurrentAmmoCount() override;
 	virtual USkeletalMeshComponent* GetWeaponMesh() override;
+	virtual void ServerFire_Implementation() override;
+	virtual bool ServerFire_Validate() override;
+	virtual void Fire() override;
 
 public:
 
@@ -45,7 +46,7 @@ public:
 
 
 protected:
-	virtual void Fire_Implementation() override;
+
 	
 protected:
 

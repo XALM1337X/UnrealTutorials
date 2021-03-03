@@ -104,7 +104,6 @@ protected:
 	void MoveRight(float Value);
 	void Reload();
 
-	UFUNCTION(Server, Reliable)
 	void Fire();
 
 	//UProperties 
@@ -116,6 +115,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USHealthComp* HealthComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<ASWeapon> starterWeaponClass;
+
+	FName WeaponAttachSocketName;
+
+
 	//These are Toggle Templates bound to action inputs.
 	//Sprint
 	void ToggleSprint(RunState speed);

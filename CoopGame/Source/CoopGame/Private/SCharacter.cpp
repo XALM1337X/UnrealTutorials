@@ -38,9 +38,10 @@ ASCharacter::ASCharacter()
 	isAiming = false;
 	isFiring = false;
 	isCrouching = false;
+	WeaponAttachSocketName = "WeaponSocket";
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
-
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -48,36 +49,48 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	hipPOV = CameraComponent->FieldOfView;
+
+	if (GetLocalRole() == ROLE_Authority) {
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(starterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, params);
+		if (CurrentWeapon) {
+			CurrentWeapon->SetOwner(this);
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+		}
+	}
 	
 }
 
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-	float targetPOV = isAiming ? zoomPOV : hipPOV;
-	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
-	CameraComponent->SetFieldOfView(newPOV);
-	if (DebugMode > 0) {
-		HealthComp->SetHealth(HealthComp->GetHealth() - .5f);
-		HealthComp->onHealthChanged.Broadcast(HealthComp, HealthComp->GetHealth()+33, HealthComp->GetHealth() -1, GetController(),  this, FVector(1.0,1.0,1.0), "Head");
-		if (HealthComp->GetHealth() <= 0) {
-			//UE_LOG(LogTemp, Warning, TEXT("DEBUG_DEAD"));
-			UPawnMovementComponent* MC = GetMovementComponent();
-			if (MC) {
-				MC->StopMovementImmediately();
-			} 
-			APlayerController* cont = Cast<APlayerController>(this->GetController());
-			if (cont) {
-				this->DisableInput(cont);
-			}
-			USkeletalMeshComponent* mesh = GetMesh();
-			if (mesh) {
-				mesh->SetSimulatePhysics(true);
+	if (GetLocalRole() == ROLE_Authority) {
+		Super::Tick(DeltaTime);
+		float targetPOV = isAiming ? zoomPOV : hipPOV;
+		float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
+		CameraComponent->SetFieldOfView(newPOV);
+		if (DebugMode > 0) {
+			HealthComp->SetHealth(HealthComp->GetHealth() - .5f);
+			HealthComp->onHealthChanged.Broadcast(HealthComp, HealthComp->GetHealth()+33, HealthComp->GetHealth() -1, GetController(),  this, FVector(1.0,1.0,1.0), "Head");
+			if (HealthComp->GetHealth() <= 0) {
+				//UE_LOG(LogTemp, Warning, TEXT("DEBUG_DEAD"));
+				UPawnMovementComponent* MC = GetMovementComponent();
+				if (MC) {
+					MC->StopMovementImmediately();
+				} 
+				APlayerController* cont = Cast<APlayerController>(this->GetController());
+				if (cont) {
+					this->DisableInput(cont);
+				}
+				USkeletalMeshComponent* mesh = GetMesh();
+				if (mesh) {
+					mesh->SetSimulatePhysics(true);
+				}
 			}
 		}
-	}
-	
+
+	}	
 }
 
 void ASCharacter::MoveForward(float Value) 
@@ -92,8 +105,7 @@ void ASCharacter::MoveForward(float Value)
 	//UE_LOG(LogTemp, Warning, TEXT("VALUE: %f"),Value);
 }
 
-void ASCharacter::MoveRight(float Value) 
-{
+void ASCharacter::MoveRight(float Value) {
 
 	if(this->isAiming)
 	{
@@ -103,8 +115,7 @@ void ASCharacter::MoveRight(float Value)
 	}
 }
 
-void ASCharacter::Reload()
-{
+void ASCharacter::Reload() {
 	//UE_LOG(LogTemp, Warning, TEXT("RELOAD"));
 	if (CurrentWeapon->GetRemainingClips() > 0 && CurrentWeapon->GetCurrentAmmoCount() < CurrentWeapon->GetMaxClipSize() && !this->isFiring) 
 	{
@@ -112,35 +123,23 @@ void ASCharacter::Reload()
 	}
 }
 
-void ASCharacter::Fire_Implementation()
-{
+void ASCharacter::Fire() {
 	UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_0"));
-	if (CurrentWeapon && CurrentWeapon->GetCurrentAmmoCount() > 0 && !CurrentWeapon->GetReloadState())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_1"));
-		CurrentWeapon->CallFire();
-	}
+	CurrentWeapon->Fire();
 }
 
-void ASCharacter::ToggleCrouch()
-{
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
+void ASCharacter::ToggleCrouch() {
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
 		APlayerController *PC = Cast<APlayerController>(It->Get());
-		if (PC && PC->IsLocalController())
-		{			
+		if (PC && PC->IsLocalController()) {			
 			APawn* Pawn = PC->GetPawn();
-			if (Pawn)
-			{
+			if (Pawn) {
 				UCharacterMovementComponent* PawnMovement = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
-				if (PawnMovement)
-				{
-					if (!this->isCrouching)
-					{
+				if (PawnMovement) {
+					if (!this->isCrouching) {
 						Crouch();
 						this->isCrouching = true;
-					} else 
-					{
+					} else {
 						UnCrouch();
 						this->isCrouching = false;
 					}					
@@ -149,28 +148,20 @@ void ASCharacter::ToggleCrouch()
 		}
 	}
 }
-void ASCharacter::ToggleSprint(RunState speed)
-{
-	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
+void ASCharacter::ToggleSprint(RunState speed) {
+	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
 		APlayerController *PC = Cast<APlayerController>(It->Get());
-		if (PC && PC->IsLocalController())
-		{			
+		if (PC && PC->IsLocalController()) {			
 			APawn* Pawn = PC->GetPawn();
-			if (Pawn)
-			{
+			if (Pawn) {
 				UCharacterMovementComponent* PawnMovement = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
-				if (PawnMovement)
-				{
-					switch(speed)
-					{
-						case RunState::Walk:
-						{
+				if (PawnMovement) {
+					switch(speed) {
+						case RunState::Walk: {
 							PawnMovement->MaxWalkSpeed = 600;
 							break;
 						}
-						case RunState::Run:
-						{
+						case RunState::Run:	{
 							PawnMovement->MaxWalkSpeed = 1000;
 							break;
 						}
@@ -222,55 +213,45 @@ void ASCharacter::ToggleAim(AimState aim)
 	}	
 }
 
-void ASCharacter::ToggleFire(FireState fire)
-{
-	switch(fire)
-	{
-		case FireState::Fire:
-		{
+void ASCharacter::ToggleFire(FireState fire) {
+	switch(fire) {
+		case FireState::Fire: {
 			this->SetFiringState(true);
-			if (CurrentWeapon)
-			{
+			if (CurrentWeapon) {
 				float FirstDelay = FMath::Max(CurrentWeapon->GetLastFireTime() + CurrentWeapon->GetTimeBetweenShots() - GetWorld()->TimeSeconds, 0.0f);
 				GetWorldTimerManager().SetTimer(th_time_between_shots, this, &ASCharacter::Fire, CurrentWeapon->GetTimeBetweenShots() , true, FirstDelay);
 			}	
 			break;
 		}
-	
-		case FireState::Release:
-		{
+
+		case FireState::Release: {
 			this->SetFiringState(false);
-			if (CurrentWeapon)
-			{
+			if (CurrentWeapon) {
 				GetWorldTimerManager().ClearTimer(th_time_between_shots);
 			}
 			break;
 		}
-	}
+	}	
 }
 
-bool ASCharacter::GetIsAiming()
-{
+bool ASCharacter::GetIsAiming() {
 	return this->isAiming;
 } 
 
-bool ASCharacter::GetFiringState()
-{
+bool ASCharacter::GetFiringState() {
 	return this->isFiring;
 }
 
-void ASCharacter::SetFiringState(bool value)
-{
+void ASCharacter::SetFiringState(bool value) {
 	this->isFiring = value;
 }
 
-ASWeapon* ASCharacter::GetWeapon(){
+ASWeapon* ASCharacter::GetWeapon() {
 	return this->CurrentWeapon;
 }
 
 // Called to bind functionality to input
-void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
+void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("MoveForward", this, &ASCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ASCharacter::MoveRight);
@@ -290,10 +271,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 }
 
-FVector ASCharacter::GetPawnViewLocation() const
-{
-	if (CameraComponent)
-	{
+FVector ASCharacter::GetPawnViewLocation() const {
+	if (CameraComponent) {
 		return CameraComponent->GetComponentLocation();
 	}
 	return Super::GetPawnViewLocation();
@@ -303,4 +282,5 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLife
 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
+	//DOREPLIFETIME(ASCharacter, th_time_between_shots);
 }

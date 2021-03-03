@@ -18,14 +18,6 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
 	weaponName = "Launcher";
 }
 
-
-void ASWeaponGrenadeLauncher::CallFire() 
-{
-	this->Fire();
-	this->currentAmmo--;
-	this->needReload = true;
-}
-
 void ASWeaponGrenadeLauncher::ReloadWeapon()
 {
 	if (this->clipsLeft != 0)
@@ -58,51 +50,60 @@ void ASWeaponGrenadeLauncher::SetReloadState(bool reload) {
 }
 
 
+void ASWeaponGrenadeLauncher::ServerFire_Implementation() {
+	this->Fire();
+}
 
+bool ASWeaponGrenadeLauncher::ServerFire_Validate() { 
+	return true;
+}
 
-
-void ASWeaponGrenadeLauncher::Fire_Implementation() 
+void ASWeaponGrenadeLauncher::Fire() 
 {
-	AActor* myOwner = GetOwner();
-	if (myOwner) {
-		APawn*  pawn = Cast<APawn>(myOwner);
-		if (pawn) {
-			if (projectileClass) {
-				FVector eyeLocation; 
-				FRotator eyeRotation;		
-				myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
+	if (GetLocalRole() == ROLE_Authority) { 
+		if (this->currentAmmo <= 0) {
+			this->needReload = true;
+			return;
+		}
+		this->currentAmmo--;
+		AActor* myOwner = GetOwner();
+		if (myOwner) {
+			APawn*  pawn = Cast<APawn>(myOwner);
+			if (pawn) {
+				if (projectileClass) {	
+					myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
 
 
-				FVector shotDirection = eyeRotation.Vector();
+					shotDirection = eyeRotation.Vector();
 
-				FVector traceEndPos = eyeLocation + (shotDirection * 10000);
+					traceEndPos = eyeLocation + (shotDirection * 10000);
 
-				FVector muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
-				FRotator muzzleRotator = eyeRotation;
-				//Set Spawn Collision Handling Override
-				FActorSpawnParameters actorSpawnParams;
-				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+					muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+					FRotator muzzleRotator = eyeRotation;
+					//Set Spawn Collision Handling Override
+					FActorSpawnParameters actorSpawnParams;
+					actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
+					traceEndPoint = traceEndPos;
+					if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility)) {
+						traceEndPoint = hit.ImpactPoint;
+					}
 
-				FHitResult hit;
-				FVector traceEndPoint = traceEndPos;
-				if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility)) {
-					traceEndPoint = hit.ImpactPoint;
+					actorSpawnParams.Instigator = pawn;
+					// spawn the projectile at the muzzle
+					FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
+					AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
+					gren->Init(pawn->GetController());
+					this->currentAmmo--;
+					this->needReload = true;
+					PlayEffects();
 				}
-
-				actorSpawnParams.Instigator = pawn;
-				// spawn the projectile at the muzzle
-				FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
-				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
-				gren->Init(pawn->GetController());
-				
-				PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
 			}
 		}
 	}
 }
 
-void ASWeaponGrenadeLauncher::PlayEffects(FVector eyeLocation, FVector traceEndPos, FVector traceEndPoint)
+void ASWeaponGrenadeLauncher::PlayEffects()
 {
 	if (muzzleEffect) 
 	{

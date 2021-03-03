@@ -10,6 +10,11 @@
 #include "SCharacter.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "CoopGame/CoopGame.h"
+#include "Net/UnrealNetwork.h"
+
+
+//TODO: Create Structs for FHitScanTrace
+
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugWeapon(TEXT("COOP.DebugWeapons"), DebugMode, TEXT("Draw debugs for weapons"), ECVF_Cheat);
 // Sets default values
@@ -35,19 +40,9 @@ void ASWeapon::BeginPlay() {
 	Super::BeginPlay();
 	this->timeBetweenShots = 60/rateOfFire;
 }
-void ASWeapon::CallFire() {
-	UE_LOG(LogTemp, Warning, TEXT("ASWeapon::CallFire"));
-	this->Fire();
-	this->currentAmmo--;
-	if (this->currentAmmo == 0)
-	{
-		this->needReload = true;
-	}
-}
 
 void ASWeapon::ReloadWeapon() {
-	if (this->clipsLeft != 0)
-	{
+	if (this->clipsLeft != 0) {
 		if (this->currentAmmo == 0 && this->totalAmmo >= this->maxClipSize) {
 			this->currentAmmo = this->maxClipSize;
 			this->totalAmmo -= this->maxClipSize;
@@ -102,76 +97,87 @@ float ASWeapon::GetLastFireTime() {
 void ASWeapon::SetFireRate(float value) {
 	this->rateOfFire = value;
 }
-void ASWeapon::Fire_Implementation() {
 
-	AActor* myOwner = GetOwner();
+void ASWeapon::ServerFire_Implementation() { 
+	this->Fire();
+}
 
-	if (myOwner) {
-		FVector eyeLocation; 
-		FRotator eyeRotation;
-		
-		myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
+bool ASWeapon::ServerFire_Validate() { 
+	return true; 
+}
 
-		FVector shotDirection = eyeRotation.Vector();
-		
-		FVector traceEndPos = eyeLocation + (shotDirection * 10000);
-		FCollisionQueryParams queryParams;
-		queryParams.AddIgnoredActor(myOwner);
-		queryParams.AddIgnoredActor(this);
-		queryParams.bTraceComplex = true;
-		queryParams.bReturnPhysicalMaterial = true;
-
-		FVector traceEndPoint = traceEndPos;
-
-		FHitResult hit;
-		if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, COLLISION_WEAPON, queryParams)) {
-			AActor* hitActor = hit.GetActor();
-			// Process damage and such
-
-			EPhysicalSurface surfaceType = UPhysicalMaterial::DetermineSurfaceType(hit.PhysMaterial.Get());
-			UParticleSystem* selectedEffect = nullptr;
-			FVector scale;
-			float actualDamage = baseDamage;
-			switch (surfaceType) {
-				case SURFACE_FLESHDEFAULT:
-					selectedEffect = fleshImpactEffect;
-					scale.X = .3;
-					scale.Y = .3;
-					scale.Z = .3;
-					break;
-				case SURFACE_FLESHVULNERABLE:
-					selectedEffect = fleshImpactEffect;
-					scale.X = .7;
-					scale.Y = .7;
-					scale.Z = .7;
-					actualDamage *= 4;
-					break;
-				default: 
-					selectedEffect = defaultImpactEffect;
-					scale.X = 1;
-					scale.Y = 1;
-					scale.Z = 1;
-					break;
-			}
+void ASWeapon::Fire() {
+	if (GetLocalRole() < ROLE_Authority) {	
+		this->ServerFire();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("ASWeapon::Fire"));
+	if (this->currentAmmo <= 0) {
+		this->needReload = true;
+		return;
+	}
+	if (GetCurrentAmmoCount() > 0 && !GetReloadState()) {
+		this->currentAmmo--;
+		AActor* myOwner = GetOwner();
+		if (myOwner) {		
+			muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+			myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
+			shotDirection = eyeRotation.Vector();
 			
-			if (selectedEffect)	{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, hit.ImpactPoint, hit.ImpactNormal.Rotation(), scale);
+			traceEndPos = eyeLocation + (shotDirection * 10000);
+			queryParams.AddIgnoredActor(myOwner);
+			queryParams.AddIgnoredActor(this);
+			queryParams.bTraceComplex = true;
+			queryParams.bReturnPhysicalMaterial = true;
+
+			traceEndPoint = traceEndPos;
+
+			if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, COLLISION_WEAPON, queryParams)) {
+				AActor* hitActor = hit.GetActor();
+				// Process damage and such
+
+				surfaceType = UPhysicalMaterial::DetermineSurfaceType(hit.PhysMaterial.Get());
+				selectedEffect = nullptr;
+				float actualDamage = baseDamage;
+				switch (surfaceType) {
+					case SURFACE_FLESHDEFAULT:
+						selectedEffect = fleshImpactEffect;
+						scale.X = .3;
+						scale.Y = .3;
+						scale.Z = .3;
+						break;
+					case SURFACE_FLESHVULNERABLE:
+						selectedEffect = fleshImpactEffect;
+						scale.X = .7;
+						scale.Y = .7;
+						scale.Z = .7;
+						actualDamage *= 4;
+						break;
+					default: 
+						selectedEffect = defaultImpactEffect;
+						scale.X = 1;
+						scale.Y = 1;
+						scale.Z = 1;
+						break;
+				}
+				traceEndPoint = hit.ImpactPoint;
+				UGameplayStatics::ApplyPointDamage(hitActor, actualDamage, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
 			}
-			traceEndPoint = hit.ImpactPoint;
-			UGameplayStatics::ApplyPointDamage(hitActor,actualDamage, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
+			this->SetLastFireTime(GetWorld()->TimeSeconds);
 		}
-		PlayEffects(eyeLocation, traceEndPos, traceEndPoint);
-		this->SetLastFireTime(GetWorld()->TimeSeconds);
+		PlayEffects();
+	} else {
+		this->needReload = true;
 	}
 }
 
-void ASWeapon::PlayEffects(FVector eyeLocation, FVector traceEndPos, FVector traceEndPoint) {
+void ASWeapon::PlayEffects() {
 	if (muzzleEffect) {
 		UGameplayStatics::SpawnEmitterAttached(muzzleEffect, meshComp, muzzleSocketName);
 	}		
-
+	if (selectedEffect)	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, hit.ImpactPoint, hit.ImpactNormal.Rotation(), scale);
+	}
 	if (tracerEffect) {
-		FVector muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
 		UParticleSystemComponent* tracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), tracerEffect, muzzleLocation);
 		if (tracerComp)	{
 			tracerComp->SetVectorParameter("BeamEnd", traceEndPoint);
@@ -193,4 +199,18 @@ void ASWeapon::PlayEffects(FVector eyeLocation, FVector traceEndPos, FVector tra
 
 USkeletalMeshComponent* ASWeapon::GetWeaponMesh() {
 	return this->meshComp;
+}
+
+void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASWeapon, eyeLocation);
+	DOREPLIFETIME(ASWeapon, traceEndPos);
+	DOREPLIFETIME(ASWeapon, traceEndPoint);
+	DOREPLIFETIME(ASWeapon, muzzleLocation);
+	//DOREPLIFETIME(ASWeapon, tracerComp);
+	DOREPLIFETIME(ASWeapon, shotDirection);
+	DOREPLIFETIME(ASWeapon, surfaceType);
+	DOREPLIFETIME(ASWeapon, selectedEffect);
+	DOREPLIFETIME(ASWeapon, hit);
+	DOREPLIFETIME(ASWeapon, scale);
 }

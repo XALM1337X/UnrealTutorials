@@ -24,8 +24,7 @@ public:
 	// Sets default values for this actor's properties
 	ASWeapon();
 	virtual void BeginPlay() override;
-	
-	virtual void CallFire();
+
 	virtual void SetCurrentAmmoCount(int);
 	virtual bool GetReloadState();
 	virtual float GetTimeBetweenShots();
@@ -34,11 +33,16 @@ public:
 	virtual void SetReloadState(bool);
 	virtual void SetFireRate(float);
 	virtual void ReloadWeapon();
-	virtual void PlayEffects(FVector,FVector,FVector);
+
+	virtual void PlayEffects();
 
 	virtual USkeletalMeshComponent* GetWeaponMesh();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	virtual void ServerFire();
 	
-	
+	virtual void Fire();
+
 	UFUNCTION(BlueprintCallable)
 	virtual int GetMaxClipSize();
 
@@ -85,6 +89,40 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	float rateOfFire;
+	
+	//These three are testing remove if things fuck up.
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FVector eyeLocation;
+	
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FVector traceEndPos;
+	
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FVector traceEndPoint;
+	//////////////////////////////////////////////////
+
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FVector muzzleLocation;
+
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FRotator eyeRotation;
+	
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	TEnumAsByte<EPhysicalSurface> surfaceType;
+	
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UParticleSystem* selectedEffect;
+
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FVector scale;
+
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FVector shotDirection; 
+
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	FHitResult hit;
+
+	FCollisionQueryParams queryParams;
 
 	int currentAmmo;
 	int totalAmmo;
@@ -97,7 +135,6 @@ protected:
 
 //Protected member functions
 protected:
-	UFUNCTION(Server, BlueprintCallable, Reliable)
-	virtual void Fire();
+
 
 };
