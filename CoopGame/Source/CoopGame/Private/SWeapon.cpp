@@ -12,9 +12,6 @@
 #include "CoopGame/CoopGame.h"
 #include "Net/UnrealNetwork.h"
 
-
-//TODO: Create Structs for FHitScanTrace
-
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugWeapon(TEXT("COOP.DebugWeapons"), DebugMode, TEXT("Draw debugs for weapons"), ECVF_Cheat);
 // Sets default values
@@ -107,19 +104,21 @@ bool ASWeapon::ServerFire_Validate() {
 }
 
 void ASWeapon::Fire() {
+	
 	if (GetLocalRole() < ROLE_Authority) {	
 		this->ServerFire();
-	}
-	UE_LOG(LogTemp, Warning, TEXT("ASWeapon::Fire"));
-	if (this->currentAmmo <= 0) {
+	} 
+
+	if (this->currentAmmo <= 0 ) {
 		this->needReload = true;
 		return;
 	}
+	
 	if (GetCurrentAmmoCount() > 0 && !GetReloadState()) {
 		this->currentAmmo--;
 		AActor* myOwner = GetOwner();
 		if (myOwner) {		
-			muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+
 			myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
 			shotDirection = eyeRotation.Vector();
 			
@@ -164,13 +163,24 @@ void ASWeapon::Fire() {
 			}
 			this->SetLastFireTime(GetWorld()->TimeSeconds);
 		}
-		PlayEffects();
+			if (GetLocalRole() == ROLE_Authority) {
+				TraceStruct.TraceTo = traceEndPoint;
+			}
 	} else {
 		this->needReload = true;
 	}
 }
 
+void ASWeapon::OnRep_HitScanTrace() {
+	PlayEffects();
+}
+
+
 void ASWeapon::PlayEffects() {
+	AActor* myOwner = GetOwner();
+	if (myOwner) {		
+		muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+	}
 	if (muzzleEffect) {
 		UGameplayStatics::SpawnEmitterAttached(muzzleEffect, meshComp, muzzleSocketName);
 	}		
@@ -180,7 +190,7 @@ void ASWeapon::PlayEffects() {
 	if (tracerEffect) {
 		UParticleSystemComponent* tracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), tracerEffect, muzzleLocation);
 		if (tracerComp)	{
-			tracerComp->SetVectorParameter("BeamEnd", traceEndPoint);
+			tracerComp->SetVectorParameter("BeamEnd", TraceStruct.TraceTo);
 		}
 		if (DebugMode > 0) {
 			DrawDebugLine(GetWorld(), eyeLocation, traceEndPos, FColor::White, false, 1.0f, 0, 1.0f);
@@ -203,14 +213,6 @@ USkeletalMeshComponent* ASWeapon::GetWeaponMesh() {
 
 void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ASWeapon, eyeLocation);
-	DOREPLIFETIME(ASWeapon, traceEndPos);
-	DOREPLIFETIME(ASWeapon, traceEndPoint);
-	DOREPLIFETIME(ASWeapon, muzzleLocation);
-	//DOREPLIFETIME(ASWeapon, tracerComp);
-	DOREPLIFETIME(ASWeapon, shotDirection);
-	DOREPLIFETIME(ASWeapon, surfaceType);
-	DOREPLIFETIME(ASWeapon, selectedEffect);
-	DOREPLIFETIME(ASWeapon, hit);
-	DOREPLIFETIME(ASWeapon, scale);
+	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);
+	DOREPLIFETIME(ASWeapon, TraceStruct);
 }

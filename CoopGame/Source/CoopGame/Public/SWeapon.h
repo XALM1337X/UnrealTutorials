@@ -11,6 +11,19 @@ class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
 class UCameraShake;
+
+USTRUCT()
+struct FHitScanTrace {
+	GENERATED_BODY()
+	public: 
+		UPROPERTY() 
+		FVector_NetQuantize TraceFrom;
+
+		UPROPERTY() 
+		FVector_NetQuantize TraceTo;
+
+};
+
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
 {
@@ -91,36 +104,39 @@ protected:
 	float rateOfFire;
 	
 	//These three are testing remove if things fuck up.
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FVector eyeLocation;
 	
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FVector traceEndPos;
 	
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FVector traceEndPoint;
 	//////////////////////////////////////////////////
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FVector muzzleLocation;
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FRotator eyeRotation;
 	
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	TEnumAsByte<EPhysicalSurface> surfaceType;
 	
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	UParticleSystem* selectedEffect;
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FVector scale;
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FVector shotDirection; 
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=ServerFire)
+	UPROPERTY(EditDefaultsOnly)
 	FHitResult hit;
+
+	UPROPERTY(ReplicatedUsing=OnRep_HitScanTrace)
+	FHitScanTrace TraceStruct;
 
 	FCollisionQueryParams queryParams;
 
@@ -136,5 +152,7 @@ protected:
 //Protected member functions
 protected:
 
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 
 };
