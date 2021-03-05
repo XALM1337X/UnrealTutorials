@@ -66,10 +66,14 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 		}
 		
 	}
-	onHealthChanged.Broadcast(this, this->health, Damage, InstigatedBy,  DamageCauser, ShotFromDirection, BoneName);
+	ClientOnHealthChange(this, this->health, Damage, InstigatedBy,  DamageCauser, ShotFromDirection, BoneName);
 	//UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(health));
 
 	//Using Broadcast to trigger blueprint
+}
+
+void USHealthComp::ClientOnHealthChange_Implementation(USHealthComp* HealthComp, float current_health, float healthDelta, class AController* InstigatedBy, AActor* DamageCauser, FVector ShotFromDirection, FName BoneName) {
+	onHealthChanged.Broadcast(this, current_health, healthDelta, InstigatedBy,  DamageCauser, ShotFromDirection, BoneName);
 }
 
 //TODO: Fix Damage/Health here.

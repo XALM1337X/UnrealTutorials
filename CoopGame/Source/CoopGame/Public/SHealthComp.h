@@ -52,6 +52,9 @@ protected:
 	UFUNCTION()
 	void HandleTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser ); 
 	
+	UFUNCTION(Client, Reliable)
+	void ClientOnHealthChange(USHealthComp* HealthComp, float current_health, float healthDelta, class AController* InstigatedBy, AActor* DamageCauser, FVector ShotFromDirection, FName BoneName);
+
 	UFUNCTION(NetMulticast, Reliable)
 	void ApplyPhysics(ASCharacter* character, FVector ShotFromDirection, FName BoneName);
 
