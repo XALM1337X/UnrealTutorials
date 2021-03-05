@@ -26,7 +26,7 @@ ASWeapon::ASWeapon() {
 	totalAmmo = 175;
 	maxClipSize = 35;
 	weaponMod = 13;
-	baseDamage = 20;
+	baseDamage = 8;
 	weaponName = "rifle";
 	clipsLeft = totalAmmo / maxClipSize;
 	rateOfFire = 600;
