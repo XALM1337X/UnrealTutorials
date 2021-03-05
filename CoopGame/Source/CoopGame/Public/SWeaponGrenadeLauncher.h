@@ -29,7 +29,7 @@ public:
 	virtual bool GetReloadState() override;
 	virtual void SetReloadState(bool) override;
 	virtual void ReloadWeapon() override;
-	virtual void PlayEffects() override;
+	virtual void PlayFireEffects() override;
 
 	
 	virtual int GetMaxClipSize() override;

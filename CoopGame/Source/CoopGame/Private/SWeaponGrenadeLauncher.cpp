@@ -96,14 +96,14 @@ void ASWeaponGrenadeLauncher::Fire()
 					gren->Init(pawn->GetController());
 					this->currentAmmo--;
 					this->needReload = true;
-					PlayEffects();
+					PlayFireEffects();
 				}
 			}
 		}
 	}
 }
 
-void ASWeaponGrenadeLauncher::PlayEffects()
+void ASWeaponGrenadeLauncher::PlayFireEffects()
 {
 	if (muzzleEffect) 
 	{

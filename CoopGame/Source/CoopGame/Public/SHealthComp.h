@@ -35,7 +35,7 @@ public:
 	
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthComponents")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="HealthComponents")
 	float health;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="HealthComponents")
@@ -52,6 +52,8 @@ protected:
 	UFUNCTION()
 	void HandleTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser ); 
 	
+	UFUNCTION(NetMulticast, Reliable)
+	void ApplyPhysics(ASCharacter* character, FVector ShotFromDirection, FName BoneName);
 
 	void CleanUp();
 

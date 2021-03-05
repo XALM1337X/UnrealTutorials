@@ -65,11 +65,14 @@ void ASCharacter::BeginPlay()
 // Called every frame
 void ASCharacter::Tick(float DeltaTime)
 {
-	if (GetLocalRole() == ROLE_Authority) {
-		Super::Tick(DeltaTime);
+	Super::Tick(DeltaTime);
+	if (GetLocalRole() != ROLE_Authority) {
 		float targetPOV = isAiming ? zoomPOV : hipPOV;
 		float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 		CameraComponent->SetFieldOfView(newPOV);
+	}
+	
+	if (GetLocalRole() == ROLE_Authority) {
 		if (DebugMode > 0) {
 			HealthComp->SetHealth(HealthComp->GetHealth() - .5f);
 			HealthComp->onHealthChanged.Broadcast(HealthComp, HealthComp->GetHealth()+33, HealthComp->GetHealth() -1, GetController(),  this, FVector(1.0,1.0,1.0), "Head");

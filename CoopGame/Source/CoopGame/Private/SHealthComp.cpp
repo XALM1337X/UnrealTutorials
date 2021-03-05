@@ -9,6 +9,7 @@
 #include "kismet/GameplayStatics.h"
 #include "BarrelExplosionActor.h"
 #include "Components/SphereComponent.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values for this component's properties
@@ -17,28 +18,32 @@ USHealthComp::USHealthComp()
 	//PrimaryComponentTick.bCanEverTick = true;
 	this->defaultHealth = 100;
 	this->health = 0;
+	SetIsReplicated(true);
 }
 
 
 // Called when the game starts
 void USHealthComp::BeginPlay()
 {
-	Super::BeginPlay();
-	AActor* myOwner = GetOwner();
-	this->health = this->defaultHealth;
-	Role = myOwner->GetLocalRole();
-	myOwner->OnTakePointDamage.AddDynamic(this, &USHealthComp::HandleTakePointDamage);	
-	myOwner->OnTakeRadialDamage.AddDynamic(this, &USHealthComp::HandleTakeRadialDamage);
-
+	Super::BeginPlay();	
+	if (GetOwnerRole() == ROLE_Authority) {
+		AActor* myOwner = GetOwner();
+		myOwner->OnTakePointDamage.AddDynamic(this, &USHealthComp::HandleTakePointDamage);	
+		myOwner->OnTakeRadialDamage.AddDynamic(this, &USHealthComp::HandleTakeRadialDamage);
+	}
+	this->health = this->defaultHealth;	
 }
 
 void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser ) 
 {
+
 	if (Damage <= 0.0f)
 	{		
 		return;
 	}
+	//UE_LOG(LogTemp, Log, TEXT("Health Before: %s"), *FString::SanitizeFloat(health));
 	this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
+	//UE_LOG(LogTemp, Log, TEXT("Health After: %s"), *FString::SanitizeFloat(health));
 
 	if (this->health <= 0.0f) {
 		ASCharacter* character = Cast<ASCharacter>(DamagedActor);
@@ -53,18 +58,9 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 			if (cont) {
 				character->DisableInput(cont);
 			}
-			USkeletalMeshComponent* mesh = character->GetMesh();
-			if (mesh) {
-				mesh->SetSimulatePhysics(true);
-				mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
-			}
-			USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
-			if (weapon_mesh) {
-				weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-				weapon_mesh->SetSimulatePhysics(true);
-				//weapon_mesh->WakeRigidBody();
-				UE_LOG(LogTemp, Log, TEXT("PHYSICS_DEBUG"));			
-			}
+			ApplyPhysics(character, ShotFromDirection, BoneName);
+
+
 			FTimerHandle Handler;
 			GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
 		}
@@ -150,4 +146,23 @@ void USHealthComp::SetHealth(float val) {
 
 float USHealthComp::GetHealth() {
 	return this->health;
+}
+
+
+void USHealthComp::ApplyPhysics_Implementation(ASCharacter* character, FVector ShotFromDirection, FName BoneName) {
+	USkeletalMeshComponent* mesh = character->GetMesh();
+			if (mesh) {
+				mesh->SetSimulatePhysics(true);
+				mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
+			} 
+			USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
+			if (weapon_mesh) {
+				weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				weapon_mesh->SetSimulatePhysics(true);			
+			}
+}
+
+void USHealthComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(USHealthComp, health);
 }

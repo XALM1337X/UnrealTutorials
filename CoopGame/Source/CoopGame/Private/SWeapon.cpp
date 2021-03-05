@@ -31,6 +31,11 @@ ASWeapon::ASWeapon() {
 	clipsLeft = totalAmmo / maxClipSize;
 	rateOfFire = 600;
 	SetReplicates(true);
+
+	//Built in actor tick network frequency.
+	//Note: This is ranged from 2.0f to 100.0f by default.
+	NetUpdateFrequency = 66.0f;		//
+	MinNetUpdateFrequency = 33.0f;	//
 }
 
 void ASWeapon::BeginPlay() {
@@ -132,6 +137,7 @@ void ASWeapon::Fire() {
 
 			if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, COLLISION_WEAPON, queryParams)) {
 				AActor* hitActor = hit.GetActor();
+				traceEndPoint = hit.ImpactPoint;
 				// Process damage and such
 
 				surfaceType = UPhysicalMaterial::DetermineSurfaceType(hit.PhysMaterial.Get());
@@ -139,44 +145,68 @@ void ASWeapon::Fire() {
 				float actualDamage = baseDamage;
 				switch (surfaceType) {
 					case SURFACE_FLESHDEFAULT:
-						selectedEffect = fleshImpactEffect;
-						scale.X = .3;
-						scale.Y = .3;
-						scale.Z = .3;
 						break;
 					case SURFACE_FLESHVULNERABLE:
-						selectedEffect = fleshImpactEffect;
-						scale.X = .7;
-						scale.Y = .7;
-						scale.Z = .7;
 						actualDamage *= 4;
 						break;
 					default: 
-						selectedEffect = defaultImpactEffect;
-						scale.X = 1;
-						scale.Y = 1;
-						scale.Z = 1;
 						break;
 				}
-				traceEndPoint = hit.ImpactPoint;
 				UGameplayStatics::ApplyPointDamage(hitActor, actualDamage, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
 			}
 			this->SetLastFireTime(GetWorld()->TimeSeconds);
 		}
-			if (GetLocalRole() == ROLE_Authority) {
-				TraceStruct.TraceTo = traceEndPoint;
-			}
+		if (GetLocalRole() == ROLE_Authority) {
+			TraceStruct.TraceTo = traceEndPoint;
+			TraceStruct.SurfaceTypeBytes = surfaceType;
+		}
 	} else {
 		this->needReload = true;
 	}
 }
 
 void ASWeapon::OnRep_HitScanTrace() {
-	PlayEffects();
+	PlayFireEffects();
+	PlayImpactEffects();
 }
 
 
-void ASWeapon::PlayEffects() {
+void ASWeapon::PlayImpactEffects() {
+	AActor* myOwner = GetOwner();
+	if (myOwner) {		
+		muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+		FVector ShotDirection = TraceStruct.TraceTo - muzzleLocation;
+		ShotDirection.Normalize();
+
+		switch (TraceStruct.SurfaceTypeBytes) {
+			case SURFACE_FLESHDEFAULT:
+				selectedEffect = fleshImpactEffect;
+				scale.X = .3;
+				scale.Y = .3;
+				scale.Z = .3;
+				break;
+			case SURFACE_FLESHVULNERABLE:
+				selectedEffect = fleshImpactEffect;
+				scale.X = .7;
+				scale.Y = .7;
+				scale.Z = .7;
+				break;
+			default: 
+				selectedEffect = defaultImpactEffect;
+				scale.X = 1;
+				scale.Y = 1;
+				scale.Z = 1;
+				break;
+		}
+
+		if (selectedEffect)	{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, TraceStruct.TraceTo, ShotDirection.Rotation(), scale);
+		}
+
+	}
+}
+
+void ASWeapon::PlayFireEffects() {
 	AActor* myOwner = GetOwner();
 	if (myOwner) {		
 		muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
@@ -184,9 +214,6 @@ void ASWeapon::PlayEffects() {
 	if (muzzleEffect) {
 		UGameplayStatics::SpawnEmitterAttached(muzzleEffect, meshComp, muzzleSocketName);
 	}		
-	if (selectedEffect)	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, hit.ImpactPoint, hit.ImpactNormal.Rotation(), scale);
-	}
 	if (tracerEffect) {
 		UParticleSystemComponent* tracerComp = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), tracerEffect, muzzleLocation);
 		if (tracerComp)	{

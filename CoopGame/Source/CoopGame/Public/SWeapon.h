@@ -16,12 +16,12 @@ USTRUCT()
 struct FHitScanTrace {
 	GENERATED_BODY()
 	public: 
+
 		UPROPERTY() 
-		FVector_NetQuantize TraceFrom;
+		TEnumAsByte<EPhysicalSurface> SurfaceTypeBytes;
 
 		UPROPERTY() 
 		FVector_NetQuantize TraceTo;
-
 };
 
 UCLASS()
@@ -47,7 +47,8 @@ public:
 	virtual void SetFireRate(float);
 	virtual void ReloadWeapon();
 
-	virtual void PlayEffects();
+	virtual void PlayFireEffects();
+	virtual void PlayImpactEffects();
 
 	virtual USkeletalMeshComponent* GetWeaponMesh();
 
