@@ -15,8 +15,7 @@
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugDeath(TEXT("COOP.DebugDeath"), DebugMode, TEXT("Set death defaults"), ECVF_Cheat);
 // Sets default values
-ASCharacter::ASCharacter()
-{
+ASCharacter::ASCharacter() {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
@@ -49,7 +48,6 @@ void ASCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	hipPOV = CameraComponent->FieldOfView;
-
 	if (GetLocalRole() == ROLE_Authority) {
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -129,6 +127,7 @@ void ASCharacter::Reload() {
 void ASCharacter::Fire() {
 	UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_0"));
 	CurrentWeapon->Fire();
+
 }
 
 void ASCharacter::ToggleCrouch() {
@@ -151,6 +150,7 @@ void ASCharacter::ToggleCrouch() {
 		}
 	}
 }
+
 void ASCharacter::ToggleSprint(RunState speed) {
 	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
 		APlayerController *PC = Cast<APlayerController>(It->Get());
@@ -177,16 +177,12 @@ void ASCharacter::ToggleSprint(RunState speed) {
 
 void ASCharacter::ToggleJump(JumpState jumping)
 {
-	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
+	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
 		APlayerController *PC = Cast<APlayerController>(It->Get());
-		if (PC && PC->IsLocalController())
-		{
+		if (PC && PC->IsLocalController()) {
 			ACharacter* character = PC->GetCharacter();
-			if (character)
-			{
-				switch(jumping)
-				{
+			if (character) {
+				switch(jumping)	{
 					case JumpState::Jump:
 							character->Jump();
 							break;
@@ -198,18 +194,14 @@ void ASCharacter::ToggleJump(JumpState jumping)
 	}
 }
 
-void ASCharacter::ToggleAim(AimState aim)
-{		
-	switch(aim)
-	{
-		case AimState::Zoom:
-		{
+void ASCharacter::ToggleAim(AimState aim) {		
+	switch(aim)	{
+		case AimState::Zoom: {
 			isAiming = true;
 			break;
 		}			
 		
-		case AimState::Hip:
-		{
+		case AimState::Hip:	{
 			isAiming = false;
 			break;
 		}
@@ -252,6 +244,8 @@ void ASCharacter::SetFiringState(bool value) {
 ASWeapon* ASCharacter::GetWeapon() {
 	return this->CurrentWeapon;
 }
+
+
 
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {

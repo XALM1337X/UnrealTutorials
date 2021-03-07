@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAmmoChangeSigniture, int, AmmoCount, int, ClipCount, int, MaxClipSize, FString, WeaponName);
 enum class RunState : uint8 
 {
 	Walk,
@@ -51,6 +51,10 @@ class COOPGAME_API ASCharacter : public ACharacter
 
 //Public Member Variables
 public:
+
+
+	UPROPERTY(BlueprintAssignable, Category="Events")
+	FOnAmmoChangeSigniture onAmmoChanged;
 	
 //Public Methods/Functions
 public:	

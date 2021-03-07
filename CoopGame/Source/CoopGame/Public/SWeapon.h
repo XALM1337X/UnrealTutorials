@@ -66,6 +66,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual int GetRemainingClips();
 
+	UFUNCTION(Client, Reliable)
+	void ClientOnAmmoChanged(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name);
 
 	
 //Protected member variables

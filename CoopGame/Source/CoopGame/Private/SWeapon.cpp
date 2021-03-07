@@ -41,6 +41,11 @@ ASWeapon::ASWeapon() {
 void ASWeapon::BeginPlay() {
 	Super::BeginPlay();
 	this->timeBetweenShots = 60/rateOfFire;
+	AActor* myOwner = GetOwner();
+	if (myOwner) {
+		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
+		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+	}
 }
 
 void ASWeapon::ReloadWeapon() {
@@ -121,6 +126,7 @@ void ASWeapon::Fire() {
 	
 	if (GetCurrentAmmoCount() > 0 && !GetReloadState()) {
 		this->currentAmmo--;
+		
 		AActor* myOwner = GetOwner();
 		if (myOwner) {		
 
@@ -155,6 +161,14 @@ void ASWeapon::Fire() {
 				UGameplayStatics::ApplyPointDamage(hitActor, actualDamage, shotDirection, hit, myOwner->GetInstigatorController(), this, damageType);
 			}
 			this->SetLastFireTime(GetWorld()->TimeSeconds);
+
+			if (GetLocalRole() == ROLE_Authority) {
+				ASCharacter* my_char = Cast<ASCharacter>(myOwner);
+				if (my_char) {
+
+					ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+				}
+			}	
 		}
 		if (GetLocalRole() == ROLE_Authority) {
 			TraceStruct.TraceTo = traceEndPoint;
@@ -163,6 +177,10 @@ void ASWeapon::Fire() {
 	} else {
 		this->needReload = true;
 	}
+}
+
+void ASWeapon::ClientOnAmmoChanged_Implementation(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name) {
+	my_char->onAmmoChanged.Broadcast(ammoCount, clipCount, clipSize, weapon_name);
 }
 
 void ASWeapon::OnRep_HitScanTrace() {
