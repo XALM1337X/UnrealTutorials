@@ -118,14 +118,11 @@ void ASCharacter::MoveRight(float Value) {
 
 void ASCharacter::Reload() {
 	//UE_LOG(LogTemp, Warning, TEXT("RELOAD"));
-	if (CurrentWeapon->GetRemainingClips() > 0 && CurrentWeapon->GetCurrentAmmoCount() < CurrentWeapon->GetMaxClipSize() && !this->isFiring) 
-	{
-		CurrentWeapon->ReloadWeapon();
-	}
+	CurrentWeapon->ReloadWeapon();	
 }
 
 void ASCharacter::Fire() {
-	UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_0"));
+	//UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_0"));
 	CurrentWeapon->Fire();
 
 }
@@ -244,8 +241,6 @@ void ASCharacter::SetFiringState(bool value) {
 ASWeapon* ASCharacter::GetWeapon() {
 	return this->CurrentWeapon;
 }
-
-
 
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {

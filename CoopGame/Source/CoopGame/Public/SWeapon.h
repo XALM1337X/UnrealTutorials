@@ -47,6 +47,9 @@ public:
 	virtual void SetFireRate(float);
 	virtual void ReloadWeapon();
 
+	UFUNCTION(Server, Reliable) //TODO: Add validation later.
+	virtual void ServerReloadWeapon();
+
 	virtual void PlayFireEffects();
 	virtual void PlayImpactEffects();
 
@@ -142,12 +145,17 @@ protected:
 	FHitScanTrace TraceStruct;
 
 	FCollisionQueryParams queryParams;
-
-	int currentAmmo;
+	
+	int currentAmmo;	
+	
 	int totalAmmo;
+	
 	int maxClipSize;
+	
 	int clipsLeft;
+	
 	bool needReload;
+	
 	int weaponMod;
 	float timeBetweenShots;
 	float lastFireTime;
@@ -157,5 +165,7 @@ protected:
 
 	UFUNCTION()
 	void OnRep_HitScanTrace();
+
+	//void Tick(float DeltaTime);
 
 };

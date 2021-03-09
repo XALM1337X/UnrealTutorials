@@ -17,6 +17,8 @@ FAutoConsoleVariableRef DebugWeapon(TEXT("COOP.DebugWeapons"), DebugMode, TEXT("
 // Sets default values
 ASWeapon::ASWeapon() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	//PrimaryActorTick.bCanEverTick = true;
+
 	meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("meshComp"));
 	RootComponent = meshComp;
 	muzzleSocketName = "MuzzleSocket";
@@ -48,7 +50,25 @@ void ASWeapon::BeginPlay() {
 	}
 }
 
+/*void ASWeapon::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+	if (GetLocalRole() == ROLE_Authority) {
+		//UE_LOG(LogTemp, Warning, TEXT("Server: %d"),this->currentAmmo);
+	} else {
+		//UE_LOG(LogTemp, Warning, TEXT("Client: %d"),this->currentAmmo);
+	}
+}*/
+
+void ASWeapon::ServerReloadWeapon_Implementation() {
+	this->ReloadWeapon();
+}
+
+
 void ASWeapon::ReloadWeapon() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerReloadWeapon();
+		return; 
+	}
 	if (this->clipsLeft != 0) {
 		if (this->currentAmmo == 0 && this->totalAmmo >= this->maxClipSize) {
 			this->currentAmmo = this->maxClipSize;
@@ -57,10 +77,16 @@ void ASWeapon::ReloadWeapon() {
 			this->totalAmmo -= this->maxClipSize;
 			this->totalAmmo += this->currentAmmo;
 			this->currentAmmo = this->maxClipSize;
+		} else {
 		}
 
 		this->needReload = false;
 		this->clipsLeft = this->totalAmmo/this->maxClipSize;
+	}
+	AActor* myOwner = GetOwner();
+	if (myOwner) {
+		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
+		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
 	}
 }
 
@@ -105,21 +131,23 @@ void ASWeapon::SetFireRate(float value) {
 	this->rateOfFire = value;
 }
 
-void ASWeapon::ServerFire_Implementation() { 
-	this->Fire();
-}
-
 bool ASWeapon::ServerFire_Validate() { 
 	return true; 
 }
 
+void ASWeapon::ServerFire_Implementation() { 
+	this->Fire();
+}
+
 void ASWeapon::Fire() {
-	
-	if (GetLocalRole() < ROLE_Authority) {	
+	//I Collapsed a lot of the conditional trees here for readability.
+	//All you should see now is where ammo is being decremented and checked.
+	if (GetLocalRole() != ROLE_Authority) {	
 		this->ServerFire();
+		return;
 	} 
 
-	if (this->currentAmmo <= 0 ) {
+	if (GetCurrentAmmoCount() <= 0 ) {
 		this->needReload = true;
 		return;
 	}
@@ -260,4 +288,5 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetim
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);
 	DOREPLIFETIME(ASWeapon, TraceStruct);
+
 }
