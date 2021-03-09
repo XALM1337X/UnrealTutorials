@@ -6,6 +6,11 @@
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAmmoChangeSigniture, int, AmmoCount, int, ClipCount, int, MaxClipSize, FString, WeaponName);
+
+enum class WeaponSelectedState: uint8 {
+	Primary,
+	Secondary
+};
 enum class RunState : uint8 
 {
 	Walk,
@@ -80,6 +85,10 @@ protected:
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	ASWeapon* CurrentWeapon;
 
+	ASWeapon* StoredPrimary;
+
+	ASWeapon* StoredLauncher;
+
 	UPROPERTY(BlueprintReadOnly, Category="Player")
 	bool isAiming;
 
@@ -123,6 +132,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
 	TSubclassOf<ASWeapon> starterWeaponClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<ASWeapon> launcherWeaponClass;
+
 	FName WeaponAttachSocketName;
 
 
@@ -144,6 +156,10 @@ protected:
 	void ToggleFire(FireState fire);
 	template<FireState fire>
 	void ToggleFire() {ToggleFire(fire);}
+
+	void ToggleSwitchWeapon(WeaponSelectedState weapon);
+	template<WeaponSelectedState weapon>
+	void ToggleSwitchWeapon() {ToggleSwitchWeapon(weapon);}
 
 
 };

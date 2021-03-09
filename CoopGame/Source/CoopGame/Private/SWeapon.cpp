@@ -140,8 +140,6 @@ void ASWeapon::ServerFire_Implementation() {
 }
 
 void ASWeapon::Fire() {
-	//I Collapsed a lot of the conditional trees here for readability.
-	//All you should see now is where ammo is being decremented and checked.
 	if (GetLocalRole() != ROLE_Authority) {	
 		this->ServerFire();
 		return;

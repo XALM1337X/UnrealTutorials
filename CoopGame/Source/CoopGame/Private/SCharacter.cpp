@@ -52,6 +52,14 @@ void ASCharacter::BeginPlay()
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(starterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, params);
+		/*
+		StoredLauncher = GetWorld()->SpawnActor<ASWeaponGrenadeLauncher>(launcherWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, params);
+		if (StoredLauncher) {
+			StoredLauncher->SetOwner(this);
+			StoredLauncher->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+			StoredLauncher->SetActorHiddenInGame(false);
+		}
+		*/
 		if (CurrentWeapon) {
 			CurrentWeapon->SetOwner(this);
 			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
@@ -226,6 +234,57 @@ void ASCharacter::ToggleFire(FireState fire) {
 	}	
 }
 
+void ASCharacter::ToggleSwitchWeapon(WeaponSelectedState weapon) {
+	switch (weapon) {
+		case WeaponSelectedState::Primary: {
+			if (CurrentWeapon) {
+				//Check Type of weapon.
+				if (CurrentWeapon->IsA(ASWeaponGrenadeLauncher::StaticClass())) {
+					if (StoredPrimary) {
+						//TODO: Add Server RPC's to ASWeapon and  ASWeaponGrenadeLauncher.
+						//Everything called in this block needs to be replicated
+						/*
+						CurrentWeapon->SetActorHiddenInGame(true);
+						CurrentWeapon->GetWea->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+						StoredLauncher = CurrentWeapon;
+						CurrentWeapon = StoredPrimary;
+						StoredPrimary = nullptr;
+						CurrentWeapon->SetActorHiddenInGame(false);
+						*/
+					} else {
+						UE_LOG(LogTemp, Warning, TEXT("No Stored Primary Weapon."))
+					}
+				}
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("Primary::CurrentWeapon Is Null."));
+			}
+			break;
+		}
+		case WeaponSelectedState::Secondary: {
+			if (CurrentWeapon) {
+				if (CurrentWeapon->IsA(ASWeapon::StaticClass())) {
+					if (StoredLauncher) {
+						//TODO: Add Server RPC's to ASWeapon and  ASWeaponGrenadeLauncher.
+						//Everything called in this block needs to be replicated
+						/*
+						CurrentWeapon->SetActorHiddenInGame(true);
+						StoredPrimary = CurrentWeapon;
+						CurrentWeapon = StoredLauncher;
+						StoredLauncher = nullptr;
+						CurrentWeapon->SetActorHiddenInGame(false);
+						*/
+					} else {
+						UE_LOG(LogTemp, Warning, TEXT("No Stored Launcher Weapon."))
+					}
+				}
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("Launcher::CurrentWeapon Is Null."));
+			}
+			break;
+		}
+	}
+}
+
 bool ASCharacter::GetIsAiming() {
 	return this->isAiming;
 } 
@@ -250,7 +309,6 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("LookUp",this, &ASCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn",this, &ASCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ASCharacter::ToggleCrouch);
-	//PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ASCharacter::ToggleCrouch<CrouchState::Stand>);
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &ASCharacter::ToggleSprint<RunState::Run>);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &ASCharacter::ToggleSprint<RunState::Walk>);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASCharacter::ToggleJump<JumpState::Jump>);
@@ -259,6 +317,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Aim", IE_Released, this, &ASCharacter::ToggleAim<AimState::Hip>);
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ASCharacter::ToggleFire<FireState::Fire>);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ASCharacter::ToggleFire<FireState::Release>);
+	PlayerInputComponent->BindAction("SwitchPrimary", IE_Pressed, this, &ASCharacter::ToggleSwitchWeapon<WeaponSelectedState::Primary>);
+	PlayerInputComponent->BindAction("SwitchSecondary", IE_Pressed, this, &ASCharacter::ToggleSwitchWeapon<WeaponSelectedState::Secondary>);
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASCharacter::Reload);
 
 }

@@ -6,16 +6,16 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "kismet/GameplayStatics.h"
 #include "SCharacter.h"
-
-ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher()
-{
-	meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshCompGren"));
-	muzzleSocketName = "MuzzleSocket";
-	currentAmmo = 1;
-	maxClipSize = 1;
-	totalAmmo = 3;
-	needReload = false;
-	weaponName = "Launcher";
+#include "Net/UnrealNetwork.h"
+ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher() {
+	this->meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshCompGren"));
+	this->muzzleSocketName = "MuzzleSocket";
+	this->currentAmmo = 1;
+	this->maxClipSize = 1;
+	this->totalAmmo = 3;
+	this->needReload = false;
+	this->weaponName = "Launcher";
+	SetReplicates(true);
 }
 
 void ASWeaponGrenadeLauncher::ReloadWeapon()
@@ -50,57 +50,60 @@ void ASWeaponGrenadeLauncher::SetReloadState(bool reload) {
 }
 
 
-void ASWeaponGrenadeLauncher::ServerFire_Implementation() {
-	this->Fire();
-}
-
 bool ASWeaponGrenadeLauncher::ServerFire_Validate() { 
 	return true;
 }
 
-void ASWeaponGrenadeLauncher::Fire() 
-{
-	if (GetLocalRole() == ROLE_Authority) { 
-		if (this->currentAmmo <= 0) {
-			this->needReload = true;
-			return;
-		}
-		this->currentAmmo--;
-		AActor* myOwner = GetOwner();
-		if (myOwner) {
-			APawn*  pawn = Cast<APawn>(myOwner);
-			if (pawn) {
-				if (projectileClass) {	
-					myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
+
+void ASWeaponGrenadeLauncher::ServerFire_Implementation() {
+	this->Fire();
+}
+
+void ASWeaponGrenadeLauncher::Fire() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerFire();
+		return;
+	}
+	if (this->currentAmmo <= 0) {
+		this->needReload = true;
+		return;
+	}
+	AActor* myOwner = GetOwner();
+	if (myOwner) {
+		APawn*  pawn = Cast<APawn>(myOwner);
+		if (pawn) {
+			if (projectileClass) {	
+				myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
 
 
-					shotDirection = eyeRotation.Vector();
+				shotDirection = eyeRotation.Vector();
 
-					traceEndPos = eyeLocation + (shotDirection * 10000);
+				traceEndPos = eyeLocation + (shotDirection * 10000);
 
-					muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
-					FRotator muzzleRotator = eyeRotation;
-					//Set Spawn Collision Handling Override
-					FActorSpawnParameters actorSpawnParams;
-					actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+				muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+				FRotator muzzleRotator = eyeRotation;
 
-					traceEndPoint = traceEndPos;
-					if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility)) {
-						traceEndPoint = hit.ImpactPoint;
-					}
 
-					actorSpawnParams.Instigator = pawn;
-					// spawn the projectile at the muzzle
-					FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
-					AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
-					gren->Init(pawn->GetController());
-					this->currentAmmo--;
-					this->needReload = true;
-					PlayFireEffects();
+				traceEndPoint = traceEndPos;
+				if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility)) {
+					traceEndPoint = hit.ImpactPoint;
 				}
+
+
+				// spawn the projectile at the muzzle
+				FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
+				FActorSpawnParameters actorSpawnParams;
+				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+				actorSpawnParams.Instigator = pawn;
+				//Use replicated muzzleLocation/finalRot
+				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
+				gren->Init(pawn->GetController());
+				this->needReload = true;
+				this->currentAmmo--;
+				PlayFireEffects();
 			}
 		}
-	}
+	}	
 }
 
 void ASWeaponGrenadeLauncher::PlayFireEffects()
@@ -128,3 +131,10 @@ USkeletalMeshComponent* ASWeaponGrenadeLauncher::GetWeaponMesh() {
 	return this->meshComp;
 }
 
+
+void ASWeaponGrenadeLauncher::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);
+	DOREPLIFETIME(ASWeaponGrenadeLauncher, projectileClass);
+
+}

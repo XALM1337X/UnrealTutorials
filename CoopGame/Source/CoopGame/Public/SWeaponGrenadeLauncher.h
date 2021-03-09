@@ -8,10 +8,6 @@
 
 class AGrenadeProjectile;
 class USkeletalMeshComponent;
-
-/**
- * 
- */
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
@@ -37,11 +33,11 @@ public:
 	virtual USkeletalMeshComponent* GetWeaponMesh() override;
 	virtual void ServerFire_Implementation() override;
 	virtual bool ServerFire_Validate() override;
-	virtual void Fire() override;
+	virtual void Fire();
 
 public:
 
-	UPROPERTY(EditDefaultsOnly, Category="Projectile")
+	UPROPERTY(Replicated, EditDefaultsOnly, Category="Projectile")
 	TSubclassOf<AGrenadeProjectile> projectileClass;
 
 
