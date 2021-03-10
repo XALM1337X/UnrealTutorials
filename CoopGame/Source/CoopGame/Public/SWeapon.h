@@ -31,6 +31,8 @@ class COOPGAME_API ASWeapon : public AActor
 	
 //Public memeber variables
 public:
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	FName muzzleSocketName;
 
 //Public member functions
 public:	
@@ -82,9 +84,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	TSubclassOf<UDamageType> damageType;
 
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Weapon")
-	FName muzzleSocketName;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	UParticleSystem* muzzleEffect;
 
@@ -120,7 +119,7 @@ protected:
 	FVector traceEndPoint;
 	//////////////////////////////////////////////////
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(Replicated, EditDefaultsOnly)
 	FVector muzzleLocation;
 
 	UPROPERTY(EditDefaultsOnly)

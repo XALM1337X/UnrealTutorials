@@ -82,6 +82,24 @@ public:
 
 //Protected Member Variables
 protected:
+	//UProperties 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCameraComponent* CameraComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USHealthComp* HealthComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<ASWeapon> starterWeaponClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Player")
+	TSubclassOf<ASWeapon> launcherWeaponClass;
+
+	FName WeaponAttachSocketName;
+
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	ASWeapon* CurrentWeapon;
 
@@ -89,7 +107,7 @@ protected:
 
 	ASWeapon* StoredLauncher;
 
-	UPROPERTY(BlueprintReadOnly, Category="Player")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="Player")
 	bool isAiming;
 
 	UPROPERTY(EditDefaultsOnly, Category="Player")
@@ -119,24 +137,17 @@ protected:
 
 	void Fire();
 
-	//UProperties 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	UCameraComponent* CameraComponent;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USpringArmComponent* SpringArmComp;
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchToPrimary();
+	void SwitchToPrimary();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USHealthComp* HealthComp;
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchToSecondary();
+	void SwitchToSecondary();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Player")
-	TSubclassOf<ASWeapon> starterWeaponClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Player")
-	TSubclassOf<ASWeapon> launcherWeaponClass;
-
-	FName WeaponAttachSocketName;
-
+	UFUNCTION(Server, Reliable)
+	void ServerSetIsAiming(bool aim);
+	void SetIsAiming(bool aim);
 
 	//These are Toggle Templates bound to action inputs.
 	//Sprint

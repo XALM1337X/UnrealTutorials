@@ -4,6 +4,7 @@
 #include "ExplosionActor.h"
 #include "Components/SphereComponent.h"
 #include "kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 AExplosionActor::AExplosionActor()
 {
@@ -19,18 +20,10 @@ AExplosionActor::AExplosionActor()
 	}
 }
 
-
-void AExplosionActor::Init(AController* controller) {
-	instigator = controller;
-}
-
 // Called when the game starts or when spawned
 void AExplosionActor::BeginPlay()
 {
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		Super::BeginPlay();
-	}	
+	Super::BeginPlay();		
 }
 
 // Called every frame
@@ -49,7 +42,7 @@ void AExplosionActor::Explode_Implementation()
 	{
 		TArray<AActor*> ignores;
 		//UE_LOG(LogTemp, Warning, TEXT("Overlapped component %s on actor %s"), *OverLap->GetName(),*OverLap->GetOwner()->GetName());
-		UGameplayStatics::ApplyRadialDamage(GetWorld(), 100, GetActorLocation(), SphereComp->GetScaledSphereRadius(), damageType, ignores, this, instigator, false, ECC_WorldDynamic);		
+		UGameplayStatics::ApplyRadialDamage(GetWorld(), 100, GetActorLocation(), SphereComp->GetScaledSphereRadius(), damageType, ignores, this, GetInstigatorController(), false, ECC_WorldDynamic);		
 	}
 }
 
@@ -57,4 +50,7 @@ bool AExplosionActor::Explode_Validate()
 {
 	return true;
 }
-
+/*void AExplosionActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);	
+}*/

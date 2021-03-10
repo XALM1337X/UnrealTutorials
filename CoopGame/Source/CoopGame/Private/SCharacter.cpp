@@ -52,14 +52,14 @@ void ASCharacter::BeginPlay()
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(starterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, params);
-		/*
+		
 		StoredLauncher = GetWorld()->SpawnActor<ASWeaponGrenadeLauncher>(launcherWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, params);
 		if (StoredLauncher) {
 			StoredLauncher->SetOwner(this);
-			StoredLauncher->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
-			StoredLauncher->SetActorHiddenInGame(false);
+			//StoredLauncher->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+			StoredLauncher->SetActorHiddenInGame(true);
 		}
-		*/
+		
 		if (CurrentWeapon) {
 			CurrentWeapon->SetOwner(this);
 			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
@@ -72,11 +72,11 @@ void ASCharacter::BeginPlay()
 void ASCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (GetLocalRole() != ROLE_Authority) {
-		float targetPOV = isAiming ? zoomPOV : hipPOV;
-		float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
-		CameraComponent->SetFieldOfView(newPOV);
-	}
+
+	float targetPOV = isAiming ? zoomPOV : hipPOV;
+	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
+	CameraComponent->SetFieldOfView(newPOV);
+	
 	
 	if (GetLocalRole() == ROLE_Authority) {
 		if (DebugMode > 0) {
@@ -133,6 +133,112 @@ void ASCharacter::Fire() {
 	//UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_0"));
 	CurrentWeapon->Fire();
 
+}
+
+void ASCharacter::ServerSwitchToPrimary_Implementation() {
+	this->SwitchToPrimary();
+}
+
+void ASCharacter::SwitchToPrimary() { 
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerSwitchToPrimary();
+		return;
+	}
+	if (CurrentWeapon) {
+		//Check Type of weapon.
+		if (CurrentWeapon->IsA(ASWeaponGrenadeLauncher::StaticClass())) {
+			if (StoredPrimary) {
+				//TODO: Add Server RPC's to ASWeapon and  ASWeaponGrenadeLauncher.
+				//Everything called in this block needs to be replicated
+				
+				CurrentWeapon->SetActorHiddenInGame(true);
+				CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				StoredLauncher = CurrentWeapon;
+				CurrentWeapon = StoredPrimary;
+				StoredPrimary = nullptr;
+				CurrentWeapon->SetActorHiddenInGame(false);
+				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("No Stored Primary Weapon."));
+			}
+		}
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("Primary::CurrentWeapon Is Null."));
+	}
+}
+
+void ASCharacter::ServerSwitchToSecondary_Implementation() {
+	this->SwitchToSecondary();
+}
+
+void ASCharacter::SwitchToSecondary() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerSwitchToSecondary();
+		return;
+	}
+	if (CurrentWeapon) {
+		if (CurrentWeapon->IsA(ASWeapon::StaticClass())) {
+			if (StoredLauncher) {
+				//TODO: Add Server RPC's to ASWeapon and  ASWeaponGrenadeLauncher.
+				//Everything called in this block needs to be replicated
+				
+				CurrentWeapon->SetActorHiddenInGame(true);
+				CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				StoredPrimary = CurrentWeapon;
+				CurrentWeapon = StoredLauncher;
+				StoredLauncher = nullptr;
+				CurrentWeapon->SetActorHiddenInGame(false);
+				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("No Stored Launcher Weapon."))
+			}
+		}
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("Launcher::CurrentWeapon Is Null."));
+	}
+}
+
+void ASCharacter::ToggleSwitchWeapon(WeaponSelectedState weapon) {
+	switch (weapon) {
+		case WeaponSelectedState::Primary: {
+			this->SwitchToPrimary();
+			break;
+		}
+		case WeaponSelectedState::Secondary: {
+			this->SwitchToSecondary();
+			break;
+		}
+	}
+}
+
+bool ASCharacter::GetIsAiming() {
+	return this->isAiming;
+} 
+
+bool ASCharacter::GetFiringState() {
+	return this->isFiring;
+}
+
+void ASCharacter::SetFiringState(bool value) {
+	this->isFiring = value;
+}
+
+void ASCharacter::ServerSetIsAiming_Implementation(bool value) {
+	this->SetIsAiming(value);
+}
+
+void ASCharacter::SetIsAiming(bool value) {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerSetIsAiming(value);
+		return;
+	}
+	this->isAiming = value;
+}
+
+ASWeapon* ASCharacter::GetWeapon() {
+	return this->CurrentWeapon;
 }
 
 void ASCharacter::ToggleCrouch() {
@@ -202,12 +308,12 @@ void ASCharacter::ToggleJump(JumpState jumping)
 void ASCharacter::ToggleAim(AimState aim) {		
 	switch(aim)	{
 		case AimState::Zoom: {
-			isAiming = true;
+			this->SetIsAiming(true);
 			break;
 		}			
 		
 		case AimState::Hip:	{
-			isAiming = false;
+			this->SetIsAiming(false);
 			break;
 		}
 	}	
@@ -232,73 +338,6 @@ void ASCharacter::ToggleFire(FireState fire) {
 			break;
 		}
 	}	
-}
-
-void ASCharacter::ToggleSwitchWeapon(WeaponSelectedState weapon) {
-	switch (weapon) {
-		case WeaponSelectedState::Primary: {
-			if (CurrentWeapon) {
-				//Check Type of weapon.
-				if (CurrentWeapon->IsA(ASWeaponGrenadeLauncher::StaticClass())) {
-					if (StoredPrimary) {
-						//TODO: Add Server RPC's to ASWeapon and  ASWeaponGrenadeLauncher.
-						//Everything called in this block needs to be replicated
-						/*
-						CurrentWeapon->SetActorHiddenInGame(true);
-						CurrentWeapon->GetWea->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-						StoredLauncher = CurrentWeapon;
-						CurrentWeapon = StoredPrimary;
-						StoredPrimary = nullptr;
-						CurrentWeapon->SetActorHiddenInGame(false);
-						*/
-					} else {
-						UE_LOG(LogTemp, Warning, TEXT("No Stored Primary Weapon."))
-					}
-				}
-			} else {
-				UE_LOG(LogTemp, Warning, TEXT("Primary::CurrentWeapon Is Null."));
-			}
-			break;
-		}
-		case WeaponSelectedState::Secondary: {
-			if (CurrentWeapon) {
-				if (CurrentWeapon->IsA(ASWeapon::StaticClass())) {
-					if (StoredLauncher) {
-						//TODO: Add Server RPC's to ASWeapon and  ASWeaponGrenadeLauncher.
-						//Everything called in this block needs to be replicated
-						/*
-						CurrentWeapon->SetActorHiddenInGame(true);
-						StoredPrimary = CurrentWeapon;
-						CurrentWeapon = StoredLauncher;
-						StoredLauncher = nullptr;
-						CurrentWeapon->SetActorHiddenInGame(false);
-						*/
-					} else {
-						UE_LOG(LogTemp, Warning, TEXT("No Stored Launcher Weapon."))
-					}
-				}
-			} else {
-				UE_LOG(LogTemp, Warning, TEXT("Launcher::CurrentWeapon Is Null."));
-			}
-			break;
-		}
-	}
-}
-
-bool ASCharacter::GetIsAiming() {
-	return this->isAiming;
-} 
-
-bool ASCharacter::GetFiringState() {
-	return this->isFiring;
-}
-
-void ASCharacter::SetFiringState(bool value) {
-	this->isFiring = value;
-}
-
-ASWeapon* ASCharacter::GetWeapon() {
-	return this->CurrentWeapon;
 }
 
 // Called to bind functionality to input
@@ -334,5 +373,6 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLife
 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
-	//DOREPLIFETIME(ASCharacter, th_time_between_shots);
+	DOREPLIFETIME(ASCharacter, CameraComponent);
+	DOREPLIFETIME(ASCharacter, isAiming);
 }

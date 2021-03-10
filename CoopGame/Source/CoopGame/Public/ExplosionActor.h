@@ -25,7 +25,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	TSubclassOf<UDamageType> damageType;
 
-	AController* instigator;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -48,7 +47,5 @@ public:
 	
 	UFUNCTION(Server,Reliable,WithValidation)
 	virtual void Explode();
-
-	void Init(AController* controller);
 
 };

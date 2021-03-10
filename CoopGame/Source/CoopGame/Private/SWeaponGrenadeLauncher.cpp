@@ -8,8 +8,11 @@
 #include "SCharacter.h"
 #include "Net/UnrealNetwork.h"
 ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher() {
+	//PrimaryActorTick.bCanEverTick = true;
 	this->meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshCompGren"));
-	this->muzzleSocketName = "MuzzleSocket";
+	//NOTE: HOLY FUCK DONT FORGET TO ENABLE THIS OR ELSE CLIENTS GETSOCKETLOCATION WILL BE FUCKED UP, ALSO HAD TO ENABLE THIS ON CHARACTER BLUEPRINT.
+	this->meshComp->VisibilityBasedAnimTickOption  = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	this->muzzleSocketName = "MuzzleSocketGren";
 	this->currentAmmo = 1;
 	this->maxClipSize = 1;
 	this->totalAmmo = 3;
@@ -17,6 +20,20 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher() {
 	this->weaponName = "Launcher";
 	SetReplicates(true);
 }
+
+
+void ASWeaponGrenadeLauncher::BeginPlay() {
+	Super::BeginPlay();
+	//this->timeBetweenShots = 60/rateOfFire;
+	AActor* myOwner = GetOwner();
+	/*if (myOwner) {
+		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
+		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+	}*/
+}
+/*void ASWeaponGrenadeLauncher::Tick(float DeltaTime) {
+
+} */
 
 void ASWeaponGrenadeLauncher::ReloadWeapon()
 {
@@ -79,8 +96,7 @@ void ASWeaponGrenadeLauncher::Fire() {
 				shotDirection = eyeRotation.Vector();
 
 				traceEndPos = eyeLocation + (shotDirection * 10000);
-
-				muzzleLocation = meshComp->GetSocketLocation(muzzleSocketName);
+				muzzleLocation = this->meshComp->GetSocketLocation(muzzleSocketName);
 				FRotator muzzleRotator = eyeRotation;
 
 
@@ -93,11 +109,10 @@ void ASWeaponGrenadeLauncher::Fire() {
 				// spawn the projectile at the muzzle
 				FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
 				FActorSpawnParameters actorSpawnParams;
-				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				actorSpawnParams.Instigator = pawn;
 				//Use replicated muzzleLocation/finalRot
-				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, muzzleLocation, finalRot, actorSpawnParams);
-				gren->Init(pawn->GetController());
+				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, this->muzzleLocation, finalRot, actorSpawnParams);
 				this->needReload = true;
 				this->currentAmmo--;
 				PlayFireEffects();
@@ -136,5 +151,6 @@ void ASWeaponGrenadeLauncher::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);
 	DOREPLIFETIME(ASWeaponGrenadeLauncher, projectileClass);
+	DOREPLIFETIME(ASWeaponGrenadeLauncher, muzzleLocation);
 
 }

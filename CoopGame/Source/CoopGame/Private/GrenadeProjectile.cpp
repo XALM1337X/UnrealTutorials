@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AGrenadeProjectile::AGrenadeProjectile() {
@@ -44,11 +45,6 @@ void AGrenadeProjectile::BeginPlay() {
 	Super::BeginPlay();	
 }
 
-
-void AGrenadeProjectile::Init(AController* instigator) {
-	SetInstigator(instigator);
-}
-
 // Called every frame
 void AGrenadeProjectile::Tick(float DeltaTime) {
 	if (GetLocalRole() == ROLE_Authority)
@@ -56,10 +52,14 @@ void AGrenadeProjectile::Tick(float DeltaTime) {
 		Super::Tick(DeltaTime);
 		if (TickCount % 300 == 0) 
 		{
+			FActorSpawnParameters actorSpawnParams;
+			actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+			//TODO: Figure out how to get 
+			actorSpawnParams.Instigator = GetInstigator();
 			//Call Explosion
 			FVector loc = GetActorLocation();
 			FRotator rot = GetActorRotation();
-			AActor* explosion = GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot);
+			AActor* explosion = GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot, actorSpawnParams);
 
 			//TODO: Pass player controller into explosion via an initilization function that needs to be put in Explosion Actor.
 			Destroy();
@@ -72,6 +72,10 @@ void AGrenadeProjectile::Tick(float DeltaTime) {
 
 }
 
-void AGrenadeProjectile::SetInstigator(AController* inst) {
-	 gren_instigator = inst;
+/*
+void AGrenadeProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);
+
 }
+*/

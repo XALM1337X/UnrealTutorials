@@ -17,7 +17,7 @@ FAutoConsoleVariableRef DebugWeapon(TEXT("COOP.DebugWeapons"), DebugMode, TEXT("
 // Sets default values
 ASWeapon::ASWeapon() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	//PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = true;
 
 	meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("meshComp"));
 	RootComponent = meshComp;
@@ -152,7 +152,6 @@ void ASWeapon::Fire() {
 	
 	if (GetCurrentAmmoCount() > 0 && !GetReloadState()) {
 		this->currentAmmo--;
-		
 		AActor* myOwner = GetOwner();
 		if (myOwner) {		
 
@@ -246,7 +245,6 @@ void ASWeapon::PlayImpactEffects() {
 		if (selectedEffect)	{
 			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), selectedEffect, TraceStruct.TraceTo, ShotDirection.Rotation(), scale);
 		}
-
 	}
 }
 

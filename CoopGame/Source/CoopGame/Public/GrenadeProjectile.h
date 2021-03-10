@@ -24,9 +24,7 @@ public:
 	AGrenadeProjectile();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	void Init(AController* controller);
-
+	
 //Public member variables
 public:	
 
@@ -43,13 +41,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void SetInstigator(AController* controller);
-
 
 //Protected member variables.
 protected:
-
-	AController* gren_instigator;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ExplosionRadius")
 	UStaticMeshComponent* ExplosionMesh;
