@@ -46,7 +46,9 @@ void ASWeapon::BeginPlay() {
 	AActor* myOwner = GetOwner();
 	if (myOwner) {
 		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
-		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+		if (my_char) {
+			this->ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+		}
 	}
 }
 
@@ -191,7 +193,7 @@ void ASWeapon::Fire() {
 				ASCharacter* my_char = Cast<ASCharacter>(myOwner);
 				if (my_char) {
 
-					ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+					this->ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
 				}
 			}	
 		}
@@ -205,6 +207,7 @@ void ASWeapon::Fire() {
 }
 
 void ASWeapon::ClientOnAmmoChanged_Implementation(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name) {
+	UE_LOG(LogTemp, Warning, TEXT("ASWeapon::OnAmmOChange - %s"), *weapon_name);
 	my_char->onAmmoChanged.Broadcast(ammoCount, clipCount, clipSize, weapon_name);
 }
 

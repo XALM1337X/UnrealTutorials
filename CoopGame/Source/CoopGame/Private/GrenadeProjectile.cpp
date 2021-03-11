@@ -43,34 +43,44 @@ AGrenadeProjectile::AGrenadeProjectile() {
 // Called when the game starts or when spawned
 void AGrenadeProjectile::BeginPlay() {
 	Super::BeginPlay();	
+	UE_LOG(LogTemp, Warning, TEXT("AGrenadeProjectile::BeginPlay"));
+	GetWorldTimerManager().SetTimer(th_time_between_shots, this, &AGrenadeProjectile::SpawnExplosion, 3 , true, -1);
+	
 }
 
 // Called every frame
 void AGrenadeProjectile::Tick(float DeltaTime) {
-	if (GetLocalRole() == ROLE_Authority)
-	{
-		Super::Tick(DeltaTime);
-		if (TickCount % 300 == 0) 
-		{
-			FActorSpawnParameters actorSpawnParams;
-			actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-			//TODO: Figure out how to get 
-			actorSpawnParams.Instigator = GetInstigator();
-			//Call Explosion
-			FVector loc = GetActorLocation();
-			FRotator rot = GetActorRotation();
-			AActor* explosion = GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot, actorSpawnParams);
-
-			//TODO: Pass player controller into explosion via an initilization function that needs to be put in Explosion Actor.
-			Destroy();
-		} 
-		else 
-		{
-			TickCount++;
-		}
-	}
-
+	Super::Tick(DeltaTime);
+	
 }
+
+void AGrenadeProjectile::ServerSpawnExplosion_Implementation() {
+	this->SpawnExplosion();
+}
+
+void AGrenadeProjectile::SpawnExplosion() {
+
+	if(GetLocalRole() != ROLE_Authority) {
+		this->ServerSpawnExplosion();
+		return;
+	}
+	FActorSpawnParameters actorSpawnParams;
+	actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+	//TODO: Figure out how to get 
+	actorSpawnParams.Instigator = GetInstigator();
+	//Call Explosion
+	FVector loc = GetActorLocation();
+	FRotator rot = GetActorRotation();
+	AActor* explosion = GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot, actorSpawnParams);
+	if (explosion){
+		UE_LOG(LogTemp, Warning, TEXT("AGrenadeProjectile::explosion_success"));
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("AGrenadeProjectile::explosion_fail"));
+	}
+	Destroy();
+	
+}
+
 
 /*
 void AGrenadeProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {

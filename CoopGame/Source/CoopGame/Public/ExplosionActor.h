@@ -20,6 +20,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UParticleSystem* Explosion;
 
+
 	FVector ExplosionAnimationScale;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
@@ -28,6 +29,9 @@ protected:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayExplosionEffect();
 
 
 public:	
@@ -45,7 +49,7 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 	
-	UFUNCTION(Server,Reliable,WithValidation)
+	UFUNCTION(NetMulticast,Reliable)
 	virtual void Explode();
 
 };

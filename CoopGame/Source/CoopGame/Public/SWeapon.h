@@ -34,6 +34,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	FName muzzleSocketName;
 
+	UPROPERTY(BlueprintReadOnly)
+	FString weaponName;
+
 //Public member functions
 public:	
 	// Sets default values for this actor's properties
@@ -72,7 +75,7 @@ public:
 	virtual int GetRemainingClips();
 
 	UFUNCTION(Client, Reliable)
-	void ClientOnAmmoChanged(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name);
+	virtual void ClientOnAmmoChanged(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name);
 
 	
 //Protected member variables
@@ -96,9 +99,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	UParticleSystem* tracerEffect;
 
-	UPROPERTY(BlueprintReadOnly)
-	FString weaponName;
-
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	TSubclassOf<UCameraShake> fireCamShake;
 	
@@ -119,7 +119,7 @@ protected:
 	FVector traceEndPoint;
 	//////////////////////////////////////////////////
 
-	UPROPERTY(Replicated, EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly)
 	FVector muzzleLocation;
 
 	UPROPERTY(EditDefaultsOnly)

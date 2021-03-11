@@ -11,6 +11,7 @@ class USkeletalMeshComponent;
 class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
+class ASCharacter;
 
 UCLASS()
 class COOPGAME_API ASWeaponGrenadeLauncher : public ASWeapon
@@ -24,8 +25,12 @@ public:
 	virtual void SetCurrentAmmoCount(int) override;
 	virtual bool GetReloadState() override;
 	virtual void SetReloadState(bool) override;
+
+	virtual void ServerReloadWeapon_Implementation() override;
 	virtual void ReloadWeapon() override;
-	virtual void PlayFireEffects() override;
+
+	UFUNCTION(NetMulticast, reliable)
+	virtual void PlayFireEffectsGren();
 
 	
 	virtual int GetMaxClipSize() override;
@@ -33,6 +38,8 @@ public:
 	virtual USkeletalMeshComponent* GetWeaponMesh() override;
 	virtual void ServerFire_Implementation() override;
 	virtual bool ServerFire_Validate() override;
+	
+	virtual void ClientOnAmmoChanged_Implementation(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name) override;
 	virtual void Fire();
 
 public:

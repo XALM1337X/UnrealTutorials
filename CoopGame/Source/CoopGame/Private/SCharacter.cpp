@@ -51,6 +51,7 @@ void ASCharacter::BeginPlay()
 	if (GetLocalRole() == ROLE_Authority) {
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
 		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(starterWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, params);
 		
 		StoredLauncher = GetWorld()->SpawnActor<ASWeaponGrenadeLauncher>(launcherWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, params);
@@ -58,6 +59,7 @@ void ASCharacter::BeginPlay()
 			StoredLauncher->SetOwner(this);
 			//StoredLauncher->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
 			StoredLauncher->SetActorHiddenInGame(true);
+			StoredLauncher->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 		
 		if (CurrentWeapon) {
@@ -153,11 +155,14 @@ void ASCharacter::SwitchToPrimary() {
 				
 				CurrentWeapon->SetActorHiddenInGame(true);
 				CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				StoredLauncher = CurrentWeapon;
 				CurrentWeapon = StoredPrimary;
 				StoredPrimary = nullptr;
 				CurrentWeapon->SetActorHiddenInGame(false);
 				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+				CurrentWeapon->ClientOnAmmoChanged(this, CurrentWeapon->GetCurrentAmmoCount(), CurrentWeapon->GetRemainingClips(), CurrentWeapon->GetMaxClipSize(), CurrentWeapon->weaponName);
 				
 			} else {
 				UE_LOG(LogTemp, Warning, TEXT("No Stored Primary Weapon."));
@@ -185,11 +190,13 @@ void ASCharacter::SwitchToSecondary() {
 				
 				CurrentWeapon->SetActorHiddenInGame(true);
 				CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				StoredPrimary = CurrentWeapon;
 				CurrentWeapon = StoredLauncher;
 				StoredLauncher = nullptr;
 				CurrentWeapon->SetActorHiddenInGame(false);
 				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				CurrentWeapon->ClientOnAmmoChanged(this, CurrentWeapon->GetCurrentAmmoCount(), CurrentWeapon->GetRemainingClips(), CurrentWeapon->GetMaxClipSize(), CurrentWeapon->weaponName);
 				
 			} else {
 				UE_LOG(LogTemp, Warning, TEXT("No Stored Launcher Weapon."))

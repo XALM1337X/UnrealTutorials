@@ -41,6 +41,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(Server, Reliable)
+	void ServerSpawnExplosion();
+
+	void SpawnExplosion();
 
 //Protected member variables.
 protected:
@@ -58,6 +62,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<AActor> ActorToSpawn;
+
+	FTimerHandle th_time_between_shots;
 
 	int TickCount;
 };

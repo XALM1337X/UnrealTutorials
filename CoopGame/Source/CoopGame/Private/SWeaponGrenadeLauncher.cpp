@@ -24,25 +24,32 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher() {
 
 void ASWeaponGrenadeLauncher::BeginPlay() {
 	Super::BeginPlay();
-	//this->timeBetweenShots = 60/rateOfFire;
-	AActor* myOwner = GetOwner();
-	/*if (myOwner) {
-		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
-		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
-	}*/
 }
 /*void ASWeaponGrenadeLauncher::Tick(float DeltaTime) {
 
 } */
 
-void ASWeaponGrenadeLauncher::ReloadWeapon()
-{
+void ASWeaponGrenadeLauncher::ServerReloadWeapon_Implementation() {
+	this->ReloadWeapon();
+}
+
+void ASWeaponGrenadeLauncher::ReloadWeapon() {
+	
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerReloadWeapon();
+		return;
+	}
 	if (this->clipsLeft != 0)
 	{
 		this->currentAmmo = this->maxClipSize;
 		this->needReload = false;
 		this->clipsLeft--;
 	}	
+	AActor* myOwner = GetOwner();
+	if (myOwner) {
+		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
+		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+	}
 }
 int ASWeaponGrenadeLauncher::GetCurrentAmmoCount() 
 {
@@ -89,7 +96,9 @@ void ASWeaponGrenadeLauncher::Fire() {
 	if (myOwner) {
 		APawn*  pawn = Cast<APawn>(myOwner);
 		if (pawn) {
-			if (projectileClass) {	
+			if (projectileClass) {
+				this->needReload = true;
+				this->currentAmmo--;	
 				myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
 
 
@@ -101,7 +110,7 @@ void ASWeaponGrenadeLauncher::Fire() {
 
 
 				traceEndPoint = traceEndPos;
-				if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPos, ECC_Visibility)) {
+				if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPoint, ECC_Visibility)) {
 					traceEndPoint = hit.ImpactPoint;
 				}
 
@@ -109,34 +118,41 @@ void ASWeaponGrenadeLauncher::Fire() {
 				// spawn the projectile at the muzzle
 				FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
 				FActorSpawnParameters actorSpawnParams;
-				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 				actorSpawnParams.Instigator = pawn;
 				//Use replicated muzzleLocation/finalRot
-				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, this->muzzleLocation, finalRot, actorSpawnParams);
-				this->needReload = true;
-				this->currentAmmo--;
-				PlayFireEffects();
+				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, this->muzzleLocation+5, finalRot, actorSpawnParams);
+			
+				if (GetLocalRole() == ROLE_Authority) {
+					ASCharacter* my_char = Cast<ASCharacter>(pawn);
+					if (my_char) {
+						this->ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+					}
+				}			
+				PlayFireEffectsGren();
 			}
 		}
 	}	
 }
 
-void ASWeaponGrenadeLauncher::PlayFireEffects()
-{
+void ASWeaponGrenadeLauncher::ClientOnAmmoChanged_Implementation(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name) {
+	my_char->onAmmoChanged.Broadcast(ammoCount, clipCount, clipSize, weapon_name);
+}
+
+void ASWeaponGrenadeLauncher::PlayFireEffectsGren_Implementation() {
 	if (muzzleEffect) 
 	{
 		UGameplayStatics::SpawnEmitterAttached(muzzleEffect, meshComp, muzzleSocketName);
 	}	
 	
 	APawn* owner = Cast<APawn>(GetOwner());
-	if (owner)
-	{
+	if (owner){
 		APlayerController* PC = Cast<APlayerController>(owner->GetController());
-		if (PC)
-		{
-			if (fireCamShake)
-			{
+		if (PC)	{
+			if (fireCamShake) {
 				PC->ClientPlayCameraShake(fireCamShake);
+			} else {
+				UE_LOG(LogTemp, Warning, TEXT("FIRECAM_SHAKE_ERR"));
 			}
 		}
 	}
@@ -151,6 +167,6 @@ void ASWeaponGrenadeLauncher::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);
 	DOREPLIFETIME(ASWeaponGrenadeLauncher, projectileClass);
-	DOREPLIFETIME(ASWeaponGrenadeLauncher, muzzleLocation);
+	
 
 }
