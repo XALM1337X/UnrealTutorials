@@ -10,11 +10,11 @@
 //#include "BarrelExplosionActor.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "GrenadeProjectile.h"
 
 
 // Sets default values for this component's properties
-USHealthComp::USHealthComp()
-{
+USHealthComp::USHealthComp() {
 	//PrimaryComponentTick.bCanEverTick = true;
 	this->defaultHealth = 100;
 	this->health = 0;
@@ -34,11 +34,8 @@ void USHealthComp::BeginPlay()
 	this->health = this->defaultHealth;	
 }
 
-void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser ) 
-{
-
-	if (Damage <= 0.0f)
-	{		
+void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser ) {
+	if (Damage <= 0.0f)	{		
 		return;
 	}
 	//UE_LOG(LogTemp, Log, TEXT("Health Before: %s"), *FString::SanitizeFloat(health));
@@ -79,60 +76,68 @@ void USHealthComp::ClientOnHealthChange_Implementation(USHealthComp* HealthComp,
 //TODO: Fix Damage/Health here.
 //As it stands its putting off too much damage at a distance
 void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser ) {
-	/*
-	if (this->Role == ROLE_Authority) {
-		if (Damage <= 0.0f)
-		{		
-			return;
-		}
-		this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
-		
-		if (this->health <= 0.0f) {
-			ASCharacter* character = Cast<ASCharacter>(DamagedActor);
 
-			if (character) {
 
-				UPawnMovementComponent* MC = character->GetMovementComponent();
-				if (MC) {
-					MC->StopMovementImmediately();
-				} 
-				APlayerController* cont = Cast<APlayerController>(character->GetController());
-				if (cont) {
-					character->DisableInput(cont);
-				}
-				USkeletalMeshComponent* mesh = character->GetMesh();
-				if (mesh) {
-					mesh->SetSimulatePhysics(true);
-					if (DamageCauser->IsA(ABarrelExplosionActor::StaticClass())) {
-						ABarrelExplosionActor* barrel_exp_act = Cast<ABarrelExplosionActor>(DamageCauser);
-						if (barrel_exp_act) {
-							mesh->AddRadialForce(Origin, barrel_exp_act->SphereComp->GetScaledSphereRadius(),  barrel_exp_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
-						}
-					} else if (DamageCauser->IsA(AExplosionActor::StaticClass())) {
-						AExplosionActor* gren_exp_act = Cast<AExplosionActor>(DamageCauser);
-						if (gren_exp_act) {
-							mesh->AddRadialForce(Origin, gren_exp_act->SphereComp->GetScaledSphereRadius(), gren_exp_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
-						}
+	if (GetOwnerRole() == ROLE_Authority) {
+		UE_LOG(LogTemp, Warning, TEXT("USHealthComp::HandleTakeRadialDamage-server"));	
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("USHealthComp::HandleTakeRadialDamage-client"));	
+	}
+
+	if (Damage <= 0.0f)
+	{		
+		return;
+	}
+	this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
+	
+	if (this->health <= 0.0f) {
+		ASCharacter* character = Cast<ASCharacter>(DamagedActor);
+
+		if (character) {
+
+			UPawnMovementComponent* MC = character->GetMovementComponent();
+			if (MC) {
+				MC->StopMovementImmediately();
+			} 
+			APlayerController* cont = Cast<APlayerController>(character->GetController());
+			if (cont) {
+				character->DisableInput(cont);
+			}
+			USkeletalMeshComponent* mesh = character->GetMesh();
+			if (mesh) {
+				mesh->SetSimulatePhysics(true);
+				/*if (DamageCauser->IsA(ABarrelExplosionActor::StaticClass())) {
+					ABarrelExplosionActor* barrel_exp_act = Cast<ABarrelExplosionActor>(DamageCauser);
+					if (barrel_exp_act) {
+						mesh->AddRadialForce(Origin, barrel_exp_act->SphereComp->GetScaledSphereRadius(),  barrel_exp_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
+					}
+				} */
+		/*else*/ if (DamageCauser->IsA(AGrenadeProjectile::StaticClass())) {
+					AGrenadeProjectile* gren_act = Cast<AGrenadeProjectile>(DamageCauser);
+					if (gren_act) {
+						mesh->SetSimulatePhysics(true);
+						mesh->AddRadialForce(Origin, gren_act->ExplosionSphere->GetScaledSphereRadius(), gren_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
 					}
 				}
-				USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
-				if (weapon_mesh) {
-					weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-					weapon_mesh->SetSimulatePhysics(true);
-			
-				}
-				FTimerHandle Handler;
-				GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
 			}
-			
+			USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
+			if (weapon_mesh) {
+				weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				weapon_mesh->SetSimulatePhysics(true);
+		
+			}
+			FTimerHandle Handler;
+			GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
 		}
-
+		
 	}
+
+	
 	FName defaultBone = "defaultBone";
 	onHealthChanged.Broadcast(this, this->health, Damage, InstigatedBy,  DamageCauser, Origin, defaultBone);
 
 
-	*/
+	
 }
 //
 

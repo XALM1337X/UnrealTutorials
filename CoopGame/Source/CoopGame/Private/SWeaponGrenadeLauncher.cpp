@@ -123,7 +123,7 @@ void ASWeaponGrenadeLauncher::Fire() {
 				actorSpawnParams.Instigator = pawn;
 				//Use replicated muzzleLocation/finalRot
 				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, this->muzzleLocation, finalRot, actorSpawnParams);
-				gren->GetWorldTimerManager().SetTimer(gren->ExplodeTimer, gren, &AGrenadeProjectile::Explode, 3.0f , false);
+				//gren->TriggerTimer();
 
 
 				if (GetLocalRole() == ROLE_Authority) {

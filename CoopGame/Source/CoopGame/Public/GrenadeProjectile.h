@@ -10,7 +10,21 @@ class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystem;
 class UStaticMeshComponent;
+USTRUCT()
+struct FGrenEffectsReplicator {
+	GENERATED_BODY()
 
+	public:
+		UPROPERTY()
+		FVector_NetQuantize net_explosion_scale;
+
+		UPROPERTY()
+		FVector_NetQuantize net_actor_loc;
+		
+		UPROPERTY()
+		FRotator net_actor_rot;
+
+};
 
 UCLASS()
 class COOPGAME_API AGrenadeProjectile : public AActor
@@ -33,20 +47,34 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerExplode();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void TriggerTimer();
+
 	UFUNCTION()
-	void Explode();
+	void OnRep_FGrenEffectsReplicate();
 	
 //Public member variables
 public:	
 
-	UPROPERTY(Replicated, VisibleDefaultsOnly)
+	UPROPERTY(VisibleDefaultsOnly)
 	FTimerHandle ExplodeTimer;
+
+	/* Collision Sphere for Explosion*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
+	USphereComponent* ExplosionSphere;
+
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	float ExplosionForce;
 
 
 //Protected functions
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 //Protected member variables.
 protected:
@@ -68,17 +96,14 @@ protected:
 
 
 		
-	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Effects")
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UParticleSystem* Explosion;
 	
-	/* Collision Sphere for Explosion*/
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Components")
-	USphereComponent* ExplosionSphere;
 
 	//TODO: This needs to be in replicated struct FVector_NetQuantize
 	FVector ExplosionAnimationScale;
 
-	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Effects")
-	float ExplosionForce;
+	UPROPERTY(ReplicatedUsing=OnRep_FGrenEffectsReplicate)
+	FGrenEffectsReplicator grenEffectsRep;
 
 };
