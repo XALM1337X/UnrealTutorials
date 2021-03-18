@@ -7,6 +7,7 @@
 #include "kismet/GameplayStatics.h"
 #include "SCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "GrenadeProjectile.h"
 ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher() {
 	//PrimaryActorTick.bCanEverTick = true;
 	this->meshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshCompGren"));
@@ -121,14 +122,22 @@ void ASWeaponGrenadeLauncher::Fire() {
 				actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 				actorSpawnParams.Instigator = pawn;
 				//Use replicated muzzleLocation/finalRot
-				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, this->muzzleLocation+5, finalRot, actorSpawnParams);
-			
+				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, this->muzzleLocation, finalRot, actorSpawnParams);
+				gren->GetWorldTimerManager().SetTimer(gren->ExplodeTimer, gren, &AGrenadeProjectile::Explode, 3.0f , false);
+
+
 				if (GetLocalRole() == ROLE_Authority) {
 					ASCharacter* my_char = Cast<ASCharacter>(pawn);
 					if (my_char) {
 						this->ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
 					}
-				}			
+
+					//Add timer here for explosion on gren.
+
+
+
+				}	
+
 				PlayFireEffectsGren();
 			}
 		}

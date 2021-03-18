@@ -22,18 +22,25 @@ class COOPGAME_API AGrenadeProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AGrenadeProjectile();
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
-//Public member variables
-public:	
-
 	USphereComponent* GetCollisionComp() const { return CollisionComp; }
 
 	/** Returns ProjectileMovement subobject **/
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayExplosionEffect();
 
+	UFUNCTION(Server, Reliable)
+	void ServerExplode();
+
+	UFUNCTION()
+	void Explode();
+	
+//Public member variables
+public:	
+
+	UPROPERTY(Replicated, VisibleDefaultsOnly)
+	FTimerHandle ExplodeTimer;
 
 
 //Protected functions
@@ -41,29 +48,37 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UFUNCTION(Server, Reliable)
-	void ServerSpawnExplosion();
-
-	void SpawnExplosion();
-
 //Protected member variables.
 protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ExplosionRadius")
-	UStaticMeshComponent* ExplosionMesh;
+	UStaticMeshComponent* GrenMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	TSubclassOf<UDamageType> damageType;
 	
 	/** Sphere collision component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	USphereComponent* CollisionComp;
+	
 
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	UProjectileMovementComponent* ProjectileMovement;
 
-	UPROPERTY(EditAnywhere, Category = "Spawning")
-	TSubclassOf<AActor> ActorToSpawn;
 
-	FTimerHandle th_time_between_shots;
+		
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* Explosion;
+	
+	/* Collision Sphere for Explosion*/
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Components")
+	USphereComponent* ExplosionSphere;
 
-	int TickCount;
+	//TODO: This needs to be in replicated struct FVector_NetQuantize
+	FVector ExplosionAnimationScale;
+
+	UPROPERTY(Replicated, EditDefaultsOnly, Category = "Effects")
+	float ExplosionForce;
+
 };

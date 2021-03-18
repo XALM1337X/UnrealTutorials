@@ -7,7 +7,7 @@
 #include "Engine/World.h"
 #include "SWeapon.h"
 #include "kismet/GameplayStatics.h"
-#include "BarrelExplosionActor.h"
+//#include "BarrelExplosionActor.h"
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -79,6 +79,7 @@ void USHealthComp::ClientOnHealthChange_Implementation(USHealthComp* HealthComp,
 //TODO: Fix Damage/Health here.
 //As it stands its putting off too much damage at a distance
 void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser ) {
+	/*
 	if (this->Role == ROLE_Authority) {
 		if (Damage <= 0.0f)
 		{		
@@ -129,6 +130,9 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 	}
 	FName defaultBone = "defaultBone";
 	onHealthChanged.Broadcast(this, this->health, Damage, InstigatedBy,  DamageCauser, Origin, defaultBone);
+
+
+	*/
 }
 //
 

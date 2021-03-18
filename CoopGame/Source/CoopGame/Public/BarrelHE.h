@@ -25,9 +25,6 @@ protected:
 
 USHealthCompMisc* HealthComp;
 
-UPROPERTY(EditAnywhere, Category = "Spawning")
-TSubclassOf<AActor> ActorToSpawn;
-
 UPROPERTY(EditAnywhere, Category = "FX")
 UStaticMeshComponent* mesh;
 

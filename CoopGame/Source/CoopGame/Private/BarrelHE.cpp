@@ -4,7 +4,6 @@
 #include "BarrelHE.h"
 #include "Components/StaticMeshComponent.h"
 #include "SHealthCompMisc.h"
-#include "BarrelExplosionActor.h"
 
 // Sets default values
 ABarrelHE::ABarrelHE() {
@@ -24,15 +23,8 @@ void ABarrelHE::BeginPlay() {
 
 void ABarrelHE::TriggerExplosion(AController* controller) {
 	if (GetLocalRole() == ROLE_Authority && !isDead) {
-		//Call Explosion
-		FVector loc = GetActorLocation();
-		FRotator rot = GetActorRotation();
-		AActor* spawn = GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot);
-		isDead = true;
-		ABarrelExplosionActor* barrel_explosion = Cast<ABarrelExplosionActor>(spawn);
-		if (barrel_explosion) {
-			barrel_explosion->Init(controller);
-		}
+
+
 		FTimerHandle Handler;
 		GetWorld()->GetTimerManager().SetTimer(Handler, this,&ABarrelHE::CleanUp, 5.0f, false);
 		AActor* owner = GetOwner();
