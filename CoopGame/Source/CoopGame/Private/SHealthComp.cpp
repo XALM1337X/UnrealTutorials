@@ -6,6 +6,7 @@
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "SWeapon.h"
+#include "SWeaponGrenadeLauncher.h"
 #include "kismet/GameplayStatics.h"
 //#include "BarrelExplosionActor.h"
 #include "Components/SphereComponent.h"
@@ -150,13 +151,14 @@ void USHealthComp::ApplyPhysicsPointDamage_Implementation(ASCharacter* character
 }
 
 void USHealthComp::ApplyPhysicsRadialDamage_Implementation(ASCharacter* character, FVector ExplosionOrigin, float SphereRadius, float ExplosionForce) {
+
 	USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
 	if (weapon_mesh) {
 		weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		weapon_mesh->SetSimulatePhysics(true);
 		weapon_mesh->AddRadialImpulse(ExplosionOrigin, SphereRadius, ExplosionForce/2, ERadialImpulseFalloff::RIF_Constant, true);
-
 	}
+
 	USkeletalMeshComponent* mesh = character->GetMesh();
 	if (mesh) {
 		mesh->SetSimulatePhysics(true);

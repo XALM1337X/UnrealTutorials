@@ -10,21 +10,6 @@ class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystem;
 class UStaticMeshComponent;
-USTRUCT()
-struct FGrenEffectsReplicator {
-	GENERATED_BODY()
-
-	public:
-		UPROPERTY()
-		FVector_NetQuantize net_explosion_scale;
-
-		UPROPERTY()
-		FVector_NetQuantize net_actor_loc;
-		
-		UPROPERTY()
-		FRotator net_actor_rot;
-
-};
 
 UCLASS()
 class COOPGAME_API AGrenadeProjectile : public AActor
@@ -76,9 +61,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UFUNCTION()
-	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
 //Protected member variables.
 protected:
 	
@@ -105,8 +87,4 @@ protected:
 
 	//TODO: This needs to be in replicated struct FVector_NetQuantize
 	FVector ExplosionAnimationScale;
-
-	UPROPERTY(ReplicatedUsing=OnRep_FGrenEffectsReplicate)
-	FGrenEffectsReplicator grenEffectsRep;
-
 };

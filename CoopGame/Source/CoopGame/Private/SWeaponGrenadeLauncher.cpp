@@ -40,16 +40,17 @@ void ASWeaponGrenadeLauncher::ReloadWeapon() {
 		this->ServerReloadWeapon();
 		return;
 	}
-	if (this->clipsLeft != 0)
-	{
-		this->currentAmmo = this->maxClipSize;
-		this->needReload = false;
-		this->clipsLeft--;
-	}	
 	AActor* myOwner = GetOwner();
+	ASCharacter* my_char = Cast<ASCharacter>(myOwner);
 	if (myOwner) {
-		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
-		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+		if (my_char) {
+			if (this->clipsLeft != 0 && !my_char->GetFiringState()) {
+				this->currentAmmo = this->maxClipSize;
+				this->needReload = false;
+				this->clipsLeft--;
+				ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+			}	
+		}
 	}
 }
 int ASWeaponGrenadeLauncher::GetCurrentAmmoCount() 

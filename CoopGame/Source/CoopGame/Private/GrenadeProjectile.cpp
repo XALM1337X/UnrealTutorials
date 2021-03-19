@@ -19,7 +19,6 @@ AGrenadeProjectile::AGrenadeProjectile() {
 		CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 		CollisionComp->CanCharacterStepUpOn = ECB_No;
 		
-		//CollisionComp->OnComponentHit.AddDynamic(this, &AGrenadeProjectile::OnHit);
 		GrenMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GrenMesh"));
 		GrenMesh->SetupAttachment(CollisionComp);
 		ExplosionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ExplosionCollisionSphere"));;
@@ -69,24 +68,4 @@ void AGrenadeProjectile::OnRep_FGrenEffectsReplicate() {
 
 void AGrenadeProjectile::PlayExplosionEffect_Implementation() {
 	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(), GetActorRotation(), this->ExplosionAnimationScale);
-}
-
-void AGrenadeProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
-	// Only add impulse and destroy projectile if we hit a physics
-		UE_LOG(LogTemp,Warning,TEXT("AGrenadeProjectile::OnHit"));
-	if ((OtherActor != NULL) && (OtherActor != this) && (OtherComp != NULL))
-	{
-		//OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-		if (GetLocalRole() == ROLE_Authority) {
-			UWorld* World = GetWorld();
-			FVector loc = GetActorLocation();
-			FRotator rot = GetActorRotation();
-			this->ServerExplode();
-		}
-	}
-}
-void AGrenadeProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(AGrenadeProjectile, grenEffectsRep);
-
 }

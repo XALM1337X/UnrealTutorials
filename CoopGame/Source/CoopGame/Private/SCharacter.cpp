@@ -71,8 +71,7 @@ void ASCharacter::BeginPlay()
 }
 
 // Called every frame
-void ASCharacter::Tick(float DeltaTime)
-{
+void ASCharacter::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	float targetPOV = isAiming ? zoomPOV : hipPOV;
@@ -228,7 +227,15 @@ bool ASCharacter::GetFiringState() {
 	return this->isFiring;
 }
 
+void ASCharacter::ServerSetFiringState_Implementation(bool value) {
+	this->SetFiringState(value);
+}
+
 void ASCharacter::SetFiringState(bool value) {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerSetFiringState(value);
+		return;
+	}
 	this->isFiring = value;
 }
 

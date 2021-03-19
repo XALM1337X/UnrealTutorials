@@ -71,25 +71,27 @@ void ASWeapon::ReloadWeapon() {
 		this->ServerReloadWeapon();
 		return; 
 	}
-	if (this->clipsLeft != 0) {
-		if (this->currentAmmo == 0 && this->totalAmmo >= this->maxClipSize) {
-			this->currentAmmo = this->maxClipSize;
-			this->totalAmmo -= this->maxClipSize;
-		} else if (this->currentAmmo != 0 && this->totalAmmo >= this->maxClipSize){
-			this->totalAmmo -= this->maxClipSize;
-			this->totalAmmo += this->currentAmmo;
-			this->currentAmmo = this->maxClipSize;
-		} else {
-		}
-
-		this->needReload = false;
-		this->clipsLeft = this->totalAmmo/this->maxClipSize;
-	}
 	AActor* myOwner = GetOwner();
+	ASCharacter* my_char = Cast<ASCharacter>(myOwner);
 	if (myOwner) {
-		ASCharacter* my_char = Cast<ASCharacter>(myOwner);
-		ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
-	}
+		if (my_char) {
+			if (this->clipsLeft != 0 && !my_char->GetFiringState()) {
+				if (this->currentAmmo == 0 && this->totalAmmo >= this->maxClipSize) {
+					this->currentAmmo = this->maxClipSize;
+					this->totalAmmo -= this->maxClipSize;
+				} else if (this->currentAmmo != 0 && this->totalAmmo >= this->maxClipSize){
+					this->totalAmmo -= this->maxClipSize;
+					this->totalAmmo += this->currentAmmo;
+					this->currentAmmo = this->maxClipSize;
+				} else {
+				}
+
+				this->needReload = false;
+				this->clipsLeft = this->totalAmmo/this->maxClipSize;
+				ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
+			}	
+		}
+	}	
 }
 
 int ASWeapon::GetCurrentAmmoCount() {
