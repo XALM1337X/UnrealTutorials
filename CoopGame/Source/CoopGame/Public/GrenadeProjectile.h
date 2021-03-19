@@ -11,7 +11,6 @@ class UProjectileMovementComponent;
 class UParticleSystem;
 class UStaticMeshComponent;
 
-
 UCLASS()
 class COOPGAME_API AGrenadeProjectile : public AActor
 {
@@ -22,18 +21,39 @@ class COOPGAME_API AGrenadeProjectile : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AGrenadeProjectile();
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
-//Public member variables
-public:	
-
 	USphereComponent* GetCollisionComp() const { return CollisionComp; }
 
 	/** Returns ProjectileMovement subobject **/
 	UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovement; }
 
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayExplosionEffect();
 
+	UFUNCTION(Server, Reliable)
+	void ServerExplode();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void TriggerTimer();
+
+	UFUNCTION()
+	void OnRep_FGrenEffectsReplicate();
+	
+//Public member variables
+public:	
+
+	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	float ExplosionDamage;
+
+	UPROPERTY(VisibleDefaultsOnly)
+	FTimerHandle ExplodeTimer;
+
+	/* Collision Sphere for Explosion*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Components")
+	USphereComponent* ExplosionSphere;
+
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	float ExplosionForce;
 
 
 //Protected functions
@@ -41,29 +61,30 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UFUNCTION(Server, Reliable)
-	void ServerSpawnExplosion();
-
-	void SpawnExplosion();
-
 //Protected member variables.
 protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ExplosionRadius")
-	UStaticMeshComponent* ExplosionMesh;
+	UStaticMeshComponent* GrenMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	TSubclassOf<UDamageType> damageType;
 	
 	/** Sphere collision component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Projectile")
 	USphereComponent* CollisionComp;
+	
 
 	/** Projectile movement component */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
 	UProjectileMovementComponent* ProjectileMovement;
 
-	UPROPERTY(EditAnywhere, Category = "Spawning")
-	TSubclassOf<AActor> ActorToSpawn;
 
-	FTimerHandle th_time_between_shots;
+		
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* Explosion;
+	
 
-	int TickCount;
+	//TODO: This needs to be in replicated struct FVector_NetQuantize
+	FVector ExplosionAnimationScale;
 };

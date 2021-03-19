@@ -11,81 +11,61 @@
 AGrenadeProjectile::AGrenadeProjectile() {
 
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	
-	ExplosionMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ExplosionMesh"));
-	RootComponent = ExplosionMesh;
+	if (GetLocalRole() == ROLE_Authority) {
+		CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+		RootComponent = CollisionComp;
+		CollisionComp->InitSphereRadius(0.5f);
+		CollisionComp->SetCollisionProfileName("Projectile");
+		CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
+		CollisionComp->CanCharacterStepUpOn = ECB_No;
+		
+		GrenMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GrenMesh"));
+		GrenMesh->SetupAttachment(CollisionComp);
+		ExplosionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ExplosionCollisionSphere"));;
+		ExplosionSphere->SetupAttachment(CollisionComp);
 
+		// Use a ProjectileMovementComponent to govern this projectile's movement
+		ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
+		ProjectileMovement->UpdatedComponent = CollisionComp;
+		ProjectileMovement->InitialSpeed = 1500.f;
+		ProjectileMovement->MaxSpeed = 1500.f;
+		ProjectileMovement->bRotationFollowsVelocity = true;
+		ProjectileMovement->bShouldBounce = true;
+		this->ExplosionForce = 1000.0f;
+		this->ExplosionDamage = 50.0f;
+		this->ExplosionAnimationScale = FVector(3.0f,3.0f,3.0f);
 
-	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
-	CollisionComp->InitSphereRadius(0.5f);
-	CollisionComp->SetCollisionProfileName("Projectile");
-	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
-	CollisionComp->CanCharacterStepUpOn = ECB_No;
-	CollisionComp->SetupAttachment(ExplosionMesh);
-
-	// Use a ProjectileMovementComponent to govern this projectile's movement
-	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComp"));
-	ProjectileMovement->UpdatedComponent = ExplosionMesh;
-	ProjectileMovement->InitialSpeed = 1500.f;
-	ProjectileMovement->MaxSpeed = 1500.f;
-	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = true;
-
-	
-	// Die after 3 seconds by default
-	//InitialLifeSpan = 3.0f;
-	TickCount = 1;
-	SetReplicates(true);
-	SetReplicateMovement(true);	
+		SetReplicates(true);
+		SetReplicateMovement(true);	
+	}
 }
 
 // Called when the game starts or when spawned
 void AGrenadeProjectile::BeginPlay() {
-	Super::BeginPlay();	
-	UE_LOG(LogTemp, Warning, TEXT("AGrenadeProjectile::BeginPlay"));
-	GetWorldTimerManager().SetTimer(th_time_between_shots, this, &AGrenadeProjectile::SpawnExplosion, 3 , true, -1);
-	
+	Super::BeginPlay();
+	TriggerTimer_Implementation();
 }
 
-// Called every frame
-void AGrenadeProjectile::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-	
-}
-
-void AGrenadeProjectile::ServerSpawnExplosion_Implementation() {
-	this->SpawnExplosion();
-}
-
-void AGrenadeProjectile::SpawnExplosion() {
-
-	if(GetLocalRole() != ROLE_Authority) {
-		this->ServerSpawnExplosion();
-		return;
-	}
-	FActorSpawnParameters actorSpawnParams;
-	actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-	//TODO: Figure out how to get 
-	actorSpawnParams.Instigator = GetInstigator();
-	//Call Explosion
-	FVector loc = GetActorLocation();
-	FRotator rot = GetActorRotation();
-	AActor* explosion = GetWorld()->SpawnActor(ActorToSpawn, &loc, &rot, actorSpawnParams);
-	if (explosion){
-		UE_LOG(LogTemp, Warning, TEXT("AGrenadeProjectile::explosion_success"));
-	} else {
-		UE_LOG(LogTemp, Warning, TEXT("AGrenadeProjectile::explosion_fail"));
-	}
+void AGrenadeProjectile::ServerExplode_Implementation() { 
+	if (GetLocalRole() == ROLE_Authority) {
+		TArray<AActor*> ignores;
+		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionSphere->GetScaledSphereRadius(), damageType, ignores, this, GetInstigatorController(), false, ECC_WorldDynamic);
+		GetWorldTimerManager().ClearTimer(this->ExplodeTimer);
+	} 
+	PlayExplosionEffect();
 	Destroy();
-	
+}
+void AGrenadeProjectile::TriggerTimer_Implementation() {
+	//NOTE: FOR THE LOVE OF GOD, MAKE SURE THE ACTORS INITIAL LIFESPAN 
+	//LASTS LONGER THAN THE TIMER. IF THEY ARE EQUAL IT WILL FUCK UP EVERYTHING!
+	GetWorld()->GetTimerManager().SetTimer(this->ExplodeTimer, this, &AGrenadeProjectile::ServerExplode, 2.0f , false);
+}
+
+void AGrenadeProjectile::OnRep_FGrenEffectsReplicate() {
+	PlayExplosionEffect();
 }
 
 
-/*
-void AGrenadeProjectile::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	//DOREPLIFETIME_CONDITION(ASWeapon, TraceStruct, COND_SkipOwner);
-
+void AGrenadeProjectile::PlayExplosionEffect_Implementation() {
+	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(), GetActorRotation(), this->ExplosionAnimationScale);
 }
-*/

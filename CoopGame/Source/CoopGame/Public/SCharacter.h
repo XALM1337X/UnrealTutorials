@@ -76,7 +76,10 @@ public:
 
 	bool GetFiringState();
 
-	void SetFiringState(bool);
+	UFUNCTION(Server, Reliable)
+	void ServerSetFiringState(bool value);
+
+	void SetFiringState(bool value);
 
 	ASWeapon* GetWeapon();
 
