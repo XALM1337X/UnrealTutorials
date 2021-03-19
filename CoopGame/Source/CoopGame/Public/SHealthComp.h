@@ -56,7 +56,10 @@ protected:
 	void ClientOnHealthChange(USHealthComp* HealthComp, float current_health, float healthDelta, class AController* InstigatedBy, AActor* DamageCauser, FVector ShotFromDirection, FName BoneName);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void ApplyPhysics(ASCharacter* character, FVector ShotFromDirection, FName BoneName);
+	void ApplyPhysicsPointDamage(ASCharacter* character, FVector ShotFromDirection, FName BoneName);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ApplyPhysicsRadialDamage(ASCharacter* character, FVector ExplosionOrigin, float SphereRadius, float ExplosionForce);
 
 	void CleanUp();
 

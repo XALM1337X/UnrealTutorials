@@ -56,6 +56,9 @@ public:
 //Public member variables
 public:	
 
+	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	float ExplosionDamage;
+
 	UPROPERTY(VisibleDefaultsOnly)
 	FTimerHandle ExplodeTimer;
 

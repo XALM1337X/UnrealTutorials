@@ -55,7 +55,7 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 			if (cont) {
 				character->DisableInput(cont);
 			}
-			ApplyPhysics(character, ShotFromDirection, BoneName);
+			ApplyPhysicsPointDamage(character, ShotFromDirection, BoneName);
 
 
 			FTimerHandle Handler;
@@ -77,15 +77,7 @@ void USHealthComp::ClientOnHealthChange_Implementation(USHealthComp* HealthComp,
 //As it stands its putting off too much damage at a distance
 void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser ) {
 
-
-	if (GetOwnerRole() == ROLE_Authority) {
-		UE_LOG(LogTemp, Warning, TEXT("USHealthComp::HandleTakeRadialDamage-server"));	
-	} else {
-		UE_LOG(LogTemp, Warning, TEXT("USHealthComp::HandleTakeRadialDamage-client"));	
-	}
-
-	if (Damage <= 0.0f)
-	{		
+	if (Damage <= 0.0f)	{		
 		return;
 	}
 	this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
@@ -103,29 +95,12 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 			if (cont) {
 				character->DisableInput(cont);
 			}
-			USkeletalMeshComponent* mesh = character->GetMesh();
-			if (mesh) {
-				mesh->SetSimulatePhysics(true);
-				/*if (DamageCauser->IsA(ABarrelExplosionActor::StaticClass())) {
-					ABarrelExplosionActor* barrel_exp_act = Cast<ABarrelExplosionActor>(DamageCauser);
-					if (barrel_exp_act) {
-						mesh->AddRadialForce(Origin, barrel_exp_act->SphereComp->GetScaledSphereRadius(),  barrel_exp_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
-					}
-				} */
-		/*else*/ if (DamageCauser->IsA(AGrenadeProjectile::StaticClass())) {
-					AGrenadeProjectile* gren_act = Cast<AGrenadeProjectile>(DamageCauser);
-					if (gren_act) {
-						mesh->SetSimulatePhysics(true);
-						mesh->AddRadialForce(Origin, gren_act->ExplosionSphere->GetScaledSphereRadius(), gren_act->ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
-					}
-				}
+
+			AGrenadeProjectile* gren = Cast<AGrenadeProjectile>(DamageCauser);
+			if (gren) {
+				ApplyPhysicsRadialDamage(character, Origin, gren->ExplosionSphere->GetScaledSphereRadius(), gren->ExplosionForce);
 			}
-			USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
-			if (weapon_mesh) {
-				weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-				weapon_mesh->SetSimulatePhysics(true);
-		
-			}
+
 			FTimerHandle Handler;
 			GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
 		}
@@ -134,8 +109,7 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 
 	
 	FName defaultBone = "defaultBone";
-	onHealthChanged.Broadcast(this, this->health, Damage, InstigatedBy,  DamageCauser, Origin, defaultBone);
-
+	ClientOnHealthChange(this, this->health, Damage, InstigatedBy,  DamageCauser, Origin, defaultBone);
 
 	
 }
@@ -162,17 +136,34 @@ float USHealthComp::GetHealth() {
 }
 
 
-void USHealthComp::ApplyPhysics_Implementation(ASCharacter* character, FVector ShotFromDirection, FName BoneName) {
+void USHealthComp::ApplyPhysicsPointDamage_Implementation(ASCharacter* character, FVector ShotFromDirection, FName BoneName) {
 	USkeletalMeshComponent* mesh = character->GetMesh();
-			if (mesh) {
-				mesh->SetSimulatePhysics(true);
-				mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
-			} 
-			USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
-			if (weapon_mesh) {
-				weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-				weapon_mesh->SetSimulatePhysics(true);			
-			}
+	if (mesh) {
+		mesh->SetSimulatePhysics(true);
+		mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
+	} 
+	USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
+	if (weapon_mesh) {
+		weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		weapon_mesh->SetSimulatePhysics(true);			
+	}
+}
+
+void USHealthComp::ApplyPhysicsRadialDamage_Implementation(ASCharacter* character, FVector ExplosionOrigin, float SphereRadius, float ExplosionForce) {
+	USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
+	if (weapon_mesh) {
+		weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		weapon_mesh->SetSimulatePhysics(true);
+		weapon_mesh->AddRadialImpulse(ExplosionOrigin, SphereRadius, ExplosionForce/2, ERadialImpulseFalloff::RIF_Constant, true);
+
+	}
+	USkeletalMeshComponent* mesh = character->GetMesh();
+	if (mesh) {
+		mesh->SetSimulatePhysics(true);
+		mesh->AddRadialForce(ExplosionOrigin, SphereRadius, ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
+		mesh->AddRadialImpulse(ExplosionOrigin, SphereRadius, ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);	
+	}
+	
 }
 
 void USHealthComp::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
