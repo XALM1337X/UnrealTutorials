@@ -21,19 +21,23 @@ void ABarrelHE::BeginPlay() {
 	
 }
 
-void ABarrelHE::TriggerExplosion(AController* controller) {
+void ABarrelHE::ServerExplode_Implementation() {
 	if (GetLocalRole() == ROLE_Authority && !isDead) {
-
-
-		FTimerHandle Handler;
-		GetWorld()->GetTimerManager().SetTimer(Handler, this,&ABarrelHE::CleanUp, 5.0f, false);
-		AActor* owner = GetOwner();
-		mesh->SetMaterial(0, OffMaterial);			
+		if (!this->isDead) {
+			UE_LOG(LogTemp, Warning, TEXT("BOOM"));
+			GetWorld()->GetTimerManager().SetTimer(Handler, this,&ABarrelHE::CleanUp, 5.0f, false);
+			AActor* owner = GetOwner();
+			this->isDead = true;
+		}
+		
+		//Mesh thing will need to be done on net multicasted 
+		//mesh->SetMaterial(0, OffMaterial);			
 	}
 }
 
 
-void ABarrelHE::CleanUp() {
+void ABarrelHE::CleanUp_Implementation() {
+	GetWorldTimerManager().ClearTimer(Handler);
 	Destroy();
 }
 

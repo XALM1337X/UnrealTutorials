@@ -31,7 +31,11 @@ UStaticMeshComponent* mesh;
 //Methods/Functions
 public:	
 	ABarrelHE();
-	void TriggerExplosion(AController* controller);
+	
+	UFUNCTION(Server, Reliable)
+	void ServerExplode();
+
+	UFUNCTION(NetMultiCast,Reliable)
 	void CleanUp();
 
 //Members
@@ -39,4 +43,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* OffMaterial;
 	bool isDead;
+
+	FTimerHandle Handler;
 };

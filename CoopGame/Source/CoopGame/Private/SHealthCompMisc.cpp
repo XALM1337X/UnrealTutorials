@@ -6,23 +6,23 @@
 
 
 USHealthCompMisc::USHealthCompMisc() {
-	this->defaultHealthBarrelHE = 60.0f;
-	this->healthBarrelHE = 0;
+	if (GetOwnerRole() == ROLE_Authority) {
+		this->defaultHealthBarrelHE = 60.0f;
+		this->healthBarrelHE = 0;
+	}
 }
 
 void USHealthCompMisc::BeginPlay() {
 	Super::BeginPlay();
-	this->healthBarrelHE = this->defaultHealthBarrelHE;
-	AActor* myOwner = GetOwner();
-	myOwner->OnTakePointDamage.AddDynamic(this, &USHealthCompMisc::HandleTakePointDamageBarrelHE);	
-	myOwner->OnTakeRadialDamage.AddDynamic(this, &USHealthCompMisc::HandleTakeRadialDamageBarrelHE);
+	if (GetOwnerRole() == ROLE_Authority) {
+		this->healthBarrelHE = this->defaultHealthBarrelHE;
+		AActor* myOwner = GetOwner();
+		myOwner->OnTakeAnyDamage.AddDynamic(this, &USHealthCompMisc::HandleTakeAnyDamageBarrelHE);	
+	}
 }
-void USHealthCompMisc::HandleTakeRadialDamageBarrelHE(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser ) {
-	
-}
-void USHealthCompMisc::HandleTakePointDamageBarrelHE(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser) {
-	if (Damage <= 0.0f)
-	{		
+
+void USHealthCompMisc::HandleTakeAnyDamageBarrelHE(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser) {
+	if (Damage <= 0.0f)	{		
 		return;
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("Current Health_1: %f"), healthBarrelHE);
@@ -32,14 +32,11 @@ void USHealthCompMisc::HandleTakePointDamageBarrelHE(AActor* DamagedActor, float
 		AActor* myOwner = GetOwner();
 		ABarrelHE* barrel = Cast<ABarrelHE>(myOwner);
 		if (barrel) {
-			barrel->TriggerExplosion(InstigatedBy);
+			barrel->ServerExplode();
 		}
 
 	}
-	//UE_LOG(LogTemp, Warning, TEXT("Current Health_2: %f"), healthBarrelHE);
-	//UE_LOG(LogTemp, Warning, TEXT("TRIGGER POINT DAMAGE"));
 }
-
 
 float USHealthCompMisc::GetHealth() {
 	return this->healthBarrelHE;

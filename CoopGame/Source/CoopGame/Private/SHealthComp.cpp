@@ -138,16 +138,17 @@ float USHealthComp::GetHealth() {
 
 
 void USHealthComp::ApplyPhysicsPointDamage_Implementation(ASCharacter* character, FVector ShotFromDirection, FName BoneName) {
-	USkeletalMeshComponent* mesh = character->GetMesh();
-	if (mesh) {
-		mesh->SetSimulatePhysics(true);
-		mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
-	} 
+
 	USkeletalMeshComponent* weapon_mesh = character->GetWeapon()->GetWeaponMesh();
 	if (weapon_mesh) {
 		weapon_mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 		weapon_mesh->SetSimulatePhysics(true);			
 	}
+	USkeletalMeshComponent* mesh = character->GetMesh();
+	if (mesh) {
+		mesh->SetSimulatePhysics(true);
+		mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
+	} 
 }
 
 void USHealthComp::ApplyPhysicsRadialDamage_Implementation(ASCharacter* character, FVector ExplosionOrigin, float SphereRadius, float ExplosionForce) {
@@ -162,7 +163,7 @@ void USHealthComp::ApplyPhysicsRadialDamage_Implementation(ASCharacter* characte
 	USkeletalMeshComponent* mesh = character->GetMesh();
 	if (mesh) {
 		mesh->SetSimulatePhysics(true);
-		mesh->AddRadialForce(ExplosionOrigin, SphereRadius, ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
+		//mesh->AddRadialForce(ExplosionOrigin, SphereRadius, ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);
 		mesh->AddRadialImpulse(ExplosionOrigin, SphereRadius, ExplosionForce, ERadialImpulseFalloff::RIF_Constant, true);	
 	}
 	

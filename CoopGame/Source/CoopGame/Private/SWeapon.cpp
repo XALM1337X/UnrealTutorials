@@ -52,14 +52,6 @@ void ASWeapon::BeginPlay() {
 	}
 }
 
-/*void ASWeapon::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-	if (GetLocalRole() == ROLE_Authority) {
-		//UE_LOG(LogTemp, Warning, TEXT("Server: %d"),this->currentAmmo);
-	} else {
-		//UE_LOG(LogTemp, Warning, TEXT("Client: %d"),this->currentAmmo);
-	}
-}*/
 
 void ASWeapon::ServerReloadWeapon_Implementation() {
 	this->ReloadWeapon();
@@ -209,7 +201,6 @@ void ASWeapon::Fire() {
 }
 
 void ASWeapon::ClientOnAmmoChanged_Implementation(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name) {
-	UE_LOG(LogTemp, Warning, TEXT("ASWeapon::OnAmmOChange - %s"), *weapon_name);
 	my_char->onAmmoChanged.Broadcast(ammoCount, clipCount, clipSize, weapon_name);
 }
 

@@ -103,10 +103,8 @@ void ASCharacter::Tick(float DeltaTime) {
 	}	
 }
 
-void ASCharacter::MoveForward(float Value) 
-{
-	if(this->isAiming)
-	{
+void ASCharacter::MoveForward(float Value) {
+	if(this->isAiming) {
 		AddMovementInput(GetActorForwardVector() * Value/2);
 	} else {
 		AddMovementInput(GetActorForwardVector() * Value);
@@ -117,8 +115,7 @@ void ASCharacter::MoveForward(float Value)
 
 void ASCharacter::MoveRight(float Value) {
 
-	if(this->isAiming)
-	{
+	if(this->isAiming) {
 		AddMovementInput(GetActorRightVector() * Value/2);
 	} else {
 		AddMovementInput(GetActorRightVector() * Value);
@@ -195,6 +192,7 @@ void ASCharacter::SwitchToSecondary() {
 				StoredLauncher = nullptr;
 				CurrentWeapon->SetActorHiddenInGame(false);
 				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 				CurrentWeapon->ClientOnAmmoChanged(this, CurrentWeapon->GetCurrentAmmoCount(), CurrentWeapon->GetRemainingClips(), CurrentWeapon->GetMaxClipSize(), CurrentWeapon->weaponName);
 				
 			} else {
