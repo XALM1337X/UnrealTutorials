@@ -18,10 +18,11 @@ AGrenadeProjectile::AGrenadeProjectile() {
 		CollisionComp->SetCollisionProfileName("Projectile");
 		CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 		CollisionComp->CanCharacterStepUpOn = ECB_No;
+		//CollisionComp->OnComponentHit.AddDynamic(this, &AGrenadeProjectile::OnHit);
 		
 		GrenMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GrenMesh"));
 		GrenMesh->SetupAttachment(CollisionComp);
-		ExplosionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ExplosionCollisionSphere"));;
+		ExplosionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ExplosionCollisionSphere"));
 		ExplosionSphere->SetupAttachment(CollisionComp);
 
 		// Use a ProjectileMovementComponent to govern this projectile's movement
@@ -34,9 +35,10 @@ AGrenadeProjectile::AGrenadeProjectile() {
 		this->ExplosionForce = 1000.0f;
 		this->ExplosionDamage = 50.0f;
 		this->ExplosionAnimationScale = FVector(3.0f,3.0f,3.0f);
+		//this->SetCollisionResponseToChannel
 
 		SetReplicates(true);
-		SetReplicateMovement(true);	
+		//SetReplicateMovement(true);	<<-- Notice I did comment this out as suggested, and disabled it in my blueprint.
 	//}
 }
 
@@ -44,6 +46,10 @@ AGrenadeProjectile::AGrenadeProjectile() {
 void AGrenadeProjectile::BeginPlay() {
 	Super::BeginPlay();
 	TriggerTimer_Implementation();
+}
+
+void AGrenadeProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit) {
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *OtherComp->GetName());
 }
 
 void AGrenadeProjectile::ServerExplode_Implementation() { 
@@ -60,11 +66,6 @@ void AGrenadeProjectile::TriggerTimer_Implementation() {
 	//LASTS LONGER THAN THE TIMER. IF THEY ARE EQUAL IT WILL FUCK UP EVERYTHING!
 	GetWorld()->GetTimerManager().SetTimer(this->ExplodeTimer, this, &AGrenadeProjectile::ServerExplode, 2.0f , false);
 }
-
-void AGrenadeProjectile::OnRep_FGrenEffectsReplicate() {
-	PlayExplosionEffect();
-}
-
 
 void AGrenadeProjectile::PlayExplosionEffect_Implementation() {
 	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(), GetActorRotation(), this->ExplosionAnimationScale);

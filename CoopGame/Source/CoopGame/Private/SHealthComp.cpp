@@ -7,6 +7,7 @@
 #include "Engine/World.h"
 #include "SWeapon.h"
 #include "SWeaponGrenadeLauncher.h"
+#include "BarrelHE.h"
 #include "kismet/GameplayStatics.h"
 //#include "BarrelExplosionActor.h"
 #include "Components/SphereComponent.h"
@@ -97,9 +98,18 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 				character->DisableInput(cont);
 			}
 
-			AGrenadeProjectile* gren = Cast<AGrenadeProjectile>(DamageCauser);
-			if (gren) {
-				ApplyPhysicsRadialDamage(character, Origin, gren->ExplosionSphere->GetScaledSphereRadius(), gren->ExplosionForce);
+			if (DamageCauser->IsA(AGrenadeProjectile::StaticClass())) {
+				AGrenadeProjectile* gren = Cast<AGrenadeProjectile>(DamageCauser);
+				if (gren) {
+					ApplyPhysicsRadialDamage(character, Origin, gren->ExplosionSphere->GetScaledSphereRadius(), gren->ExplosionForce);
+				}
+			}
+
+			if (DamageCauser->IsA(ABarrelHE::StaticClass())) {
+				ABarrelHE* barrel = Cast<ABarrelHE>(DamageCauser);
+				if (barrel) {
+					ApplyPhysicsRadialDamage(character, Origin, barrel->ExplosionSphere->GetScaledSphereRadius(), barrel->ExplosionForce);
+				}
 			}
 
 			FTimerHandle Handler;

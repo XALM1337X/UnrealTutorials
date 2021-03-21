@@ -11,6 +11,9 @@ class USHealthCompMisc;
 class AController;
 class UMaterialInterface;
 class UStaticMeshComponent;
+class USphereComponent;
+class UDamageType;
+
 UCLASS()
 class COOPGAME_API ABarrelHE : public AActor {
 	GENERATED_BODY()
@@ -23,10 +26,16 @@ protected:
 //Members
 protected:
 
-USHealthCompMisc* HealthComp;
+	USHealthCompMisc* HealthComp;
 
-UPROPERTY(EditAnywhere, Category = "FX")
-UStaticMeshComponent* mesh;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Effects")
+	TSubclassOf<UDamageType> damageType;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* ExplosionEffect;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	FVector ExplosionAnimationScale;
 
 //Methods/Functions
 public:	
@@ -37,12 +46,29 @@ public:
 
 	UFUNCTION(NetMultiCast,Reliable)
 	void CleanUp();
+	
+	UFUNCTION(NetMultiCast, Reliable)
+	void PlayExplosionEffect();
 
 //Members
 public:	
+	
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* OffMaterial;
+	
 	bool isDead;
+
+	UPROPERTY(EditDefaultsOnly, Category="Effects")
+	float ExplosionDamage;
+
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UStaticMeshComponent* mesh;
+
+	UPROPERTY(EditAnywhere)
+	USphereComponent* ExplosionSphere;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	float ExplosionForce;
 
 	FTimerHandle Handler;
 };

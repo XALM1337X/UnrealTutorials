@@ -35,8 +35,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void TriggerTimer();
 
-	UFUNCTION()
-	void OnRep_FGrenEffectsReplicate();
 	
 //Public member variables
 public:	
@@ -60,6 +58,9 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	virtual void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit );
 
 //Protected member variables.
 protected:

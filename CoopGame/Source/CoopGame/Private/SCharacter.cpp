@@ -40,12 +40,12 @@ ASCharacter::ASCharacter() {
 	WeaponAttachSocketName = "WeaponSocket";
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
+	//GetCapsuleComponent()->SetCollisionResponseToChannel()
 	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
-void ASCharacter::BeginPlay()
-{
+void ASCharacter::BeginPlay() {
 	Super::BeginPlay();
 	hipPOV = CameraComponent->FieldOfView;
 	if (GetLocalRole() == ROLE_Authority) {
@@ -60,6 +60,7 @@ void ASCharacter::BeginPlay()
 			//StoredLauncher->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
 			StoredLauncher->SetActorHiddenInGame(true);
 			StoredLauncher->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			StoredLauncher->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
 		}
 		
 		if (CurrentWeapon) {
@@ -150,13 +151,13 @@ void ASCharacter::SwitchToPrimary() {
 				//Everything called in this block needs to be replicated
 				
 				CurrentWeapon->SetActorHiddenInGame(true);
-				CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				//CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				StoredLauncher = CurrentWeapon;
 				CurrentWeapon = StoredPrimary;
 				StoredPrimary = nullptr;
 				CurrentWeapon->SetActorHiddenInGame(false);
-				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				//CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
 				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 				CurrentWeapon->ClientOnAmmoChanged(this, CurrentWeapon->GetCurrentAmmoCount(), CurrentWeapon->GetRemainingClips(), CurrentWeapon->GetMaxClipSize(), CurrentWeapon->weaponName);
 				
@@ -185,13 +186,13 @@ void ASCharacter::SwitchToSecondary() {
 				//Everything called in this block needs to be replicated
 				
 				CurrentWeapon->SetActorHiddenInGame(true);
-				CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+				//CurrentWeapon->GetWeaponMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				StoredPrimary = CurrentWeapon;
 				CurrentWeapon = StoredLauncher;
 				StoredLauncher = nullptr;
 				CurrentWeapon->SetActorHiddenInGame(false);
-				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+				//CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
 				CurrentWeapon->GetWeaponMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 				CurrentWeapon->ClientOnAmmoChanged(this, CurrentWeapon->GetCurrentAmmoCount(), CurrentWeapon->GetRemainingClips(), CurrentWeapon->GetMaxClipSize(), CurrentWeapon->weaponName);
 				
