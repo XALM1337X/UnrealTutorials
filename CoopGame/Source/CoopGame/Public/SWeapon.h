@@ -22,6 +22,9 @@ struct FHitScanTrace {
 
 		UPROPERTY() 
 		FVector_NetQuantize TraceTo;
+
+		UPROPERTY() 
+		int Ticker;
 };
 
 UCLASS()
