@@ -8,6 +8,8 @@
 
 
 class UStaticMeshComponent;
+class USTrackerBotHealthComp;
+
 
 UCLASS()
 class COOPGAME_API ASTrackerBot : public APawn {
@@ -20,8 +22,10 @@ public:
 
 //Member variables
 public:	
-
-
+	UPROPERTY(EditAnywhere, Category = "Effects")
+	UStaticMeshComponent* mesh;
+	
+	UMaterialInstanceDynamic* MatInst;
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,10 +34,18 @@ protected:
 	FVector GetNextPathPoint();
 
 protected:
+	UPROPERTY(EditDefaultsOnly)
+	USTrackerBotHealthComp* TrackerBotHealthComp;
 	
-	UPROPERTY(EditAnywhere, Category = "Effects")
-	UStaticMeshComponent* mesh;
-
 	FVector NextPathPoint;
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	bool bUseVelocityChange;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float MovementForce;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	float RequiredDistanceToTarget;
 
 };
