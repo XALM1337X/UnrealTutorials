@@ -33,14 +33,12 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
             } else {
                 tb_act->MatInst->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
             }
-            
+            if (this->health <= 0.0f) {
+                //PlayExplosion effect && Destroy 
+               tb_act->Explode();
+               GetOwner()->Destroy();
+            }
         }
-    }
-
-
-	if (this->health <= 0.0f) {
-        //PlayExplosion effect && Destroy 
-        GetOwner()->Destroy();
     }
 }
 
@@ -49,8 +47,13 @@ void USTrackerBotHealthComp::HandleTakeRadialDamageTrackerBot(AActor* DamagedAct
         this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
 
 	if (this->health <= 0.0f) {
-        //PlayExplosion effect && Destroy 
-        GetOwner()->Destroy();
+        AActor* myOwner = GetOwner();
+        if (myOwner) {
+            ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
+            if (tb_act) {
+                GetOwner()->Destroy();
+            }
+        }
     }
 }
 

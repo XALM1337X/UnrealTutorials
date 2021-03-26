@@ -13,6 +13,7 @@
 #include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "GrenadeProjectile.h"
+#include "AI/STrackerBot.h"
 
 
 // Sets default values for this component's properties
@@ -103,12 +104,15 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 				if (gren) {
 					ApplyPhysicsRadialDamage(character, Origin, gren->ExplosionSphere->GetScaledSphereRadius(), gren->ExplosionForce);
 				}
-			}
-
-			if (DamageCauser->IsA(ABarrelHE::StaticClass())) {
+			} else if (DamageCauser->IsA(ABarrelHE::StaticClass())) {
 				ABarrelHE* barrel = Cast<ABarrelHE>(DamageCauser);
 				if (barrel) {
 					ApplyPhysicsRadialDamage(character, Origin, barrel->ExplosionSphere->GetScaledSphereRadius(), barrel->ExplosionForce);
+				}
+			} else if (DamageCauser->IsA(ASTrackerBot::StaticClass())) {
+				ASTrackerBot* tracker_bot = Cast<ASTrackerBot>(DamageCauser);
+				if (tracker_bot) {
+					ApplyPhysicsRadialDamage(character, Origin, tracker_bot->ExplosionRadiusSphere->GetScaledSphereRadius(), tracker_bot->ExplosionForce);
 				}
 			}
 

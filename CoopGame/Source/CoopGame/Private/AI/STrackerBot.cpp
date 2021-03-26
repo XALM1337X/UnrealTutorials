@@ -7,7 +7,10 @@
 #include "NavigationSystem/Public/NavigationSystem.h"
 #include "NavigationSystem/Public/NavigationPath.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 #include "AI/STrackerBotHealthComp.h"
+#include "Components/SphereComponent.h"
+#include "SCharacter.h"
 #include "DrawDebugHelpers.h"
 
 // Sets default values
@@ -16,12 +19,19 @@ ASTrackerBot::ASTrackerBot() {
 	PrimaryActorTick.bCanEverTick = true;
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("meshCompTB"));
 	RootComponent = mesh;
-	mesh->SetCanEverAffectNavigation(false);  
+	mesh->SetCanEverAffectNavigation(false);
+	ExplosionRadiusSphere = CreateDefaultSubobject<USphereComponent>(TEXT("TrackerBotExplosionRadiusSphere"));
+	ExplosionRadiusSphere->SetupAttachment(mesh);
+	ExplosionDetinationRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("TrackerBotExplosionDetinationRangeSphere"));
+	ExplosionDetinationRangeSphere->SetupAttachment(mesh);
 	bUseVelocityChange = false;
 	MovementForce = 1000.0f;
 	RequiredDistanceToTarget = 100.0f;
 	TrackerBotHealthComp = CreateDefaultSubobject<USTrackerBotHealthComp>(TEXT("TrackerBotHealthComp"));
-
+	ExplosionForce = 500.0f;
+	ExplosionDamage = 25;
+	ExplosionAnimationScale = FVector(1.0f,1.0f,1.0f);
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -29,9 +39,16 @@ void ASTrackerBot::BeginPlay() {
 	Super::BeginPlay();
 	if (GetLocalRole() == ROLE_Authority) {
 		mesh->SetSimulatePhysics(true);
+		ExplosionDetinationRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::HandleOverlap);
 	}	
 }
-
+void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if (OtherActor->IsA(ASCharacter::StaticClass())) {
+		UE_LOG(LogTemp, Warning, TEXT("OVERLAP"));
+		this->Explode();
+		Destroy();
+	}
+}
 // Called every frame
 void ASTrackerBot::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
@@ -50,6 +67,27 @@ void ASTrackerBot::Tick(float DeltaTime) {
 		}
 		DrawDebugSphere(GetWorld(), NextPathPoint, 20, 12, FColor::Yellow, false, 0.0f, 1.0f);
 	}
+}
+
+void ASTrackerBot::ServerExplode_Implementation() {
+	this->Explode();
+}
+
+void ASTrackerBot::Explode() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerExplode();
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("TB_EXPLODE"));
+	//Apply Radial Damage. 
+	TArray<AActor*> ignores;
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, GetInstigatorController(), false, ECC_WorldDynamic);
+	PlayExplosionEffect();
+}
+
+
+void ASTrackerBot::PlayExplosionEffect_Implementation() {
+	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionEffect, GetActorLocation(), GetActorRotation(), ExplosionAnimationScale);
 }
 
 FVector ASTrackerBot::GetNextPathPoint() {
