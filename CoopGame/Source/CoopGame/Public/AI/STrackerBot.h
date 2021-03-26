@@ -10,6 +10,7 @@
 class UStaticMeshComponent;
 class USTrackerBotHealthComp;
 class USphereComponent;
+class USoundCue;
 
 
 UCLASS()
@@ -20,8 +21,12 @@ public:
 	// Sets default values for this pawn's properties
 	ASTrackerBot();
 	virtual void Tick(float DeltaTime) override;
+	
 	UFUNCTION(Server, Reliable)
 	void ServerExplode();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayImpulseEffect();
 
 	void Explode();
 
@@ -77,6 +82,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	UParticleSystem*  ExplosionEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	USoundCue* ExplosionSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	TSubclassOf<UDamageType> damageType;

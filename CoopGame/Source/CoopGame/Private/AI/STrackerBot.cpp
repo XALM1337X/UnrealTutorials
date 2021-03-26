@@ -12,6 +12,7 @@
 #include "Components/SphereComponent.h"
 #include "SCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ASTrackerBot::ASTrackerBot() {
@@ -44,7 +45,6 @@ void ASTrackerBot::BeginPlay() {
 }
 void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if (OtherActor->IsA(ASCharacter::StaticClass())) {
-		UE_LOG(LogTemp, Warning, TEXT("OVERLAP"));
 		this->Explode();
 		Destroy();
 	}
@@ -78,9 +78,9 @@ void ASTrackerBot::Explode() {
 		this->ServerExplode();
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("TB_EXPLODE"));
 	//Apply Radial Damage. 
 	TArray<AActor*> ignores;
+	ignores.Add(this);
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, GetInstigatorController(), false, ECC_WorldDynamic);
 	PlayExplosionEffect();
 }
@@ -88,6 +88,17 @@ void ASTrackerBot::Explode() {
 
 void ASTrackerBot::PlayExplosionEffect_Implementation() {
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionEffect, GetActorLocation(), GetActorRotation(), ExplosionAnimationScale);
+	if (ExplosionSound) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, GetActorLocation());
+	}
+}
+
+void ASTrackerBot::PlayImpulseEffect_Implementation()  {
+	if (this->MatInst == nullptr) {
+		this->MatInst = mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, mesh->GetMaterial(0));
+	} else {
+		this->MatInst->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
+	}
 }
 
 FVector ASTrackerBot::GetNextPathPoint() {

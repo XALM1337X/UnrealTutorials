@@ -21,18 +21,12 @@ void USTrackerBotHealthComp::BeginPlay() {
 }
 
 void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser ) {
-    UE_LOG(LogTemp, Warning, TEXT("TrackerBotPointDamage"));
     this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
     AActor* myOwner = GetOwner();
     if (myOwner) {
         ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
         if (tb_act) {
-            UStaticMeshComponent* tb_mesh = tb_act->mesh; //->CreateAndSetMaterialInstanceDynamicFromMaterial(0, mesh->GetMaterial(0));
-            if (tb_act->MatInst == nullptr) {
-                tb_act->MatInst = tb_mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, tb_mesh->GetMaterial(0));
-            } else {
-                tb_act->MatInst->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
-            }
+            tb_act->PlayImpulseEffect();
             if (this->health <= 0.0f) {
                 //PlayExplosion effect && Destroy 
                tb_act->Explode();
@@ -43,7 +37,6 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
 }
 
 void USTrackerBotHealthComp::HandleTakeRadialDamageTrackerBot(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser) {
-    UE_LOG(LogTemp, Warning, TEXT("TrackerBotRadialDamage"));
         this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
 
 	if (this->health <= 0.0f) {
@@ -51,6 +44,7 @@ void USTrackerBotHealthComp::HandleTakeRadialDamageTrackerBot(AActor* DamagedAct
         if (myOwner) {
             ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
             if (tb_act) {
+                tb_act->Explode();
                 GetOwner()->Destroy();
             }
         }
