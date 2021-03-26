@@ -10,6 +10,7 @@
 class UStaticMeshComponent;
 class USTrackerBotHealthComp;
 class USphereComponent;
+class USoundCue;
 
 
 UCLASS()
@@ -81,6 +82,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	UParticleSystem*  ExplosionEffect;
+
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	USoundCue* ExplosionSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	TSubclassOf<UDamageType> damageType;

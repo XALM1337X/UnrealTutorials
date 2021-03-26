@@ -21,7 +21,6 @@ void USTrackerBotHealthComp::BeginPlay() {
 }
 
 void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser ) {
-    UE_LOG(LogTemp, Warning, TEXT("TrackerBotPointDamage"));
     this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
     AActor* myOwner = GetOwner();
     if (myOwner) {
@@ -38,7 +37,6 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
 }
 
 void USTrackerBotHealthComp::HandleTakeRadialDamageTrackerBot(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser) {
-    UE_LOG(LogTemp, Warning, TEXT("TrackerBotRadialDamage"));
         this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
 
 	if (this->health <= 0.0f) {
@@ -46,6 +44,7 @@ void USTrackerBotHealthComp::HandleTakeRadialDamageTrackerBot(AActor* DamagedAct
         if (myOwner) {
             ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
             if (tb_act) {
+                tb_act->Explode();
                 GetOwner()->Destroy();
             }
         }

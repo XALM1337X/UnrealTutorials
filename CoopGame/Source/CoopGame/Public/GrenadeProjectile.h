@@ -10,6 +10,7 @@ class USphereComponent;
 class UProjectileMovementComponent;
 class UParticleSystem;
 class UStaticMeshComponent;
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API AGrenadeProjectile : public AActor
@@ -85,6 +86,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UParticleSystem* Explosion;
 	
+	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
+	USoundCue* ExplosionSound;
 
 	//TODO: This needs to be in replicated struct FVector_NetQuantize
 	FVector ExplosionAnimationScale;

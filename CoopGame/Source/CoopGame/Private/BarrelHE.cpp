@@ -6,6 +6,7 @@
 #include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "SHealthCompMisc.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ABarrelHE::ABarrelHE() {
@@ -33,11 +34,11 @@ void ABarrelHE::ServerExplode_Implementation() {
 	bool Exploded = false;
 	if (GetLocalRole() == ROLE_Authority && !isDead) {
 		if (!this->isDead) {
-			UE_LOG(LogTemp, Warning, TEXT("BOOM"));
 			GetWorld()->GetTimerManager().SetTimer(Handler, this,&ABarrelHE::CleanUp, 5.0f, false);
 			AActor* owner = GetOwner();
 			this->isDead = true;
 			TArray<AActor*> ignores;
+			ignores.Add(this);
 			UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionSphere->GetScaledSphereRadius(), damageType, ignores, this, GetInstigatorController(), false, ECC_WorldDynamic);
 			Exploded = true;
 		}			
@@ -51,6 +52,9 @@ void ABarrelHE::ServerExplode_Implementation() {
 void ABarrelHE::PlayExplosionEffect_Implementation() {
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionEffect, GetActorLocation(), GetActorRotation(), this->ExplosionAnimationScale);
 	mesh->SetMaterial(0, OffMaterial);
+	if(ExplosionSound) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, GetActorLocation());
+	}
 }
 void ABarrelHE::CleanUp_Implementation() {
 	GetWorldTimerManager().ClearTimer(Handler);

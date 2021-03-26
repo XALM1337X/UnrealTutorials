@@ -12,6 +12,7 @@
 #include "Components/SphereComponent.h"
 #include "SCharacter.h"
 #include "DrawDebugHelpers.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 ASTrackerBot::ASTrackerBot() {
@@ -77,9 +78,9 @@ void ASTrackerBot::Explode() {
 		this->ServerExplode();
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("TB_EXPLODE"));
 	//Apply Radial Damage. 
 	TArray<AActor*> ignores;
+	ignores.Add(this);
 	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, GetInstigatorController(), false, ECC_WorldDynamic);
 	PlayExplosionEffect();
 }
@@ -87,6 +88,9 @@ void ASTrackerBot::Explode() {
 
 void ASTrackerBot::PlayExplosionEffect_Implementation() {
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionEffect, GetActorLocation(), GetActorRotation(), ExplosionAnimationScale);
+	if (ExplosionSound) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, GetActorLocation());
+	}
 }
 
 void ASTrackerBot::PlayImpulseEffect_Implementation()  {

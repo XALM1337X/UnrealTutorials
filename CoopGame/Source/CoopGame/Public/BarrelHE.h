@@ -13,6 +13,7 @@ class UMaterialInterface;
 class UStaticMeshComponent;
 class USphereComponent;
 class UDamageType;
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API ABarrelHE : public AActor {
@@ -36,6 +37,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="Effects")
 	FVector ExplosionAnimationScale;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	USoundCue* ExplosionSound;
 
 //Methods/Functions
 public:	

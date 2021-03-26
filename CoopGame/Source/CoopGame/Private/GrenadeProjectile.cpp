@@ -6,6 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 // Sets default values
 AGrenadeProjectile::AGrenadeProjectile() {
@@ -69,4 +70,7 @@ void AGrenadeProjectile::TriggerTimer_Implementation() {
 
 void AGrenadeProjectile::PlayExplosionEffect_Implementation() {
 	UGameplayStatics::SpawnEmitterAtLocation(this, Explosion, GetActorLocation(), GetActorRotation(), this->ExplosionAnimationScale);
+	if(ExplosionSound) {
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ExplosionSound, GetActorLocation());
+	}
 }
