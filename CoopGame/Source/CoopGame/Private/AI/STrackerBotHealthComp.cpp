@@ -27,12 +27,7 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
     if (myOwner) {
         ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
         if (tb_act) {
-            UStaticMeshComponent* tb_mesh = tb_act->mesh; //->CreateAndSetMaterialInstanceDynamicFromMaterial(0, mesh->GetMaterial(0));
-            if (tb_act->MatInst == nullptr) {
-                tb_act->MatInst = tb_mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, tb_mesh->GetMaterial(0));
-            } else {
-                tb_act->MatInst->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
-            }
+            tb_act->PlayImpulseEffect();
             if (this->health <= 0.0f) {
                 //PlayExplosion effect && Destroy 
                tb_act->Explode();

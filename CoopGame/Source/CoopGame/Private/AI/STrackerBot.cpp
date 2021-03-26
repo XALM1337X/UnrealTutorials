@@ -44,7 +44,6 @@ void ASTrackerBot::BeginPlay() {
 }
 void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if (OtherActor->IsA(ASCharacter::StaticClass())) {
-		UE_LOG(LogTemp, Warning, TEXT("OVERLAP"));
 		this->Explode();
 		Destroy();
 	}
@@ -88,6 +87,14 @@ void ASTrackerBot::Explode() {
 
 void ASTrackerBot::PlayExplosionEffect_Implementation() {
 	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionEffect, GetActorLocation(), GetActorRotation(), ExplosionAnimationScale);
+}
+
+void ASTrackerBot::PlayImpulseEffect_Implementation()  {
+	if (this->MatInst == nullptr) {
+		this->MatInst = mesh->CreateAndSetMaterialInstanceDynamicFromMaterial(0, mesh->GetMaterial(0));
+	} else {
+		this->MatInst->SetScalarParameterValue("LastTimeDamageTaken", GetWorld()->TimeSeconds);
+	}
 }
 
 FVector ASTrackerBot::GetNextPathPoint() {

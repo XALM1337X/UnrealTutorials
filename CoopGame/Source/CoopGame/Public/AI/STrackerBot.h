@@ -20,8 +20,12 @@ public:
 	// Sets default values for this pawn's properties
 	ASTrackerBot();
 	virtual void Tick(float DeltaTime) override;
+	
 	UFUNCTION(Server, Reliable)
 	void ServerExplode();
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void PlayImpulseEffect();
 
 	void Explode();
 
