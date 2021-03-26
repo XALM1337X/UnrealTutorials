@@ -26,9 +26,6 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher() {
 void ASWeaponGrenadeLauncher::BeginPlay() {
 	Super::BeginPlay();
 }
-/*void ASWeaponGrenadeLauncher::Tick(float DeltaTime) {
-
-} */
 
 void ASWeaponGrenadeLauncher::ServerReloadWeapon_Implementation() {
 	this->ReloadWeapon();
@@ -102,21 +99,14 @@ void ASWeaponGrenadeLauncher::Fire() {
 				this->needReload = true;
 				this->currentAmmo--;	
 				myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
-
-
 				shotDirection = eyeRotation.Vector();
-
 				traceEndPos = eyeLocation + (shotDirection * 10000);
 				muzzleLocation = this->meshComp->GetSocketLocation(muzzleSocketName);
 				FRotator muzzleRotator = eyeRotation;
-
-
 				traceEndPoint = traceEndPos;
 				if (GetWorld()->LineTraceSingleByChannel(hit, eyeLocation, traceEndPoint, ECC_Visibility)) {
 					traceEndPoint = hit.ImpactPoint;
 				}
-
-
 				// spawn the projectile at the muzzle
 				FRotator finalRot  =  (traceEndPoint - muzzleLocation).Rotation();
 				FActorSpawnParameters actorSpawnParams;
@@ -124,20 +114,12 @@ void ASWeaponGrenadeLauncher::Fire() {
 				actorSpawnParams.Instigator = pawn;
 				//Use replicated muzzleLocation/finalRot
 				AGrenadeProjectile* gren = GetWorld()->SpawnActor<AGrenadeProjectile>(projectileClass, this->muzzleLocation, finalRot, actorSpawnParams);
-
-
 				if (GetLocalRole() == ROLE_Authority) {
 					ASCharacter* my_char = Cast<ASCharacter>(pawn);
 					if (my_char) {
 						this->ClientOnAmmoChanged(my_char, this->currentAmmo, this->clipsLeft, this->maxClipSize, this->weaponName);
 					}
-
-					//Add timer here for explosion on gren.
-
-
-
-				}	
-
+				}
 				PlayFireEffectsGren();
 			}
 		}

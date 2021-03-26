@@ -32,6 +32,7 @@ ASWeapon::ASWeapon() {
 	weaponName = "rifle";
 	clipsLeft = totalAmmo / maxClipSize;
 	rateOfFire = 600;
+	TraceStruct.Ticker = 0;
 	SetReplicates(true);
 
 	//Built in actor tick network frequency.
@@ -194,6 +195,11 @@ void ASWeapon::Fire() {
 		if (GetLocalRole() == ROLE_Authority) {
 			TraceStruct.TraceTo = traceEndPoint;
 			TraceStruct.SurfaceTypeBytes = surfaceType;
+			if (TraceStruct.Ticker == 20000) {
+				TraceStruct.Ticker = 0;
+			} else {
+				TraceStruct.Ticker++;
+			}
 		}
 	} else {
 		this->needReload = true;
