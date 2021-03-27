@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "AI/STrackerBotHealthComp.h"
 #include "Components/SphereComponent.h"
+#include "Components/AudioComponent.h"
 #include "SCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "Sound/SoundCue.h"
@@ -18,14 +19,22 @@
 ASTrackerBot::ASTrackerBot() {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+
+	CollisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("TrackerbotCollisionComp"));
+	RootComponent = CollisionComp;
+	CollisionComp->SetCanEverAffectNavigation(false);
 	mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("meshCompTB"));
-	RootComponent = mesh;
-	mesh->SetCanEverAffectNavigation(false);
+	mesh->SetupAttachment(CollisionComp);
+	//mesh->SetCanEverAffectNavigation(false);
 	ExplosionRadiusSphere = CreateDefaultSubobject<USphereComponent>(TEXT("TrackerBotExplosionRadiusSphere"));
-	ExplosionRadiusSphere->SetupAttachment(mesh);
+	ExplosionRadiusSphere->SetupAttachment(CollisionComp);
 	ExplosionDetinationRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("TrackerBotExplosionDetinationRangeSphere"));
-	ExplosionDetinationRangeSphere->SetupAttachment(mesh);
+	ExplosionDetinationRangeSphere->SetupAttachment(CollisionComp);
 	bUseVelocityChange = false;
+
+	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("TrackerBotRollingSoundComp"));
+	AudioComp->SetupAttachment(CollisionComp);
 	MovementForce = 1000.0f;
 	RequiredDistanceToTarget = 100.0f;
 	TrackerBotHealthComp = CreateDefaultSubobject<USTrackerBotHealthComp>(TEXT("TrackerBotHealthComp"));
@@ -39,9 +48,15 @@ ASTrackerBot::ASTrackerBot() {
 void ASTrackerBot::BeginPlay() {
 	Super::BeginPlay();
 	if (GetLocalRole() == ROLE_Authority) {
-		mesh->SetSimulatePhysics(true);
+		PlayRollSoundEffect();
+		AudioComp->OnAudioFinished.AddDynamic(this, &ASTrackerBot::ReplayRollEffect);
+		CollisionComp->SetSimulatePhysics(true);
 		ExplosionDetinationRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::HandleOverlap);
 	}	
+}
+
+void ASTrackerBot::ReplayRollEffect_Implementation() {
+	PlayRollSoundEffect();
 }
 void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if (OtherActor->IsA(ASCharacter::StaticClass())) {
@@ -62,12 +77,20 @@ void ASTrackerBot::Tick(float DeltaTime) {
 			FVector ForceDirection = NextPathPoint - GetActorLocation();
 			ForceDirection.Normalize();
 			ForceDirection *= MovementForce;
-			mesh->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
+			CollisionComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
 			DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Yellow, false, 0.0f, 0, 1.0f);
 		}
 		DrawDebugSphere(GetWorld(), NextPathPoint, 20, 12, FColor::Yellow, false, 0.0f, 1.0f);
 	}
 }
+
+void ASTrackerBot::PlayRollSoundEffect_Implementation() {
+	if (AudioComp) {
+		AudioComp->Play();
+	}
+}
+
+
 
 void ASTrackerBot::ServerExplode_Implementation() {
 	this->Explode();
