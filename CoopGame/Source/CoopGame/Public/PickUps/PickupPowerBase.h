@@ -14,6 +14,21 @@ class COOPGAME_API APickupPowerBase : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APickupPowerBase();
+	
+
+	void ActivatePickupPower();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Powerups")
+	void OnActivated();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Powerups")
+	void OnExpired();
+
+	UFUNCTION(BlueprintImplementableEvent, Category="Powerups")
+	void OnPickupPowerTicked();
+
+	UFUNCTION()
+	void TickPickupPower();
 
 
 //Member Variables
@@ -25,13 +40,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	UFUNCTION(BlueprintImplementableEvent, Category="Powerups")
-	void OnActivated();
-
-	UFUNCTION(BlueprintImplementableEvent, Category="Powerups")
-	void OnExpired();
-
-
 
 //Member Variables
 protected:
@@ -41,5 +49,10 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly , Category="Powerups")
 	int32 TotalNumberOfTicks; 
+
+	int32 TicksProcessed;
+
+	FTimerHandle TimeHandle; 
+
 
 };
