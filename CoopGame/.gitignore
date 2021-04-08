@@ -75,3 +75,5 @@ Binaries/*
 
 #package
 WindowsNoEditor/*
+
+c_cpp_properties.json
