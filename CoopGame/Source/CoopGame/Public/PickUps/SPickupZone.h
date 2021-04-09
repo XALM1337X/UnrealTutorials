@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class UDecalComponent;
+class APickupPowerBase;
 
 UCLASS()
 class COOPGAME_API ASPickupZone : public AActor {
@@ -29,6 +30,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void Respawn();
 //Member Variables
 protected:
 
@@ -37,6 +40,20 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	UDecalComponent* DecalComp;
+
+	UPROPERTY(EditDefaultsOnly , Category="PickupActor")
+	TSubclassOf<APickupPowerBase> PowerUpBase;
+
+	UPROPERTY(EditDefaultsOnly , Category="PickupActor")
+	float CoolDownDuration;
+
+	APickupPowerBase* PowerUpInstance;
+
+	FTimerHandle TimerHandlerRespawn;
+
+
+
+
 	
 
 };

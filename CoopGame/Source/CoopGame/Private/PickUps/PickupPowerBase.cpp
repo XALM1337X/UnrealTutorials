@@ -2,6 +2,7 @@
 
 
 #include "PickUps/PickupPowerBase.h"
+#include "GameFramework/Actor.h"
 
 // Sets default values
 APickupPowerBase::APickupPowerBase() {
@@ -29,10 +30,13 @@ void APickupPowerBase::TickPickupPower() {
 }
 
 void APickupPowerBase::ActivatePickupPower() {
+	UE_LOG(LogTemp, Warning, TEXT("POWER_HIT_0"));
 	if (PowerupInterval > 0.0f) {
 		GetWorldTimerManager().SetTimer(TimeHandle, this, &APickupPowerBase::TickPickupPower, PowerupInterval, true, 0.0f);
 	} else {
-		TickPickupPower();
+		UE_LOG(LogTemp, Warning, TEXT("POWER_HIT_1"));
+		OnActivated();
+		GetWorldTimerManager().SetTimer(TimeHandle, this, &APickupPowerBase::OnExpired, 3.0f, true);
 	}
 }
 

@@ -4,6 +4,7 @@
 #include "PickUps/SPickupZone.h"
 #include "Components/SphereComponent.h"
 #include "Components/DecalComponent.h"
+#include "PickUps/PickupPowerBase.h"
 // Sets default values
 ASPickupZone::ASPickupZone() {
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("PickupZoneSphereComp"));
@@ -19,12 +20,31 @@ ASPickupZone::ASPickupZone() {
 // Called when the game starts or when spawned
 void ASPickupZone::BeginPlay() {
 	Super::BeginPlay();
-	
+	Respawn();
 }
+
+
+void ASPickupZone::Respawn() {
+	if (!PowerUpBase) {
+		UE_LOG(LogTemp, Warning, TEXT("Respawn failure."));
+		return;
+	}
+	FActorSpawnParameters actorSpawnParams;
+	actorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	PowerUpInstance = GetWorld()->SpawnActor<APickupPowerBase>(PowerUpBase, GetTransform(), actorSpawnParams);
+
+}
+
 
 void ASPickupZone::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
+	UE_LOG(LogTemp, Warning, TEXT("ACTOR OVERLAP 0"));
+	if (PowerUpInstance) {
+		UE_LOG(LogTemp, Warning, TEXT("ACTOR OVERLAP 1"));
+		PowerUpInstance->ActivatePickupPower();
 
+		PowerUpInstance = nullptr;
+		GetWorldTimerManager().SetTimer(TimerHandlerRespawn,this, &ASPickupZone::Respawn, CoolDownDuration); 
+	}
 }
-
-
