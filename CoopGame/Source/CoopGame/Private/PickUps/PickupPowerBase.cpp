@@ -15,6 +15,10 @@ APickupPowerBase::APickupPowerBase() {
 // Called when the game starts or when spawned
 void APickupPowerBase::BeginPlay() {
 	Super::BeginPlay();
+	InitPower();
+}
+
+void APickupPowerBase::InitPower() {
 
 }
 
@@ -30,12 +34,13 @@ void APickupPowerBase::TickPickupPower() {
 }
 
 void APickupPowerBase::ActivatePickupPower() {
-	UE_LOG(LogTemp, Warning, TEXT("POWER_HIT_0"));
+
 	if (PowerupInterval > 0.0f) {
 		GetWorldTimerManager().SetTimer(TimeHandle, this, &APickupPowerBase::TickPickupPower, PowerupInterval, true, 0.0f);
+		this->SetActorHiddenInGame(true);
 	} else {
-		UE_LOG(LogTemp, Warning, TEXT("POWER_HIT_1"));
 		OnActivated();
+		this->SetActorHiddenInGame(true);
 		GetWorldTimerManager().SetTimer(TimeHandle, this, &APickupPowerBase::OnExpired, 3.0f, true);
 	}
 }

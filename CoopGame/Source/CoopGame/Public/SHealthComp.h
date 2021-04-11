@@ -29,7 +29,7 @@ public:
 public:	
 	// Sets default values for this component's properties
 	USHealthComp();
-
+	UFUNCTION(BlueprintCallable)
 	void SetHealth(float val);
 	float GetHealth();
 	

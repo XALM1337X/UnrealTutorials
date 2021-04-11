@@ -6,6 +6,12 @@
 #include "GameFramework/Actor.h"
 #include "PickupPowerBase.generated.h"
 
+/*UENUM()
+enum class PowerType : uint8 {
+	Speed  UMETA(DisplayName = "Speed"),
+	Health UMETA(DisplayName = "Health")
+};*/
+
 UCLASS()
 class COOPGAME_API APickupPowerBase : public AActor
 {
@@ -15,6 +21,7 @@ public:
 	// Sets default values for this actor's properties
 	APickupPowerBase();
 	
+	void InitPower();
 
 	void ActivatePickupPower();
 
@@ -49,6 +56,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly , Category="Powerups")
 	int32 TotalNumberOfTicks; 
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Powerups")
+    PowerType PowerUpType;*/
 
 	int32 TicksProcessed;
 
