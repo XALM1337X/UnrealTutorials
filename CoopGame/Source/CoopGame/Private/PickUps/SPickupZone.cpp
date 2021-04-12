@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/DecalComponent.h"
 #include "PickUps/PickupPowerBase.h"
+#include "GrenadeProjectile.h"
 // Sets default values
 ASPickupZone::ASPickupZone() {
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("PickupZoneSphereComp"));
@@ -39,12 +40,12 @@ void ASPickupZone::Respawn() {
 
 void ASPickupZone::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
-	UE_LOG(LogTemp, Warning, TEXT("ACTOR OVERLAP 0"));
-	if (PowerUpInstance) {
-		UE_LOG(LogTemp, Warning, TEXT("ACTOR OVERLAP 1"));
-		PowerUpInstance->ActivatePickupPower();
+	if (!OtherActor->IsA(AGrenadeProjectile::StaticClass())) {
+		if (PowerUpInstance) {
+			PowerUpInstance->ActivatePickupPower();
 
-		PowerUpInstance = nullptr;
-		GetWorldTimerManager().SetTimer(TimerHandlerRespawn,this, &ASPickupZone::Respawn, CoolDownDuration); 
+			PowerUpInstance = nullptr;
+			GetWorldTimerManager().SetTimer(TimerHandlerRespawn,this, &ASPickupZone::Respawn, CoolDownDuration); 
+		}
 	}
 }
