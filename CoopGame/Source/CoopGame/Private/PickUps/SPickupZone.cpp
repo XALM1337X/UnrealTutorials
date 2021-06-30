@@ -6,6 +6,7 @@
 #include "Components/DecalComponent.h"
 #include "PickUps/PickupPowerBase.h"
 #include "GrenadeProjectile.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 ASPickupZone::ASPickupZone() {
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("PickupZoneSphereComp"));
@@ -21,11 +22,19 @@ ASPickupZone::ASPickupZone() {
 // Called when the game starts or when spawned
 void ASPickupZone::BeginPlay() {
 	Super::BeginPlay();
-	Respawn();
+	if (GetLocalRole() == ROLE_Authority) {
+		Respawn();
+	}
 }
 
+void ASPickupZone::ServerRespawn() {
+	this->Respawn();
+}
 
-void ASPickupZone::Respawn() {
+void ASPickupZone::Respawn_Implementation() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerRespawn();
+	}
 	if (!PowerUpBase) {
 		UE_LOG(LogTemp, Warning, TEXT("Respawn failure."));
 		return;
@@ -48,4 +57,11 @@ void ASPickupZone::NotifyActorBeginOverlap(AActor* OtherActor) {
 			GetWorldTimerManager().SetTimer(TimerHandlerRespawn,this, &ASPickupZone::Respawn, CoolDownDuration); 
 		}
 	}
+}
+
+
+void ASPickupZone::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ASPickupZone, PowerUpBase);
 }

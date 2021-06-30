@@ -188,7 +188,7 @@ protected:
 	void ServerToggleSprintOff();
 	void SprintOff();
 
-	UFUNCTION(NetMulticast, Reliable) 
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable) 
 	void CastRunSpeed(int speed);
 
 	//Jump

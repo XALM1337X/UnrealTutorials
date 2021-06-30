@@ -306,8 +306,6 @@ void ASCharacter::SprintOn() {
 	
 }
 
-
-
 void ASCharacter::ServerToggleSprintOff_Implementation() {
 	this->SprintOff();
 }
@@ -411,8 +409,6 @@ FVector ASCharacter::GetPawnViewLocation() const {
 void ASCharacter::OnRep_RunStateChange() {
 	this->isSprinting = this->run_replicator.sprintMsg;
 }
-
-
 
 void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
 

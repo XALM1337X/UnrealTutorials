@@ -22,8 +22,16 @@ void APickupPowerBase::InitPower() {
 
 }
 
-void APickupPowerBase::TickPickupPower() {
+void APickupPowerBase::ServerTickPickupPower() {
+	this->TickPickupPower();
+}
 
+void APickupPowerBase::TickPickupPower_Implementation() {
+
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerTickPickupPower();
+		return;
+	}
 	TicksProcessed++; 
 	OnPickupPowerTicked();
 
@@ -33,7 +41,15 @@ void APickupPowerBase::TickPickupPower() {
 	}
 }
 
-void APickupPowerBase::ActivatePickupPower() {
+void APickupPowerBase::ServerActivatePickupPower() {
+	this->ActivatePickupPower();
+}
+
+void APickupPowerBase::ActivatePickupPower_Implementation() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerActivatePickupPower();
+		return;
+	}
 
 	if (PowerupInterval > 0.0f) {
 		GetWorldTimerManager().SetTimer(TimeHandle, this, &APickupPowerBase::TickPickupPower, PowerupInterval, true, 0.0f);

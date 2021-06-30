@@ -31,7 +31,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(Server, Reliable)
 	virtual void Respawn();
+
+	void ServerRespawn();
 //Member Variables
 protected:
 
@@ -41,7 +44,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="Components")
 	UDecalComponent* DecalComp;
 
-	UPROPERTY(EditDefaultsOnly , Category="PickupActor")
+	UPROPERTY(Replicated, EditDefaultsOnly , Category="PickupActor")
 	TSubclassOf<APickupPowerBase> PowerUpBase;
 
 	UPROPERTY(EditDefaultsOnly , Category="PickupActor")

@@ -23,7 +23,13 @@ public:
 	
 	void InitPower();
 
+	UFUNCTION(Server, Reliable)
 	void ActivatePickupPower();
+	void ServerActivatePickupPower();
+
+	UFUNCTION(Server, Reliable)
+	void TickPickupPower();
+	void ServerTickPickupPower();
 
 	UFUNCTION(BlueprintImplementableEvent, Category="Powerups")
 	void OnActivated();
@@ -33,9 +39,6 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category="Powerups")
 	void OnPickupPowerTicked();
-
-	UFUNCTION()
-	void TickPickupPower();
 
 
 //Member Variables
