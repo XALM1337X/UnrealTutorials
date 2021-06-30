@@ -37,7 +37,9 @@ ASCharacter::ASCharacter() {
 	isAiming = false;
 	isFiring = false;
 	isCrouching = false;
+	isSprinting = false;
 	WeaponAttachSocketName = "WeaponSocket";
+
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 	//GetCapsuleComponent()->SetCollisionResponseToChannel()
@@ -276,31 +278,55 @@ void ASCharacter::ToggleCrouch() {
 }
 
 void ASCharacter::ToggleSprint(RunState speed) {
-	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
-		APlayerController *PC = Cast<APlayerController>(It->Get());
-		if (PC && PC->IsLocalController()) {			
-			APawn* Pawn = PC->GetPawn();
-			if (Pawn) {
-				UCharacterMovementComponent* PawnMovement = Cast<UCharacterMovementComponent>(Pawn->GetMovementComponent());
-				if (PawnMovement) {
-					switch(speed) {
-						case RunState::Walk: {
-							PawnMovement->MaxWalkSpeed = 600;
-							break;
-						}
-						case RunState::Run:	{
-							PawnMovement->MaxWalkSpeed = 1000;
-							break;
-						}
-					}
-				}
-			}
+
+	switch(speed) {
+		case RunState::Walk: {
+			this->SprintOff();
+			break;
+		}
+		case RunState::Run:	{
+			
+			this->SprintOn();
+			break;
 		}
 	}
 }
 
-void ASCharacter::ToggleJump(JumpState jumping)
-{
+void ASCharacter::ServerToggleSprintOn_Implementation() {
+	this->SprintOn();
+}
+
+void ASCharacter::SprintOn() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerToggleSprintOn(); 
+		return;
+	}	
+	this->run_replicator.sprintMsg = true;
+	CastRunSpeed(850);
+	
+}
+
+
+
+void ASCharacter::ServerToggleSprintOff_Implementation() {
+	this->SprintOff();
+}
+
+void ASCharacter::SprintOff() {
+	if (GetLocalRole() != ROLE_Authority) {
+		this->ServerToggleSprintOff(); 
+		return;
+	}
+	this->run_replicator.sprintMsg = false;
+	CastRunSpeed(600);
+}
+
+
+void ASCharacter::CastRunSpeed_Implementation(int speed) {
+	GetCharacterMovement()->MaxWalkSpeed = speed;	
+}
+
+void ASCharacter::ToggleJump(JumpState jumping) {
 	for(FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It) {
 		APlayerController *PC = Cast<APlayerController>(It->Get());
 		if (PC && PC->IsLocalController()) {
@@ -382,10 +408,17 @@ FVector ASCharacter::GetPawnViewLocation() const {
 	return Super::GetPawnViewLocation();
 }
 
+void ASCharacter::OnRep_RunStateChange() {
+	this->isSprinting = this->run_replicator.sprintMsg;
+}
+
+
+
 void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
 
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 	DOREPLIFETIME(ASCharacter, CameraComponent);
 	DOREPLIFETIME(ASCharacter, isAiming);
+	DOREPLIFETIME(ASCharacter, run_replicator);
 }

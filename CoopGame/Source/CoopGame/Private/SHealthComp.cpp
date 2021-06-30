@@ -144,6 +144,7 @@ void USHealthComp::CleanUp() {
 
 void USHealthComp::SetHealth(float val) {
 	this->health = val;
+	ClientOnHealthChange(this, this->health, 0.0f, nullptr,  nullptr, FVector(0.0f, 0.0f, 0.0f), "");
 }
 
 float USHealthComp::GetHealth() {

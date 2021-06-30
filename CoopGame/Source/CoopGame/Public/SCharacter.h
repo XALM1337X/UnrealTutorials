@@ -7,6 +7,7 @@
 #include "SCharacter.generated.h"
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAmmoChangeSigniture, int, AmmoCount, int, ClipCount, int, MaxClipSize, FString, WeaponName);
 
+
 enum class WeaponSelectedState: uint8 {
 	Primary,
 	Secondary
@@ -49,6 +50,17 @@ class UCameraComponent;
 class USpringArmComponent;
 class ASWeapon;
 class USHealthComp;
+
+
+USTRUCT()
+struct FRunningStateReplicator {
+	GENERATED_BODY()
+	public: 
+		UPROPERTY()
+		bool sprintMsg;
+};
+
+
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
 {
@@ -124,13 +136,22 @@ protected:
 	float hipPOV;
 
 	bool isFiring;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Player")
+	bool isSprinting;
 
 	FTimerHandle th_time_between_shots;
 
+	UPROPERTY(ReplicatedUsing=OnRep_RunStateChange)
+	FRunningStateReplicator run_replicator;
 
 //Protected Methods/Functions
 protected:
 	// Called when the game starts or when spawned
+	
+	UFUNCTION()
+	void OnRep_RunStateChange();
+
 	virtual void BeginPlay() override;
 	
 	void ToggleCrouch();
@@ -152,11 +173,23 @@ protected:
 	void ServerSetIsAiming(bool aim);
 	void SetIsAiming(bool aim);
 
+
 	//These are Toggle Templates bound to action inputs.
 	//Sprint
 	void ToggleSprint(RunState speed);
 	template<RunState speed>
 	void ToggleSprint() {ToggleSprint(speed);}
+
+	UFUNCTION(Server, Reliable)
+	void ServerToggleSprintOn();
+	void SprintOn(); 
+
+	UFUNCTION(Server, Reliable)
+	void ServerToggleSprintOff();
+	void SprintOff();
+
+	UFUNCTION(NetMulticast, Reliable) 
+	void CastRunSpeed(int speed);
 
 	//Jump
 	void ToggleJump(JumpState jumping);	
