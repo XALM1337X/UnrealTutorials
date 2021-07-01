@@ -137,7 +137,7 @@ protected:
 
 	bool isFiring;
 	
-	UPROPERTY(BlueprintReadOnly, Category="Player")
+	UPROPERTY(BlueprintReadWrite, Category="Player")
 	bool isSprinting;
 
 	FTimerHandle th_time_between_shots;

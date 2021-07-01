@@ -51,7 +51,7 @@ void ASPickupZone::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 	if (!OtherActor->IsA(AGrenadeProjectile::StaticClass())) {
 		if (PowerUpInstance) {
-			PowerUpInstance->ActivatePickupPower();
+			PowerUpInstance->ActivatePickupPower(OtherActor);
 
 			PowerUpInstance = nullptr;
 			GetWorldTimerManager().SetTimer(TimerHandlerRespawn,this, &ASPickupZone::Respawn, CoolDownDuration); 
