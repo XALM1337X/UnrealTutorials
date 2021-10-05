@@ -16,7 +16,7 @@ APickupPowerBase::APickupPowerBase() {
 void APickupPowerBase::NotifyActorBeginOverlap(AActor* OtherActor) {
 	Super::NotifyActorBeginOverlap(OtherActor);
 }
-
+ 
 // Called when the game starts or when spawned
 void APickupPowerBase::BeginPlay() {
 	Super::BeginPlay();

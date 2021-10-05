@@ -34,6 +34,7 @@ void ASPickupZone::ServerRespawn() {
 void ASPickupZone::Respawn_Implementation() {
 	if (GetLocalRole() != ROLE_Authority) {
 		this->ServerRespawn();
+		return;
 	}
 	if (!PowerUpBase) {
 		UE_LOG(LogTemp, Warning, TEXT("Respawn failure."));
