@@ -58,10 +58,10 @@ void ASTrackerBot::BeginPlay() {
 void ASTrackerBot::ReplayRollEffect_Implementation() {
 	PlayRollSoundEffect();
 }
+
 void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if (OtherActor->IsA(ASCharacter::StaticClass())) {
 		this->Explode();
-		Destroy();
 	}
 }
 // Called every frame
@@ -104,8 +104,9 @@ void ASTrackerBot::Explode() {
 	//Apply Radial Damage. 
 	TArray<AActor*> ignores;
 	ignores.Add(this);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, GetInstigatorController(), false, ECC_WorldDynamic);
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, nullptr, false, ECC_WorldDynamic);
 	PlayExplosionEffect();
+	Destroy();
 }
 
 

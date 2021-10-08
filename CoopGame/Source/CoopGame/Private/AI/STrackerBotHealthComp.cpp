@@ -30,7 +30,6 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
             if (this->health <= 0.0f) {
                 //PlayExplosion effect && Destroy 
                tb_act->Explode();
-               GetOwner()->Destroy();
             }
         }
     }
@@ -45,7 +44,6 @@ void USTrackerBotHealthComp::HandleTakeRadialDamageTrackerBot(AActor* DamagedAct
             ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
             if (tb_act) {
                 tb_act->Explode();
-                GetOwner()->Destroy();
             }
         }
     }
