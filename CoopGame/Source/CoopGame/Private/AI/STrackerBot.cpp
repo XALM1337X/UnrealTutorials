@@ -41,6 +41,7 @@ ASTrackerBot::ASTrackerBot() {
 	ExplosionForce = 500.0f;
 	ExplosionDamage = 25;
 	ExplosionAnimationScale = FVector(1.0f,1.0f,1.0f);
+	isDead = false;
 	SetReplicates(true);
 }
 
@@ -62,10 +63,10 @@ void ASTrackerBot::ReplayRollEffect_Implementation() {
 void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if (OtherActor->IsA(ASCharacter::StaticClass())) {
 		AActor* TB = Cast<AActor>(this); 
-		if (TB && TB->IsActorBeingDestroyed()) {
+		if ((TB && TB->IsActorBeingDestroyed()) || this->isDead) {
 			return;
 		}
-		this->Explode();
+		this->ServerExplode();
 	}
 }
 // Called every frame
@@ -97,26 +98,22 @@ void ASTrackerBot::PlayRollSoundEffect_Implementation() {
 
 
 void ASTrackerBot::ServerExplode_Implementation() {
-	this->Explode();
-}
-
-void ASTrackerBot::Explode() {
-	
 		if (GetLocalRole() != ROLE_Authority) {
 			this->ServerExplode();
 			return;
 		}
 		AActor* TB = Cast<AActor>(this); 
-		if (TB && TB->IsActorBeingDestroyed()) {
+		if ((TB && TB->IsActorBeingDestroyed()) || this->isDead) {
 			return;
 		}
 		//Apply Radial Damage. 
 		TArray<AActor*> ignores;
 		ignores.Add(this);
+		this->isDead = true;
 		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, nullptr, false, ECC_WorldDynamic);
 		PlayExplosionEffect();
 		Destroy();
-	
+
 }
 
 

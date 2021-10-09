@@ -29,7 +29,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void PlayImpulseEffect();
 
-	void Explode();
 
 //Member variables
 public:	
@@ -102,5 +101,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	TSubclassOf<UDamageType> damageType;
+
+	bool isDead;
 
 };
