@@ -61,6 +61,10 @@ void ASTrackerBot::ReplayRollEffect_Implementation() {
 
 void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	if (OtherActor->IsA(ASCharacter::StaticClass())) {
+		AActor* TB = Cast<AActor>(this); 
+		if (TB && TB->IsActorBeingDestroyed()) {
+			return;
+		}
 		this->Explode();
 	}
 }
@@ -77,7 +81,7 @@ void ASTrackerBot::Tick(float DeltaTime) {
 			FVector ForceDirection = NextPathPoint - GetActorLocation();
 			ForceDirection.Normalize();
 			ForceDirection *= MovementForce;
-			CollisionComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
+			//CollisionComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
 			DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Yellow, false, 0.0f, 0, 1.0f);
 		}
 		DrawDebugSphere(GetWorld(), NextPathPoint, 20, 12, FColor::Yellow, false, 0.0f, 1.0f);
@@ -97,16 +101,22 @@ void ASTrackerBot::ServerExplode_Implementation() {
 }
 
 void ASTrackerBot::Explode() {
-	if (GetLocalRole() != ROLE_Authority) {
-		this->ServerExplode();
-		return;
-	}
-	//Apply Radial Damage. 
-	TArray<AActor*> ignores;
-	ignores.Add(this);
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, nullptr, false, ECC_WorldDynamic);
-	PlayExplosionEffect();
-	Destroy();
+	
+		if (GetLocalRole() != ROLE_Authority) {
+			this->ServerExplode();
+			return;
+		}
+		AActor* TB = Cast<AActor>(this); 
+		if (TB && TB->IsActorBeingDestroyed()) {
+			return;
+		}
+		//Apply Radial Damage. 
+		TArray<AActor*> ignores;
+		ignores.Add(this);
+		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadiusSphere->GetScaledSphereRadius(), damageType, ignores, this, nullptr, false, ECC_WorldDynamic);
+		PlayExplosionEffect();
+		Destroy();
+	
 }
 
 

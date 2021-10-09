@@ -21,6 +21,10 @@ void USTrackerBotHealthComp::BeginPlay() {
 }
 
 void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation, class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType, AActor* DamageCauser ) {
+    AActor* HC = Cast<AActor>(this);
+    if ((HC && HC->IsActorBeingDestroyed()) && HC != DamageCauser) {
+        return;
+    }
     this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
     AActor* myOwner = GetOwner();
     if (myOwner) {
@@ -29,23 +33,25 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
             tb_act->PlayImpulseEffect();
             if (this->health <= 0.0f) {
                 //PlayExplosion effect && Destroy 
-               tb_act->Explode();
+            tb_act->Explode();
             }
         }
     }
+    
 }
 
 void USTrackerBotHealthComp::HandleTakeRadialDamageTrackerBot(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin, FHitResult HitInfo, class AController* InstigatedBy, AActor* DamageCauser) {
-        this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
-
-	if (this->health <= 0.0f) {
-        AActor* myOwner = GetOwner();
-        if (myOwner) {
-            ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
-            if (tb_act) {
-                tb_act->Explode();
-            }
-        }
+    AActor* HC = Cast<AActor>(this);
+    if ((HC && HC->IsActorBeingDestroyed()) && HC != DamageCauser) {
+        return;
     }
+    this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
+    AActor* myOwner = GetOwner();
+    if (myOwner) {
+        ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
+        if (this->health <= 0.0f && tb_act) {                
+            tb_act->Explode();              
+        }
+    }    
 }
 

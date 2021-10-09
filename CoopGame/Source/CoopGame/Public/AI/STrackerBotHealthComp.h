@@ -27,7 +27,6 @@ class COOPGAME_API USTrackerBotHealthComp : public USHealthComp
 	//Member vars
 	protected:
 
-
 	public:
 		USTrackerBotHealthComp();
 	
