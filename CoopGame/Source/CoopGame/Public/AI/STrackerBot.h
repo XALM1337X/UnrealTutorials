@@ -46,6 +46,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	USphereComponent* ExplosionDetinationRangeSphere;
 
+	UPROPERTY(EditAnywhere)
+	USphereComponent* PlayerDetectionSphere;
+
 	UPROPERTY(EditDefaultsOnly, Category = "TrackerBot")
 	float ExplosionForce; 
 
@@ -54,7 +57,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	FVector GetNextPathPoint();
+	FVector GetNextPathPoint(AActor* OtherActor);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void PlayExplosionEffect();
@@ -65,9 +68,15 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void ReplayRollEffect();
+
+	UFUNCTION(Server, Reliable)
+	void ServerPlayerLockOn(AActor* OtherActor);
 	
 	UFUNCTION()
 	void HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void HandlePlayerOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -103,5 +112,7 @@ protected:
 	TSubclassOf<UDamageType> damageType;
 
 	bool isDead;
+
+	AActor* Target;
 
 };

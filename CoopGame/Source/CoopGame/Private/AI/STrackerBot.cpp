@@ -33,15 +33,19 @@ ASTrackerBot::ASTrackerBot() {
 	ExplosionDetinationRangeSphere->SetupAttachment(CollisionComp);
 	bUseVelocityChange = false;
 
+	PlayerDetectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("PlayerDetectionSphere"));
+	PlayerDetectionSphere->SetupAttachment(CollisionComp);
+
 	AudioComp = CreateDefaultSubobject<UAudioComponent>(TEXT("TrackerBotRollingSoundComp"));
 	AudioComp->SetupAttachment(CollisionComp);
 	MovementForce = 1000.0f;
-	RequiredDistanceToTarget = 100.0f;
+	RequiredDistanceToTarget = 250;
 	TrackerBotHealthComp = CreateDefaultSubobject<USTrackerBotHealthComp>(TEXT("TrackerBotHealthComp"));
 	ExplosionForce = 500.0f;
 	ExplosionDamage = 25;
 	ExplosionAnimationScale = FVector(1.0f,1.0f,1.0f);
 	isDead = false;
+	Target = nullptr;
 	SetReplicates(true);
 }
 
@@ -53,6 +57,7 @@ void ASTrackerBot::BeginPlay() {
 		AudioComp->OnAudioFinished.AddDynamic(this, &ASTrackerBot::ReplayRollEffect);
 		CollisionComp->SetSimulatePhysics(true);
 		ExplosionDetinationRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::HandleOverlap);
+		PlayerDetectionSphere->OnComponentBeginOverlap.AddDynamic(this, &ASTrackerBot::HandlePlayerOverlap);
 	}	
 }
 
@@ -69,23 +74,43 @@ void ASTrackerBot::HandleOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 		this->ServerExplode();
 	}
 }
-// Called every frame
+
+void ASTrackerBot::HandlePlayerOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+
+	
+	if (GetLocalRole() == ROLE_Authority) {
+		this->ServerPlayerLockOn(OtherActor);
+
+	}
+}
+
+void ASTrackerBot::ServerPlayerLockOn_Implementation(AActor* OtherActor) {
+	if (OtherActor && !Target) {
+		Target = OtherActor;
+		GetNextPathPoint(Target);
+		//UE_LOG(LogTemp, Warning, TEXT("PLAYER_OVERLAP"));
+	}
+}
+
 void ASTrackerBot::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	if (GetLocalRole() == ROLE_Authority) {
-		float DistanceToTarget = (GetActorLocation() - NextPathPoint).Size();
-		if (DistanceToTarget <= RequiredDistanceToTarget) {
-			//UE_LOG(LogTemp, Warning, TEXT("HIT_1"));
-			NextPathPoint = GetNextPathPoint();
-		} else {
-			//UE_LOG(LogTemp, Warning, TEXT("%f : %f"),DistanceToTarget,RequiredDistanceToTarget);
-			FVector ForceDirection = NextPathPoint - GetActorLocation();
-			ForceDirection.Normalize();
-			ForceDirection *= MovementForce;
-			//CollisionComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
-			DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Yellow, false, 0.0f, 0, 1.0f);
+
+		if (Target) {
+			float DistanceToTarget = (NextPathPoint - GetActorLocation()).Size();
+			if (DistanceToTarget <= RequiredDistanceToTarget) {
+				//UE_LOG(LogTemp, Warning, TEXT("HIT_1"));
+				NextPathPoint = GetNextPathPoint(Target);
+			} else {
+				//UE_LOG(LogTemp, Warning, TEXT("%f : %f"),DistanceToTarget,RequiredDistanceToTarget);
+				FVector ForceDirection = NextPathPoint - GetActorLocation();
+				ForceDirection.Normalize();
+				ForceDirection *= MovementForce;
+				CollisionComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
+				DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Yellow, false, 0.0f, 0, 1.0f);
+			}
+			DrawDebugSphere(GetWorld(), Target->GetActorLocation(), 20, 12, FColor::Yellow, false, 0.0f, 1.0f);
 		}
-		DrawDebugSphere(GetWorld(), NextPathPoint, 20, 12, FColor::Yellow, false, 0.0f, 1.0f);
 	}
 }
 
@@ -132,16 +157,13 @@ void ASTrackerBot::PlayImpulseEffect_Implementation()  {
 	}
 }
 
-FVector ASTrackerBot::GetNextPathPoint() {
-	ACharacter* MyChar = UGameplayStatics::GetPlayerCharacter(this, 0); 
-	if (MyChar) {
-		AActor* MyAct = Cast<AActor>(MyChar);
-		if (MyAct) {
-			UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), MyAct);
-			if (NavPath && NavPath->PathPoints.Num() > 1) {
-				return NavPath->PathPoints[1];
-			}
+FVector ASTrackerBot::GetNextPathPoint(AActor* OtherActor) {
+	if (OtherActor) {
+		UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), OtherActor);
+		if (NavPath && NavPath->PathPoints.Num() > 1) {
+			return NavPath->PathPoints[1];
 		}
+		
 	}	
 	return GetActorLocation();
 }

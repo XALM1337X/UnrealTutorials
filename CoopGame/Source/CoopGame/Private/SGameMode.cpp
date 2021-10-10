@@ -13,7 +13,7 @@ ASGameMode::ASGameMode() {
 
 void ASGameMode::StartWave() {
     WaveCount++;
-    NumBotsToSpawn =  WaveCount;
+    NumBotsToSpawn =  2 * WaveCount;
     GetWorldTimerManager().SetTimer(TimerHandle_BotSpawner, this, &ASGameMode::SpawnBotTimerElapsed, 1.0f, true, 0.0f);
 }
 
