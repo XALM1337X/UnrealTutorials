@@ -3,21 +3,25 @@
 
 #include "SGameMode.h"
 #include "TimerManager.h"
-
+#include "EngineUtils.h"
+#include "AI/STrackerBotHealthComp.h"
 
 ASGameMode::ASGameMode() {
     WaveCount = 0;
     NumBotsToSpawn = 0;
     TimeBetweenWaves = 3.0f;
+    
 }
 
+
 void ASGameMode::StartPlay() {
+    FTimerHandle TimerHandle_CheckWaveState; 
     Super::StartPlay();
     PrepareForNextWave();
+    GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 0.0f);
 }
 
 void ASGameMode::PrepareForNextWave() {
-    FTimerHandle TimerHandle_TimeNextWaveStart; 
     GetWorldTimerManager().SetTimer(TimerHandle_TimeNextWaveStart, this, &ASGameMode::StartWave,TimeBetweenWaves, false);
 }
 
@@ -43,5 +47,26 @@ void ASGameMode::EndWave() {
 
 
 void ASGameMode::CheckWaveState() {
+    bool isPreparingWave = GetWorldTimerManager().IsTimerActive(TimerHandle_TimeNextWaveStart);
+    if (NumBotsToSpawn > 0 || isPreparingWave) {
+        return;
+    }
+    bool bIsAnyBotAlive = false;
+     for (TActorIterator<APawn> Itr(GetWorld()); Itr; ++Itr) {
+        APawn *TestPawn = *Itr;
+        if (TestPawn == nullptr || TestPawn->IsPlayerControlled()) {
+            continue;
+        }
+ 
+        USTrackerBotHealthComp* HealthComp = Cast<USTrackerBotHealthComp>(TestPawn->GetComponentByClass(USTrackerBotHealthComp::StaticClass()));
+        if (HealthComp && HealthComp->GetHealth() > 0.0f) {
+            bIsAnyBotAlive = true;
+            break;
+        }
+    }
 
+    if (!bIsAnyBotAlive) {
+        UE_LOG(LogTemp, Warning, TEXT("Starting Next Wave."));
+        PrepareForNextWave();
+    }
 }

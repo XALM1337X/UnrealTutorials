@@ -17,6 +17,8 @@ class COOPGAME_API ASGameMode : public AGameModeBase
 protected:
 	FTimerHandle TimerHandle_BotSpawner;
 
+	FTimerHandle TimerHandle_TimeNextWaveStart; 
+
 	int32 NumBotsToSpawn;
 
 	int32 WaveCount;
@@ -25,7 +27,7 @@ protected:
 	float TimeBetweenWaves;
 
 protected:
-	
+
 	void PrepareForNextWave();
 
 	UFUNCTION(BlueprintImplementableEvent, Category="GameMode")
@@ -43,4 +45,5 @@ public:
 
 	ASGameMode();
 	virtual void StartPlay() override;
+
 };
