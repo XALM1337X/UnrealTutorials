@@ -31,5 +31,5 @@ class COOPGAME_API USTrackerBotHealthComp : public USHealthComp
 		USTrackerBotHealthComp();
 	
 	public: 
-	
+
 };

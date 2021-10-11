@@ -3,6 +3,8 @@
 
 #include "AI/STrackerBotHealthComp.h"
 #include "AI/STrackerBot.h"
+#include "SGameMode.h"
+#include "SCharacter.h"
 
 USTrackerBotHealthComp::USTrackerBotHealthComp() {
 	this->defaultHealth = 100;
@@ -26,12 +28,21 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
         return;
     }
     this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
+
     AActor* myOwner = GetOwner();
     if (myOwner) {
         ASTrackerBot* tb_act = Cast<ASTrackerBot>(myOwner);
         if (tb_act) {
             tb_act->PlayImpulseEffect();
-            if (this->health <= 0.0f) {
+            if (this->health <= 0.0f) {             
+                
+                ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());                    
+                if (GM) {
+                    if (InstigatedBy) {
+                        GM->ClientScoreBroadcast(DamagedActor, DamageCauser, InstigatedBy);
+                    }
+                }
+                
                 //PlayExplosion effect && Destroy 
             tb_act->ServerExplode();
             }

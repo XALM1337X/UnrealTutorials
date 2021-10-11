@@ -9,6 +9,7 @@
 #include "SHealthComp.h"
 #include "SGameState.h"
 #include "AI/STrackerBot.h"
+#include "SPlayerState.h"
 
 
 ASGameMode::ASGameMode() {
@@ -16,6 +17,7 @@ ASGameMode::ASGameMode() {
     NumBotsToSpawn = 0;
     TimeBetweenWaves = 3.0f;
     GameStateClass = ASGameState::StaticClass();
+    PlayerStateClass = ASPlayerState::StaticClass();
     
 }
 
@@ -23,7 +25,11 @@ ASGameMode::ASGameMode() {
 void ASGameMode::StartPlay() {
     Super::StartPlay();
     SetWaveState(EWaveState::WaitingToStart);
-    GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 0.0f);
+    GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 5.0f);
+}
+
+void ASGameMode::BeginPlay() {
+    Super::BeginPlay();
 }
 
 void ASGameMode::PrepareForNextWave() {
@@ -122,4 +128,8 @@ void ASGameMode::PostGameAiCleanup() {
             TB->Destroy();
         }
     }
+}
+
+void ASGameMode::ClientScoreBroadcast_Implementation(AActor* VictimActor, AActor* KillerActor, AController* KillerController) {
+    this->OnActorKilled.Broadcast(VictimActor, KillerActor, KillerController);
 }
