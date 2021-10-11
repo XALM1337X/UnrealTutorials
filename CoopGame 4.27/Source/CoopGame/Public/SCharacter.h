@@ -95,6 +95,8 @@ public:
 
 	ASWeapon* GetWeapon();
 
+	USHealthComp* GetHealthComponent(); 
+
 //Protected Member Variables
 protected:
 	//UProperties 
@@ -160,6 +162,7 @@ protected:
 	void Reload();
 
 	void Fire();
+
 
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchToPrimary();

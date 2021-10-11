@@ -5,6 +5,8 @@
 #include "TimerManager.h"
 #include "EngineUtils.h"
 #include "AI/STrackerBotHealthComp.h"
+#include "SCharacter.h"
+#include "SHealthComp.h"
 
 ASGameMode::ASGameMode() {
     WaveCount = 0;
@@ -15,7 +17,6 @@ ASGameMode::ASGameMode() {
 
 
 void ASGameMode::StartPlay() {
-    FTimerHandle TimerHandle_CheckWaveState; 
     Super::StartPlay();
     PrepareForNextWave();
     GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 0.0f);
@@ -47,6 +48,10 @@ void ASGameMode::EndWave() {
 
 
 void ASGameMode::CheckWaveState() {
+    if (!CheckLivingPlayersState()) {
+        GetWorldTimerManager().ClearTimer(TimerHandle_CheckWaveState);
+        return;
+    }
     bool isPreparingWave = GetWorldTimerManager().IsTimerActive(TimerHandle_TimeNextWaveStart);
     if (NumBotsToSpawn > 0 || isPreparingWave) {
         return;
@@ -69,4 +74,23 @@ void ASGameMode::CheckWaveState() {
         UE_LOG(LogTemp, Warning, TEXT("Starting Next Wave."));
         PrepareForNextWave();
     }
+}
+
+bool ASGameMode::CheckLivingPlayersState() {
+     bool isPlayerStillAlive = false;
+     for (TActorIterator<ASCharacter> Itr(GetWorld()); Itr; ++Itr) {
+         ASCharacter* Player = *Itr; 
+         if (Player) {
+             USHealthComp* playerHC = Player->GetHealthComponent();
+             if (playerHC->GetHealth() > 0) {
+                isPlayerStillAlive = true;
+                break;
+             }
+         } 
+     }
+     if (!isPlayerStillAlive) {
+         UE_LOG(LogTemp, Warning, TEXT("GAME OVER!"));
+         return false;
+     }
+     return true;
 }

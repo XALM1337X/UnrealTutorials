@@ -136,6 +136,10 @@ void ASCharacter::Fire() {
 
 }
 
+USHealthComp* ASCharacter::GetHealthComponent() {
+	return this->HealthComp;
+}
+
 void ASCharacter::ServerSwitchToPrimary_Implementation() {
 	this->SwitchToPrimary();
 }

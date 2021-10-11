@@ -107,9 +107,9 @@ void ASTrackerBot::Tick(float DeltaTime) {
 				ForceDirection.Normalize();
 				ForceDirection *= MovementForce;
 				CollisionComp->AddForce(ForceDirection, NAME_None, bUseVelocityChange);
-				DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Yellow, false, 0.0f, 0, 1.0f);
+				//DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32, FColor::Yellow, false, 0.0f, 0, 1.0f);
 			}
-			DrawDebugSphere(GetWorld(), Target->GetActorLocation(), 20, 12, FColor::Yellow, false, 0.0f, 1.0f);
+			//DrawDebugSphere(GetWorld(), Target->GetActorLocation(), 20, 12, FColor::Yellow, false, 0.0f, 1.0f);
 		}
 	}
 }
@@ -162,6 +162,9 @@ FVector ASTrackerBot::GetNextPathPoint(AActor* OtherActor) {
 		UNavigationPath* NavPath = UNavigationSystemV1::FindPathToActorSynchronously(this, GetActorLocation(), OtherActor);
 		if (NavPath && NavPath->PathPoints.Num() > 1) {
 			return NavPath->PathPoints[1];
+		} else if (NavPath && NavPath->PathPoints.Num() < 1) {
+			Target = nullptr;
+			Destroy();
 		}
 		
 	}	

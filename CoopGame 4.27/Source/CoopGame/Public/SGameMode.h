@@ -19,6 +19,8 @@ protected:
 
 	FTimerHandle TimerHandle_TimeNextWaveStart; 
 
+	FTimerHandle TimerHandle_CheckWaveState; 
+
 	int32 NumBotsToSpawn;
 
 	int32 WaveCount;
@@ -40,6 +42,8 @@ protected:
 	void EndWave(); 
 
 	void CheckWaveState();
+
+	bool CheckLivingPlayersState();
 
 public: 
 
