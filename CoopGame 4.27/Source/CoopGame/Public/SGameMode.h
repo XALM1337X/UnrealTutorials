@@ -9,6 +9,8 @@
 /**
  * 
  */
+enum class EWaveState :  uint8;
+
 UCLASS()
 class COOPGAME_API ASGameMode : public AGameModeBase
 {
@@ -44,6 +46,10 @@ protected:
 	void CheckWaveState();
 
 	bool CheckLivingPlayersState();
+
+	void SetWaveState(EWaveState NewState);
+
+	void PostGameAiCleanup();
 
 public: 
 
