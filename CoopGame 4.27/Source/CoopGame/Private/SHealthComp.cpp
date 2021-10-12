@@ -14,6 +14,7 @@
 #include "Net/UnrealNetwork.h"
 #include "GrenadeProjectile.h"
 #include "AI/STrackerBot.h"
+#include "SGameMode.h"
 
 
 // Sets default values for this component's properties
@@ -21,13 +22,13 @@ USHealthComp::USHealthComp() {
 	//PrimaryComponentTick.bCanEverTick = true;
 	this->defaultHealth = 100;
 	this->health = 0;
+	this->isDead = false;
 	SetIsReplicated(true);
 }
 
 
 // Called when the game starts
-void USHealthComp::BeginPlay()
-{
+void USHealthComp::BeginPlay() {
 	Super::BeginPlay();	
 	if (GetOwnerRole() == ROLE_Authority) {
 		AActor* myOwner = GetOwner();
@@ -45,7 +46,7 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 	this->health = FMath::Clamp(this->health - Damage, 0.0f, this->defaultHealth);
 	//UE_LOG(LogTemp, Log, TEXT("Health After: %s"), *FString::SanitizeFloat(health));
 
-	if (this->health <= 0.0f) {
+	if (this->health <= 0.0f && !this->isDead) {
 		ASCharacter* character = Cast<ASCharacter>(DamagedActor);
 
 		if (character) {
@@ -61,10 +62,17 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 			ApplyPhysicsPointDamage(character, ShotFromDirection, BoneName);
 
 
+			ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());                    
+			if (GM) {
+				if (InstigatedBy) {
+					GM->ClientScoreBroadcast(DamagedActor, DamageCauser, InstigatedBy);
+				}
+			}
+
 			FTimerHandle Handler;
 			GetWorld()->GetTimerManager().SetTimer(Handler, this,&USHealthComp::CleanUp, 3.0f, false);
 		}
-		
+		this->isDead = true;
 	}
 	ClientOnHealthChange(this, this->health, Damage, InstigatedBy,  DamageCauser, ShotFromDirection, BoneName);
 	//UE_LOG(LogTemp, Log, TEXT("Health Changed: %s"), *FString::SanitizeFloat(health));
