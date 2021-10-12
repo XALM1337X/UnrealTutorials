@@ -12,6 +12,7 @@
 enum class EWaveState :  uint8;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorKilled, AActor*, VictimActor, AActor*, KillerActor, AController*, KillerController);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRespawnRequest, AController*, PlayerController);
 
 UCLASS()
 class COOPGAME_API ASGameMode : public AGameModeBase
@@ -63,6 +64,9 @@ public:
 	UFUNCTION(Client, reliable)
 	void ClientScoreBroadcast(AActor* VictimActor, AActor* KillerActor, AController* KillerController);
 
+	UFUNCTION(Client, reliable)
+	void ClientSendRespawnRequest(APlayerController* RespawnController);
+
 	virtual void BeginPlay() override;
 
 
@@ -70,5 +74,8 @@ public:
 	
 	UPROPERTY(BlueprintAssignable, Category="GameMode")
 	FOnActorKilled OnActorKilled;
+
+	UPROPERTY(BlueprintAssignable, Category="GameMode")
+	FRespawnRequest RespawnRequest;
 
 };

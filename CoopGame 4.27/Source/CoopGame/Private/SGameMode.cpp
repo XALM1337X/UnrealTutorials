@@ -65,6 +65,16 @@ void ASGameMode::CheckWaveState() {
         SetWaveState(EWaveState::GameOver);
         GetWorldTimerManager().ClearTimer(TimerHandle_CheckWaveState);
         PostGameAiCleanup();
+
+        //TODO: Put in own function 
+        for (FConstPlayerControllerIterator ContItr = GetWorld()->GetPlayerControllerIterator(); ContItr; ContItr++) {
+            APlayerController* PlayerCont = Cast<APlayerController>(*ContItr);
+            if (PlayerCont) {
+                //this->ClientSendRespawnRequest(PlayerCont);
+                PlayerCont->bShowMouseCursor = true;
+            }
+        }
+
         return;
     }
     bool isPreparingWave = GetWorldTimerManager().IsTimerActive(TimerHandle_TimeNextWaveStart);
@@ -132,4 +142,8 @@ void ASGameMode::PostGameAiCleanup() {
 
 void ASGameMode::ClientScoreBroadcast_Implementation(AActor* VictimActor, AActor* KillerActor, AController* KillerController) {
     this->OnActorKilled.Broadcast(VictimActor, KillerActor, KillerController);
+}
+
+void ASGameMode::ClientSendRespawnRequest_Implementation(APlayerController* RespawnController) {
+    this->RespawnRequest.Broadcast(RespawnController);
 }
