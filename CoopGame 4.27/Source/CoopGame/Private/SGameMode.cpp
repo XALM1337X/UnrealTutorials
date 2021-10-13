@@ -30,6 +30,10 @@ void ASGameMode::StartPlay() {
 
 void ASGameMode::BeginPlay() {
     Super::BeginPlay();
+    ASGameState* state = GetGameState<ASGameState>();
+    if (ensureAlways(state)) {
+        state->SetOwner(this);
+    }
 }
 
 void ASGameMode::PrepareForNextWave() {
@@ -71,7 +75,6 @@ void ASGameMode::CheckWaveState() {
             APlayerController* PlayerCont = Cast<APlayerController>(*ContItr);
             if (PlayerCont) { 
                 this->SendRespawnRequest(PlayerCont);
-                //PlayerCont->bShowMouseCursor = true;
             }
         }
 
@@ -150,3 +153,9 @@ void ASGameMode::SendRespawnRequest(APlayerController* RespawnController) {
         GS->respawn_replicator.controller = RespawnController;
     }
 }
+
+/*void ASGameMode::RespawnCharacter(APlayerController* Controller) {
+    if (Controller) {
+        this->RestartPlayer(Controller);
+    }
+}*/

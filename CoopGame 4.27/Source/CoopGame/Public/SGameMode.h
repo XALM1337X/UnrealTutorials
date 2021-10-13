@@ -68,6 +68,10 @@ public:
 
 	virtual void BeginPlay() override;
 
+	/*
+	UFUNCTION(BlueprintCallable, Category="GameMode")
+	void RespawnCharacter(APlayerController* Controller);
+	*/
 
 public: 
 	
