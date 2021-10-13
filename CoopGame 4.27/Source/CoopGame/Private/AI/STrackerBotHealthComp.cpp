@@ -39,7 +39,7 @@ void USTrackerBotHealthComp::HandleTakePointDamageTrackerBot(AActor* DamagedActo
                 ASGameMode* GM = Cast<ASGameMode>(GetWorld()->GetAuthGameMode());                    
                 if (GM) {
                     if (InstigatedBy) {
-                        GM->ClientScoreBroadcast(DamagedActor, DamageCauser, InstigatedBy);
+                        GM->ScoreBroadcast(DamagedActor, DamageCauser, InstigatedBy);
                     }
                 }
                 

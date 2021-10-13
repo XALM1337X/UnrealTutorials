@@ -69,9 +69,9 @@ void ASGameMode::CheckWaveState() {
         //TODO: Put in own function 
         for (FConstPlayerControllerIterator ContItr = GetWorld()->GetPlayerControllerIterator(); ContItr; ContItr++) {
             APlayerController* PlayerCont = Cast<APlayerController>(*ContItr);
-            if (PlayerCont) {
-                //this->ClientSendRespawnRequest(PlayerCont);
-                PlayerCont->bShowMouseCursor = true;
+            if (PlayerCont) { 
+                this->SendRespawnRequest(PlayerCont);
+                //PlayerCont->bShowMouseCursor = true;
             }
         }
 
@@ -140,10 +140,13 @@ void ASGameMode::PostGameAiCleanup() {
     }
 }
 
-void ASGameMode::ClientScoreBroadcast_Implementation(AActor* VictimActor, AActor* KillerActor, AController* KillerController) {
+void ASGameMode::ScoreBroadcast(AActor* VictimActor, AActor* KillerActor, AController* KillerController) {
     this->OnActorKilled.Broadcast(VictimActor, KillerActor, KillerController);
 }
 
-void ASGameMode::ClientSendRespawnRequest_Implementation(APlayerController* RespawnController) {
-    this->RespawnRequest.Broadcast(RespawnController);
+void ASGameMode::SendRespawnRequest(APlayerController* RespawnController) {
+    ASGameState* GS = GetGameState<ASGameState>();
+    if (ensureAlways(GS)) {
+        GS->respawn_replicator.controller = RespawnController;
+    }
 }
