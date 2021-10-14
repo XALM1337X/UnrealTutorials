@@ -48,7 +48,8 @@ ASCharacter::ASCharacter() {
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
 	//GetCapsuleComponent()->SetCollisionResponseToChannel()
-	SetReplicates(true);
+	//SetReplicates(true);
+	this->bReplicates = true;
 }
 
 // Called when the game starts or when spawned

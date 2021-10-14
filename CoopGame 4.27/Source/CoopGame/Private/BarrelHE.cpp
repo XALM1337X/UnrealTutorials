@@ -21,7 +21,8 @@ ABarrelHE::ABarrelHE() {
 	this->ExplosionForce = 1000.0f;
 	this->ExplosionAnimationScale = FVector(5.0f,5.0f,5.0f);
 	isDead = false;
-	SetReplicates(true);
+	//SetReplicates(true);
+	this->bReplicates = true;
 }
 
 // Called when the game starts or when spawned

@@ -46,7 +46,8 @@ ASTrackerBot::ASTrackerBot() {
 	ExplosionAnimationScale = FVector(1.0f,1.0f,1.0f);
 	isDead = false;
 	Target = nullptr;
-	SetReplicates(true);
+	//SetReplicates(true);
+	this->bReplicates = true;
 }
 
 // Called when the game starts or when spawned

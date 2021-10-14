@@ -19,7 +19,8 @@ ASWeaponGrenadeLauncher::ASWeaponGrenadeLauncher() {
 	this->totalAmmo = 3;
 	this->needReload = false;
 	this->weaponName = "Launcher";
-	SetReplicates(true);
+	//SetReplicates(true);
+	this->bReplicates = true;
 }
 
 

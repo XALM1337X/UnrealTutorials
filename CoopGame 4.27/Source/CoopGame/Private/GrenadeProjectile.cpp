@@ -38,7 +38,8 @@ AGrenadeProjectile::AGrenadeProjectile() {
 		this->ExplosionAnimationScale = FVector(3.0f,3.0f,3.0f);
 		//this->SetCollisionResponseToChannel
 
-		SetReplicates(true);
+		//SetReplicates(true);
+		this->bReplicates = true;
 		//SetReplicateMovement(true);	<<-- Notice I did comment this out as suggested, and disabled it in my blueprint.
 	//}
 }

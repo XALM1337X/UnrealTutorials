@@ -8,7 +8,8 @@
 
 ASPlayerController::ASPlayerController() {
     //IsDead = false;
-    SetReplicates(true);
+    //SetReplicates(true);
+    this->bReplicates = true;
 }
 
 

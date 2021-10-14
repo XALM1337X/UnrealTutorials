@@ -33,7 +33,8 @@ ASWeapon::ASWeapon() {
 	clipsLeft = totalAmmo / maxClipSize;
 	rateOfFire = 600;
 	TraceStruct.Ticker = 0;
-	SetReplicates(true);
+	//SetReplicates(true);
+	this->bReplicates = true;
 
 	//Built in actor tick network frequency.
 	//Note: This is ranged from 2.0f to 100.0f by default.
