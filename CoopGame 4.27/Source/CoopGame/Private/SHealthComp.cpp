@@ -15,6 +15,7 @@
 #include "GrenadeProjectile.h"
 #include "AI/STrackerBot.h"
 #include "SGameMode.h"
+#include "SPlayerController.h"
 
 
 // Sets default values for this component's properties
@@ -55,7 +56,7 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 			if (MC) {
 				MC->StopMovementImmediately();
 			} 
-			APlayerController* cont = Cast<APlayerController>(character->GetController());
+			ASPlayerController* cont = Cast<ASPlayerController>(character->GetController());
 			if (cont) {
 				character->DisableInput(cont);
 			}
@@ -102,7 +103,7 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 			if (MC) {
 				MC->StopMovementImmediately();
 			} 
-			APlayerController* cont = Cast<APlayerController>(character->GetController());
+			ASPlayerController* cont = Cast<ASPlayerController>(character->GetController());
 			if (cont) {
 				character->DisableInput(cont);
 			}

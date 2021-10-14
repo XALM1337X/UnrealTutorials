@@ -28,10 +28,6 @@ ASGameMode::ASGameMode() {
 //Standard actor events
 void ASGameMode::BeginPlay() {
     Super::BeginPlay();
-    ASGameState* state = GetGameState<ASGameState>();
-    if (ensureAlways(state)) {
-        state->SetOwner(this);
-    }
     IsGameActive=true;
 }
 //////////////////////////////////////////////////////////////
@@ -45,16 +41,10 @@ void ASGameMode::StartPlay() {
 }
 
 void ASGameMode::PlayerStateSpawnHandler() {
-    for (FConstPlayerControllerIterator ContItr = GetWorld()->GetPlayerControllerIterator(); ContItr; ContItr++) {
-        APlayerController* PlayerCont = Cast<APlayerController>(*ContItr);
-        if (PlayerCont) { 
-            ASCharacter* PlayerChar = Cast<ASCharacter>(PlayerCont); 
-            if (!PlayerChar) {
-                this->SendRespawnRequest(PlayerCont);
-            }
-        }
-    }
-    return;    
+    ASGameState* GS = GetGameState<ASGameState>();
+    if (ensureAlways(GS)) {
+        GS->CheckPlayerRespawn();
+    }   
 }
 
 void ASGameMode::GameRestartHandler() {
@@ -72,7 +62,7 @@ void ASGameMode::GameRestartHandler() {
 }
 
 void ASGameMode::CheckWaveState() {
-    if (CheckLivingPlayersState()) {
+    if (!CheckLivingPlayersState()) {
         PostGameAiCleanup();
         IsGameActive = false;
         GetWorldTimerManager().ClearTimer(TimerHandle_CheckWaveState);
@@ -175,19 +165,20 @@ void ASGameMode::ScoreBroadcast(AActor* VictimActor, AActor* KillerActor, AContr
     this->OnActorKilled.Broadcast(VictimActor, KillerActor, KillerController);
 }
 
-void ASGameMode::SendRespawnRequest(APlayerController* RespawnController) {
+void ASGameMode::SendRespawnRequest(ASPlayerController* RespawnController) {
     ASGameState* GS = GetGameState<ASGameState>();
     if (ensureAlways(GS)) {
+        //UE_LOG(LogTemp, Warning, TEXT("HIT-1"));
         GS->respawn_replicator.controller = RespawnController;
-    }
+        GS->respawn_replicator.repTick += 1;
+        if (GS->respawn_replicator.repTick > 1000) {
+            GS->respawn_replicator.repTick = 0;
+        }
+    } 
 }
 
-void ASGameMode::RespawnCharacter(APlayerController* Controller) {
+void ASGameMode::RespawnCharacter(ASPlayerController* Controller) {
     if (Controller) {
         this->RestartPlayer(Controller);
-        ASCharacter* Character = Cast<ASCharacter>(Controller); 
-        if (Character) {
-            Character->EnableInput(Controller);
-        }
     }
 }

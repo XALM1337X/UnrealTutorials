@@ -4,13 +4,15 @@
 #include "SPlayerController.h"
 #include "SGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 ASPlayerController::ASPlayerController() {
-
+    //IsDead = false;
+    SetReplicates(true);
 }
 
 
-void ASPlayerController::TriggerRespawn_Implementation(APlayerController* PlayerCont) {
+void ASPlayerController::TriggerRespawn_Implementation(ASPlayerController* PlayerCont) {
     if (GetLocalRole() != ROLE_Authority) {
         return;
     }
@@ -19,3 +21,8 @@ void ASPlayerController::TriggerRespawn_Implementation(APlayerController* Player
         GM->RespawnCharacter(PlayerCont);
     }
 }
+
+//void ASPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
+    //Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+   // DOREPLIFETIME(ASPlayerController, IsDead);
+//}

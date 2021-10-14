@@ -10,6 +10,7 @@
  * 
  */
 enum class EWaveState :  uint8;
+class ASPlayerController;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorKilled, AActor*, VictimActor, AActor*, KillerActor, AController*, KillerController);
 
@@ -74,13 +75,13 @@ public:
 	void ScoreBroadcast(AActor* VictimActor, AActor* KillerActor, AController* KillerController);
 
 
-	void SendRespawnRequest(APlayerController* RespawnController);
+	void SendRespawnRequest(ASPlayerController* RespawnController);
 
 	virtual void BeginPlay() override;
 
 	
 	UFUNCTION(BlueprintCallable, Category="GameMode")
-	void RespawnCharacter(APlayerController* Controller);
+	void RespawnCharacter(ASPlayerController* Controller);
 	
 
 public: 

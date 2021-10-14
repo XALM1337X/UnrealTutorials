@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "SPlayerController.generated.h"
 
+
+class ASPlayerController;
 /**
  * 
  */
@@ -17,8 +19,12 @@ class COOPGAME_API ASPlayerController : public APlayerController
 public: 
 	ASPlayerController();
 
+public:
+	//UPROPERTY(Replicated)
+	//bool IsDead;
+
 protected: //
 	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void TriggerRespawn(APlayerController* PlayerCont);
+	void TriggerRespawn(ASPlayerController* PlayerCont);
 	
 };

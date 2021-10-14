@@ -27,6 +27,9 @@ struct FRespawnCheck {
 	public:
 		UPROPERTY()
 		APlayerController* controller;
+
+		UPROPERTY()
+		int repTick;
 };
 
 
@@ -37,7 +40,8 @@ class COOPGAME_API ASGameState : public AGameStateBase {
 public: 
 	ASGameState();
 	virtual void BeginPlay() override;
-	
+	UFUNCTION()
+	void CheckPlayerRespawn();
 
 protected: 
 	UFUNCTION()
@@ -51,6 +55,8 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category="GameState")
 	void StateRespawnRequest(APlayerController* PC);
+
+
 
 
 public:
