@@ -52,9 +52,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="GameState")
 	void StateRespawnRequest(APlayerController* PC);
 
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void TriggerRespawn(APlayerController* PlayerCont);
-
 
 public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing=OnRep_WaveState, Category="GameState")

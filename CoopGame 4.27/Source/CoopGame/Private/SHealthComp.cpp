@@ -57,7 +57,7 @@ void USHealthComp::HandleTakePointDamage(AActor* DamagedActor, float Damage, cla
 			} 
 			APlayerController* cont = Cast<APlayerController>(character->GetController());
 			if (cont) {
-				//character->DisableInput(cont);
+				character->DisableInput(cont);
 			}
 			ApplyPhysicsPointDamage(character, ShotFromDirection, BoneName);
 
@@ -104,7 +104,7 @@ void USHealthComp::HandleTakeRadialDamage(AActor* DamagedActor, float Damage, co
 			} 
 			APlayerController* cont = Cast<APlayerController>(character->GetController());
 			if (cont) {
-				//character->DisableInput(cont);
+				character->DisableInput(cont);
 			}
 
 			if (DamageCauser->IsA(AGrenadeProjectile::StaticClass())) {

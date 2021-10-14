@@ -3,7 +3,6 @@
 
 #include "SGameState.h"
 #include "Net/UnrealNetwork.h"
-#include "Kismet/GameplayStatics.h"
 #include "SGameMode.h"
 
 
@@ -25,15 +24,7 @@ void ASGameState::OnRep_StateRespawnRequest() {
     StateRespawnRequest(respawn_replicator.controller);
 }
 
-void ASGameState::TriggerRespawn_Implementation(APlayerController* PlayerCont) {
-    if (GetLocalRole() != ROLE_Authority) {
-        return;
-    }
-    ASGameMode* GM = Cast<ASGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
-    if (ensureAlways(GM)) {
-        GM->RestartPlayer(PlayerCont);
-    }
-}
+
 
 void ASGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

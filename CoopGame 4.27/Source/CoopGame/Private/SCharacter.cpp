@@ -12,6 +12,11 @@
 #include "CoopGame/CoopGame.h"
 #include "SHealthComp.h"
 #include "Net/UnrealNetwork.h"
+#include "SGameMode.h"
+#include "SPlayerController.h"
+
+
+
 static int32 DebugMode = 0;
 FAutoConsoleVariableRef DebugDeath(TEXT("COOP.DebugDeath"), DebugMode, TEXT("Set death defaults"), ECVF_Cheat);
 // Sets default values
@@ -68,6 +73,12 @@ void ASCharacter::BeginPlay() {
 		if (CurrentWeapon) {
 			CurrentWeapon->SetOwner(this);
 			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+		}
+
+
+		ASPlayerController* PC = Cast<ASPlayerController>(this); 
+		if (PC) {
+			this->EnableInput(PC);
 		}
 	}
 	
@@ -413,6 +424,8 @@ FVector ASCharacter::GetPawnViewLocation() const {
 void ASCharacter::OnRep_RunStateChange() {
 	this->isSprinting = this->run_replicator.sprintMsg;
 }
+
+
 
 void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> & OutLifetimeProps) const {
 

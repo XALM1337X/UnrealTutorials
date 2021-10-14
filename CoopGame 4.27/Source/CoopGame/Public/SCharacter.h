@@ -96,6 +96,7 @@ public:
 	ASWeapon* GetWeapon();
 
 	USHealthComp* GetHealthComponent(); 
+	
 
 //Protected Member Variables
 protected:
@@ -175,7 +176,6 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerSetIsAiming(bool aim);
 	void SetIsAiming(bool aim);
-
 
 	//These are Toggle Templates bound to action inputs.
 	//Sprint

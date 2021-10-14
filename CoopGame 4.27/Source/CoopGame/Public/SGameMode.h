@@ -25,9 +25,15 @@ protected:
 
 	FTimerHandle TimerHandle_CheckWaveState; 
 
+	FTimerHandle TimerHandle_PlayerRespawnState;
+
+	FTimerHandle TimerHandle_GameRestartState;
+
 	int32 NumBotsToSpawn;
 
 	int32 WaveCount;
+
+	bool IsGameActive;
 
 	UPROPERTY(EditDefaultsOnly, Category="GameMode")
 	float TimeBetweenWaves;
@@ -53,6 +59,10 @@ protected:
 
 	void PostGameAiCleanup();
 
+	void PlayerStateSpawnHandler();
+
+	void GameRestartHandler();
+
 
 
 public: 
@@ -68,10 +78,10 @@ public:
 
 	virtual void BeginPlay() override;
 
-	/*
+	
 	UFUNCTION(BlueprintCallable, Category="GameMode")
 	void RespawnCharacter(APlayerController* Controller);
-	*/
+	
 
 public: 
 	
