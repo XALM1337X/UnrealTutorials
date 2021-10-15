@@ -11,6 +11,7 @@
 #include "AI/STrackerBot.h"
 #include "SPlayerState.h"
 #include "SPlayerController.h"
+#include "SAIController.h"
 
 
 
@@ -37,15 +38,47 @@ void ASGameMode::StartPlay() {
     Super::StartPlay();
     SetWaveState(EWaveState::WaitingToStart);
     //GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 5.0f);
-    GetWorldTimerManager().SetTimer(TimerHandle_PlayerRespawnState, this, &ASGameMode::PlayerStateSpawnHandler, 3.0f, true, 0.0f);
-    SpawnNewAdvancedAI();
+    GetWorldTimerManager().SetTimer(TimerHandle_PlayerRespawnState, this, &ASGameMode::PlayerSpawnHandler, 3.0f, true, 0.0f);
+
+    GetWorldTimerManager().SetTimer(TimerHandle_AdvancedAISpawn, this, &ASGameMode::AdvancedAISpawnHandler, 1.0f, true, 3.0f);
+
 }
 
-void ASGameMode::PlayerStateSpawnHandler() {
+void ASGameMode::PlayerSpawnHandler() {
     ASGameState* GS = GetGameState<ASGameState>();
     if (ensureAlways(GS)) {
         GS->CheckPlayerRespawn();
     }   
+}
+
+void ASGameMode::AdvancedAISpawnHandler() {
+    bool canSpawn = false;
+    for (TActorIterator<ASCharacter> Itr(GetWorld()); Itr; ++Itr) {
+        ASCharacter* Player = *Itr;
+        if (Player) {
+            canSpawn = true;
+        }
+    } 
+
+
+    if (canSpawn) {   
+        bool liveBot = false;     
+        for (TActorIterator<APawn> Itr(GetWorld()); Itr; ++Itr) {
+            APawn* target_pawn = *Itr;
+            if (target_pawn && !target_pawn->IsPlayerControlled()) {
+                if (target_pawn->IsA(ASCharacter::StaticClass())) {
+                    ASAIController* AiController = Cast<ASAIController>(target_pawn->GetController());
+                    if (AiController) {    
+                        liveBot = true;                    
+                        break;
+                    }
+                }
+            }
+        }
+        if (!liveBot) {
+            SpawnNewAdvancedAI();
+        }
+    }
 }
 
 void ASGameMode::GameRestartHandler() {

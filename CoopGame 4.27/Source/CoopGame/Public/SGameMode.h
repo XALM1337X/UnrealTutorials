@@ -30,6 +30,8 @@ protected:
 
 	FTimerHandle TimerHandle_GameRestartState;
 
+	FTimerHandle TimerHandle_AdvancedAISpawn;
+
 	int32 NumBotsToSpawn;
 
 	int32 WaveCount;
@@ -64,7 +66,9 @@ protected:
 
 	void PostGameAiCleanup();
 
-	void PlayerStateSpawnHandler();
+	void PlayerSpawnHandler();
+
+	void AdvancedAISpawnHandler();
 
 	void GameRestartHandler();
 
