@@ -43,6 +43,7 @@ public:
 	UFUNCTION()
 	void CheckPlayerRespawn();
 
+
 protected: 
 	UFUNCTION()
 	void OnRep_WaveState(EWaveState OldState);
@@ -55,8 +56,6 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category="GameState")
 	void StateRespawnRequest(APlayerController* PC);
-
-
 
 
 public:

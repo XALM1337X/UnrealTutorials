@@ -46,6 +46,10 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="GameMode")
 	void SpawnNewBot();
 
+	
+	UFUNCTION(BlueprintImplementableEvent, Category="GameMode")
+	void SpawnNewAdvancedAI();
+
 	void SpawnBotTimerElapsed();
 
 	void StartWave();

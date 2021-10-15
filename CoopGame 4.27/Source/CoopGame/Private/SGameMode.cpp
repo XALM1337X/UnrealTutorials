@@ -38,6 +38,7 @@ void ASGameMode::StartPlay() {
     SetWaveState(EWaveState::WaitingToStart);
     //GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 5.0f);
     GetWorldTimerManager().SetTimer(TimerHandle_PlayerRespawnState, this, &ASGameMode::PlayerStateSpawnHandler, 3.0f, true, 0.0f);
+    SpawnNewAdvancedAI();
 }
 
 void ASGameMode::PlayerStateSpawnHandler() {
