@@ -110,7 +110,7 @@ void ASGameMode::CheckWaveState() {
         return;
     }
     bool bIsAnyBotAlive = false;
-     for (TActorIterator<APawn> Itr(GetWorld()); Itr; ++Itr) {
+    for (TActorIterator<APawn> Itr(GetWorld()); Itr; ++Itr) {
         APawn *TestPawn = *Itr;
         if (TestPawn == nullptr || TestPawn->IsPlayerControlled()) {
             continue;

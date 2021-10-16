@@ -171,7 +171,7 @@ void USHealthComp::ApplyPhysicsPointDamage_Implementation(ASCharacter* character
 	USkeletalMeshComponent* mesh = character->GetMesh();
 	if (mesh) {
 		mesh->SetSimulatePhysics(true);
-		mesh->AddImpulseAtLocation(ShotFromDirection*8000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
+		mesh->AddImpulseAtLocation(ShotFromDirection*15000, ShotFromDirection ,BoneName);   //TODO: Remove magic number later with adjustable UPROPERTY.
 	} 
 }
 
