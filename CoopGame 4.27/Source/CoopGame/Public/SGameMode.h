@@ -32,7 +32,11 @@ protected:
 
 	FTimerHandle TimerHandle_AdvancedAISpawn;
 
+	int32 NumBotsToSpawnPersistent;
 	int32 NumBotsToSpawn;
+
+	int32 NumAdvancedAIToSpawnPersistent;
+	int32 NumAdvancedAIToSpawn;
 
 	int32 WaveCount;
 
