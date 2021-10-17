@@ -379,6 +379,7 @@ void ASCharacter::ToggleFire(FireState fire) {
 			if (CurrentWeapon) {
 				float FirstDelay = FMath::Max(CurrentWeapon->GetLastFireTime() + CurrentWeapon->GetTimeBetweenShots() - GetWorld()->TimeSeconds, 0.0f);
 				GetWorldTimerManager().SetTimer(th_time_between_shots, this, &ASCharacter::Fire, CurrentWeapon->GetTimeBetweenShots() , true, FirstDelay);
+				GetWorldTimerManager().SetTimer(th_recoil_tick_timer, this, &ASCharacter::TickUpRecoil, 1.5f, true, .5);
 			}	
 			break;
 		}
@@ -387,11 +388,35 @@ void ASCharacter::ToggleFire(FireState fire) {
 			this->SetFiringState(false);
 			if (CurrentWeapon) {
 				GetWorldTimerManager().ClearTimer(th_time_between_shots);
+				GetWorldTimerManager().ClearTimer(th_recoil_tick_timer);
+				GetWorldTimerManager().SetTimer(th_recoil_tick_timer, this, &ASCharacter::TickDownRecoil, .5f, true, 0.0f);
 			}
 			break;
 		}
 	}	
 }
+
+void ASCharacter::TickUpRecoil_Implementation() {
+	if (GetLocalRole() == ROLE_Authority) {
+		if (CurrentWeapon) {
+			CurrentWeapon->SetBulletSpread(CurrentWeapon->GetBulletSpread() + 1); 
+		}
+	}
+}
+
+void ASCharacter::TickDownRecoil_Implementation() {
+
+	if (GetLocalRole() == ROLE_Authority) {
+		if (CurrentWeapon->GetBulletSpread() <= 0) {
+			GetWorldTimerManager().ClearTimer(th_recoil_tick_timer);
+			return;
+		}
+		if (CurrentWeapon) {
+			CurrentWeapon->SetBulletSpread(CurrentWeapon->GetBulletSpread() - 1);
+		}
+	}
+}
+
 
 // Called to bind functionality to input
 void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
