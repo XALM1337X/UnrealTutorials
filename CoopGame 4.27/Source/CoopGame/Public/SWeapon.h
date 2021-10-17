@@ -47,12 +47,15 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void SetCurrentAmmoCount(int);
+
+	UFUNCTION(BlueprintCallable, Category="Weapon")
 	virtual bool GetReloadState();
 	virtual float GetTimeBetweenShots();
 	virtual void SetLastFireTime(float);
 	virtual float GetLastFireTime();
 	virtual void SetReloadState(bool);
 	virtual void SetFireRate(float);
+	UFUNCTION(BlueprintCallable, Category="Weapon")
 	virtual void ReloadWeapon();
 
 	UFUNCTION(Server, Reliable) //TODO: Add validation later.
@@ -67,6 +70,9 @@ public:
 	virtual void ServerFire();
 	
 	virtual void Fire();
+
+	void SetBulletSpread(float Spread);
+	float GetBulletSpread();
 
 	UFUNCTION(BlueprintCallable)
 	virtual int GetMaxClipSize();
@@ -107,6 +113,10 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	int baseDamage;
+
+	//Bullet spread in degrees
+	UPROPERTY(EditDefaultsOnly, Category="Weapon", meta=(ClampMin=0.0f, ClampMax= 4.0f))
+	float BulletSpread;
 	
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	float rateOfFire;

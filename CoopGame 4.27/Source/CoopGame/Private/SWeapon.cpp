@@ -35,6 +35,7 @@ ASWeapon::ASWeapon() {
 	TraceStruct.Ticker = 0;
 	//SetReplicates(true);
 	this->bReplicates = true;
+	BulletSpread = 0.0f;
 
 	//Built in actor tick network frequency.
 	//Note: This is ranged from 2.0f to 100.0f by default.
@@ -156,6 +157,10 @@ void ASWeapon::Fire() {
 			myOwner->GetActorEyesViewPoint(eyeLocation, eyeRotation);
 			shotDirection = eyeRotation.Vector();
 			
+			//Apply bullet spread. 
+			float Halfrad = FMath::DegreesToRadians(BulletSpread);
+			shotDirection = FMath::VRandCone(shotDirection, Halfrad);
+
 			traceEndPos = eyeLocation + (shotDirection * 10000);
 			queryParams.AddIgnoredActor(myOwner);
 			queryParams.AddIgnoredActor(this);
@@ -205,6 +210,14 @@ void ASWeapon::Fire() {
 	} else {
 		this->needReload = true;
 	}
+}
+
+void ASWeapon::SetBulletSpread(float Spread) {
+	this->BulletSpread = Spread;
+}
+
+float ASWeapon::GetBulletSpread() {
+	return this->BulletSpread;
 }
 
 void ASWeapon::ClientOnAmmoChanged_Implementation(ASCharacter* my_char, int ammoCount, int clipCount, int clipSize, const FString& weapon_name) {

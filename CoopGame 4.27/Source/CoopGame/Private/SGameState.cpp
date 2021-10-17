@@ -19,7 +19,6 @@ void ASGameState::BeginPlay() {
 }
 
 void ASGameState::OnRep_WaveState(EWaveState OldState) {
-    UE_LOG(LogTemp, Warning, TEXT("ONREP_WAVESTATE"));
     WaveStateChanged(WaveState, OldState);
 }
 
@@ -34,18 +33,9 @@ void ASGameState::CheckPlayerRespawn() {
         if (PlayerCont) {
             APawn* player_pawn = PlayerCont->GetPawn();
             if (player_pawn) {
-                UE_LOG(LogTemp, Warning, TEXT("HIT-0"));
                 ASCharacter* playerChar = Cast<ASCharacter>(player_pawn);
                 if (!playerChar) {            
-                    UE_LOG(LogTemp, Warning, TEXT("HIT-1"));
                     GM->SendRespawnRequest(PlayerCont);
-
-                } else if (playerChar && !playerChar->IsPlayerControlled()) {
-                    //UE_LOG(LogTemp, Warning, TEXT("HIT-2"));
-                    //GM->SendRespawnRequest(PlayerCont);
-                    //TODO: Attach controller to character?
-                } else if (playerChar && playerChar->IsPlayerControlled()) {
-                    //UE_LOG(LogTemp, Warning, TEXT("HIT-3"));
                 }
             } else {
                 GM->SendRespawnRequest(PlayerCont);

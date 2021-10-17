@@ -92,8 +92,7 @@ void ASCharacter::Tick(float DeltaTime) {
 	float targetPOV = isAiming ? zoomPOV : hipPOV;
 	float newPOV = FMath::FInterpTo(CameraComponent->FieldOfView, targetPOV, DeltaTime, zoomInterpolationSpeed);
 	CameraComponent->SetFieldOfView(newPOV);
-	
-	
+
 	if (GetLocalRole() == ROLE_Authority) {
 		if (DebugMode > 0) {
 			HealthComp->SetHealth(HealthComp->GetHealth() - .5f);
@@ -144,8 +143,9 @@ void ASCharacter::Reload() {
 
 void ASCharacter::Fire() {
 	//UE_LOG(LogTemp, Warning, TEXT("ASCharacter::FIRE_TRIGGER_0"));
-	CurrentWeapon->Fire();
-
+	if (this->GetHealthComponent()->GetHealth() > 0) {
+			CurrentWeapon->Fire();
+	}
 }
 
 USHealthComp* ASCharacter::GetHealthComponent() {

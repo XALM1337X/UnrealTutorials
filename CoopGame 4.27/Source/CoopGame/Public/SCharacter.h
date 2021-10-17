@@ -29,12 +29,14 @@ enum class JumpState : uint8
 	Fall
 };
 
+
+UENUM(BlueprintType)
 enum class AimState : uint8 
 {
 	Zoom,
 	Hip
 };
-
+UENUM(BlueprintType)
 enum class FireState : uint8 
 {
 	Fire,
@@ -84,8 +86,10 @@ public:
 
 	virtual FVector GetPawnViewLocation() const override;
 
+	UFUNCTION(BlueprintCallable, Category="Player")
 	bool GetIsAiming();
 
+	UFUNCTION(BlueprintCallable, Category="Player")
 	bool GetFiringState();
 
 	UFUNCTION(Server, Reliable)
@@ -93,9 +97,11 @@ public:
 
 	void SetFiringState(bool value);
 
+	UFUNCTION(BlueprintCallable, Category="Player")
 	ASWeapon* GetWeapon();
 
 	USHealthComp* GetHealthComponent(); 
+
 	
 
 //Protected Member Variables
@@ -160,10 +166,17 @@ protected:
 	void ToggleCrouch();
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+	UFUNCTION(BlueprintCallable, Category = "Player")
 	void Reload();
 
 	void Fire();
-
+	//This function needs to be public so it can be called from blueprint
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void ToggleFire(FireState fire);
+	template<FireState fire>
+	void ToggleFire() {ToggleFire(fire);}
+	
 
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchToPrimary();
@@ -199,13 +212,11 @@ protected:
 	template<JumpState jumping>
 	void ToggleJump() {ToggleJump(jumping);}
 
+	UFUNCTION(BlueprintCallable, Category = "Player")
 	void ToggleAim(AimState aim);
 	template<AimState aim>
 	void ToggleAim() {ToggleAim(aim);}
 
-	void ToggleFire(FireState fire);
-	template<FireState fire>
-	void ToggleFire() {ToggleFire(fire);}
 
 	void ToggleSwitchWeapon(WeaponSelectedState weapon);
 	template<WeaponSelectedState weapon>
