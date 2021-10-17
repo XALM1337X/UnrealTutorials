@@ -47,8 +47,7 @@ ASCharacter::ASCharacter() {
 
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
-	//GetCapsuleComponent()->SetCollisionResponseToChannel()
-	//SetReplicates(true);
+
 	this->bReplicates = true;
 }
 
