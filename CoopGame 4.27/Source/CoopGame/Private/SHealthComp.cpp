@@ -24,7 +24,7 @@ USHealthComp::USHealthComp() {
 	this->defaultHealth = 100;
 	this->health = 0;
 	this->isDead = false;
-	SetIsReplicated(true);
+	SetIsReplicatedByDefault(true);
 }
 
 

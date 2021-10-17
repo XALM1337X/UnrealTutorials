@@ -18,6 +18,11 @@
 ASGameMode::ASGameMode() {
     WaveCount = 0;
     NumBotsToSpawn = 0;
+    NumAdvancedAIToSpawn = 0; 
+    NumBotsToSpawnPersistent = 1; 
+    NumAdvancedAIToSpawnPersistent = 0;
+
+    NumAdvancedAIToSpawn = 0;
     TimeBetweenWaves = 3.0f;
     GameStateClass = ASGameState::StaticClass();
     PlayerStateClass = ASPlayerState::StaticClass();
@@ -37,10 +42,10 @@ void ASGameMode::BeginPlay() {
 void ASGameMode::StartPlay() {
     Super::StartPlay();
     SetWaveState(EWaveState::WaitingToStart);
-    //GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 5.0f);
+    GetWorldTimerManager().SetTimer(TimerHandle_CheckWaveState, this, &ASGameMode::CheckWaveState, 3.0f, true, 5.0f);
     GetWorldTimerManager().SetTimer(TimerHandle_PlayerRespawnState, this, &ASGameMode::PlayerSpawnHandler, 3.0f, true, 0.0f);
 
-    GetWorldTimerManager().SetTimer(TimerHandle_AdvancedAISpawn, this, &ASGameMode::AdvancedAISpawnHandler, 1.0f, true, 3.0f);
+    //GetWorldTimerManager().SetTimer(TimerHandle_AdvancedAISpawn, this, &ASGameMode::AdvancedAISpawnHandler, 1.0f, true, 3.0f);
 
 }
 
@@ -166,15 +171,40 @@ void ASGameMode::PrepareForNextWave() {
 void ASGameMode::StartWave() {
     SetWaveState(EWaveState::WaitingToStart);
     WaveCount++;
-    NumBotsToSpawn =  2 * WaveCount;
+    if (WaveCount % 3 == 0) {
+        NumBotsToSpawnPersistent++;
+    }
+    if (WaveCount % 5 == 0) {
+        NumAdvancedAIToSpawnPersistent++;
+        NumBotsToSpawnPersistent = 0;
+    }
+
+    NumBotsToSpawn = NumBotsToSpawnPersistent;
+    NumAdvancedAIToSpawn = NumAdvancedAIToSpawnPersistent;
+
     GetWorldTimerManager().SetTimer(TimerHandle_BotSpawner, this, &ASGameMode::SpawnBotTimerElapsed, 1.0f, true, 0.0f);
 }
 
 
 void ASGameMode::SpawnBotTimerElapsed() {
-    SpawnNewBot();
-    NumBotsToSpawn--; 
+    bool allTrackerbotsSpawned = false; 
+    bool allAdvancedAISpawned = false;
+    if (NumBotsToSpawn > 0) {
+        SpawnNewBot();
+        NumBotsToSpawn--;
+    }
+
+    if (NumAdvancedAIToSpawn > 0) {
+        SpawnNewAdvancedAI();
+        NumAdvancedAIToSpawn--;
+    }   
     if (NumBotsToSpawn <= 0) {
+        allTrackerbotsSpawned = true;
+    }
+    if (NumAdvancedAIToSpawn <= 0) {
+        allAdvancedAISpawned = true;
+    }
+    if (allTrackerbotsSpawned && allAdvancedAISpawned) {
         EndWave();
     }
 }

@@ -151,6 +151,8 @@ protected:
 
 	FTimerHandle th_time_between_shots;
 
+	FTimerHandle th_recoil_tick_timer;
+
 	UPROPERTY(ReplicatedUsing=OnRep_RunStateChange)
 	FRunningStateReplicator run_replicator;
 
@@ -166,6 +168,12 @@ protected:
 	void ToggleCrouch();
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+
+	UFUNCTION(Server, Reliable)
+	void TickUpRecoil();
+	
+	UFUNCTION(Server, Reliable)
+	void TickDownRecoil();
 
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void Reload();
